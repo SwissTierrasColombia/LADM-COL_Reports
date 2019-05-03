@@ -1,0 +1,510 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.3.1.final using JasperReports Library version 6.3.1  -->
+<!-- 2018-10-17T14:45:18 -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="sub_report_coordinates" pageWidth="595" pageHeight="842" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="20" uuid="8044c259-bf6b-4072-8923-78bca3eb0308">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="ladmcolV221"/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="539"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="447"/>
+	<parameter name="id" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[66040]]></defaultValueExpression>
+	</parameter>
+	<parameter name="criterio_punto_inicial" class="java.lang.Integer"/>
+	<parameter name="datasetName" class="java.lang.String"/>
+	<queryString language="SQL">
+		<![CDATA[WITH 
+parametros AS (
+  SELECT
+     $P{id} 	AS poligono_t_id,
+      $P{criterio_punto_inicial} 		AS criterio_punto_inicial, --tipo de criterio para seleccionar el punto inicial del terreno, valores posibles: 1,2
+    4		AS criterio_observador, --1: Centroide, 2: Centro del extent, 3: punto en la superficie, 4: Punto mas cercano al centroide dentro del poligono
+    true	AS incluir_tipo_derecho --Mostrar el tipo de derecho de cada interesado (booleano)
+),
+t AS ( --Orienta los vertices del terreno en sentido horario
+	SELECT t_id, ST_ForceRHR(poligono_creado) as poligono_creado FROM $P!{datasetName}.terreno AS t, parametros WHERE t.t_id = poligono_t_id
+),
+--bordes de la extension del poligono
+a AS (
+	SELECT ST_SetSRID(ST_MakePoint(st_xmin(t.poligono_creado), st_ymax(t.poligono_creado)), ST_SRID(t.poligono_creado)) AS p FROM t
+),
+b AS (
+	SELECT ST_SetSRID(ST_MakePoint(st_xmax(t.poligono_creado), st_ymax(t.poligono_creado)), ST_SRID(t.poligono_creado)) AS p FROM t
+),
+c AS (
+	SELECT ST_SetSRID(ST_MakePoint(st_xmax(t.poligono_creado), st_ymin(t.poligono_creado)), ST_SRID(t.poligono_creado)) AS p FROM t
+),
+d AS (
+	SELECT ST_SetSRID(ST_MakePoint(st_xmin(t.poligono_creado), st_ymin(t.poligono_creado)), ST_SRID(t.poligono_creado)) AS p FROM t
+),
+--Punto medio (ubicación del observador para la definicion de las cardinalidades)
+m AS (
+  SELECT
+    CASE WHEN criterio_observador = 1 THEN --centroide del poligono
+      ( SELECT ST_SetSRID(ST_MakePoint(st_x(ST_centroid(t.poligono_creado)), st_y(ST_centroid(t.poligono_creado))), ST_SRID(t.poligono_creado)) AS p FROM t )
+    WHEN criterio_observador = 2 THEN --Centro del extent
+      ( SELECT ST_SetSRID(ST_MakePoint(st_x(ST_centroid(st_envelope(t.poligono_creado))), st_y(ST_centroid(st_envelope(t.poligono_creado)))), ST_SRID(t.poligono_creado)) AS p FROM t )
+    WHEN criterio_observador = 3 THEN --Punto en la superficie
+      ( SELECT ST_SetSRID(ST_PointOnSurface(poligono_creado), ST_SRID(t.poligono_creado)) AS p FROM t )
+    WHEN criterio_observador = 4 THEN --Punto mas cercano al centroide pero que se intersecte el poligono si esta fuera
+      ( SELECT ST_SetSRID(ST_MakePoint(st_x( ST_ClosestPoint( poligono_creado, ST_centroid(t.poligono_creado))), st_y( ST_ClosestPoint( poligono_creado,ST_centroid(t.poligono_creado)))), ST_SRID(t.poligono_creado)) AS p FROM t )
+    ELSE --defecto: Centro del extent
+      ( SELECT ST_SetSRID(ST_MakePoint(st_x(ST_centroid(st_envelope(t.poligono_creado))), st_y(ST_centroid(st_envelope(t.poligono_creado)))), ST_SRID(t.poligono_creado)) AS p FROM t )
+    END as p
+    FROM parametros
+),
+--Cuadrantes del polígono desde el observador a cada una de las esquinas de la extensión del polígono
+norte AS (
+	SELECT ST_SetSRID(ST_MakePolygon(ST_MakeLine(ARRAY [a.p, b.p, m.p, a.p])), ST_SRID(t.poligono_creado)) geom FROM t,a,b,m
+),
+este AS (
+	SELECT ST_SetSRID(ST_MakePolygon(ST_MakeLine(ARRAY [m.p, b.p, c.p, m.p])), ST_SRID(t.poligono_creado)) geom FROM t,b,c,m
+),
+sur AS (
+	SELECT ST_SetSRID(ST_MakePolygon(ST_MakeLine(ARRAY [m.p, c.p, d.p, m.p])), ST_SRID(t.poligono_creado)) geom FROM t,m,c,d
+),
+oeste AS (
+	SELECT ST_SetSRID(ST_MakePolygon(ST_MakeLine(ARRAY [a.p, m.p, d.p, a.p])), ST_SRID(t.poligono_creado)) geom FROM t,a,m,d
+)
+,limite_poligono as(
+	SELECT t_id, ST_Boundary(poligono_creado) geom FROM t
+)
+,limite_vecinos as (  --obtiene el limite de los terrenos colindantes, filtrados por bounding box
+	select o.t_id, ST_Boundary(o.poligono_creado) geom from t, $P!{datasetName}.terreno o where o.poligono_creado && st_envelope(t.poligono_creado) and t.t_id <> o.t_id
+)
+,pre_colindancias as ( --inteseccion entre el limite del poligono y los terrenos cercanos, añade la geometria de los limites sin adjacencia
+	SELECT limite_vecinos.t_id, st_intersection(limite_poligono.geom,limite_vecinos.geom) geom  FROM limite_poligono,limite_vecinos where st_intersects(limite_poligono.geom,limite_vecinos.geom) and limite_poligono.t_id <> limite_vecinos.t_id
+	union 
+	SELECT null as t_id, ST_Difference(limite_poligono.geom, a.geom) geom
+	FROM limite_poligono,
+	(
+		select ST_LineMerge(ST_Union(geom)) geom from limite_vecinos
+	) a 
+)
+, tmp_colindantes as (
+	select  t_id,ST_LineMerge(ST_Union(geom)) geom from 
+	(
+		SELECT
+		  simple.t_id,
+		  simple.simple_geom as geom,
+		  ST_GeometryType(simple.simple_geom) as geom_type,
+		  ST_AsEWKT(simple.simple_geom) as geom_wkt
+		FROM (
+		  SELECT
+		    dumped.*,
+		    (dumped.geom_dump).geom as simple_geom,
+		    (dumped.geom_dump).path as path
+		  FROM (
+		    SELECT *, ST_Dump(geom) AS geom_dump FROM pre_colindancias
+		  ) as dumped
+		) AS simple
+
+	) a
+	group by t_id
+)
+, lineas_colindancia as ( --contiene las lineas de cambio de colindancia todas las lineas son parte simple
+	SELECT * FROM
+	(
+		SELECT
+		  simple.t_id,
+		  simple.simple_geom as geom
+		FROM (
+		  SELECT
+		    dumped.*,
+		    (dumped.geom_dump).geom as simple_geom,
+		    (dumped.geom_dump).path as path
+		  FROM (
+		    SELECT *, ST_Dump(geom) AS geom_dump FROM (select * from tmp_colindantes where ST_GeometryType(geom) = 'ST_MultiLineString') a
+		  ) as dumped
+		) AS simple			
+	) a 
+	UNION 
+	select * from tmp_colindantes where ST_GeometryType(geom) <> 'ST_MultiLineString'
+)
+, puntos_terreno as (
+	SELECT (ST_DumpPoints(poligono_creado)).* AS dp
+	FROM t
+)
+--Criterio 1: el punto inicial del terreno es el primer punto del lindero que intersecte con el punto ubicado mas cerca de la esquina nw del polígono
+, punto_nw as (
+	SELECT 	geom
+		,st_distance(geom, nw) AS dist
+	FROM 	puntos_terreno,
+		(SELECT ST_SetSRID(ST_MakePoint(st_xmin(st_envelope(poligono_creado)), st_ymax(st_envelope(poligono_creado))), ST_SRID(poligono_creado)) as nw FROM t ) a
+	ORDER BY dist limit 1
+)
+, punto_inicial_por_lindero_con_punto_nw as (
+	select st_startpoint(lineas_colindancia.geom) geom from lineas_colindancia, punto_nw where st_intersects(lineas_colindancia.geom, punto_nw.geom ) and not st_intersects(st_endpoint(lineas_colindancia.geom), punto_nw.geom )  limit 1
+)
+
+--Criterio 2: el punto inicial del terreno es el primer punto del lindero que tenga mayor porcentaje de su longitud sobre el cuadrante norte del poligono
+, punto_inicial_por_lindero_porcentaje_n as(
+	select 	round((st_length(st_intersection(lineas_colindancia.geom, norte.geom))/st_length(lineas_colindancia.geom))::numeric,2) dist, 
+		st_startpoint(lineas_colindancia.geom) geom 
+		,st_distance(lineas_colindancia.geom,nw) distance_to_nw
+		from lineas_colindancia
+			,norte
+			,(SELECT ST_SetSRID(ST_MakePoint(st_xmin(st_envelope(poligono_creado)), st_ymax(st_envelope(poligono_creado))), ST_SRID(poligono_creado)) as nw FROM t ) a
+		where st_intersects(lineas_colindancia.geom, norte.geom)  order by dist desc, distance_to_nw
+		limit 1
+)
+--Criterio para definir el punto inicial del terreno
+,punto_inicial as (
+	SELECT 
+		CASE WHEN criterio_punto_inicial = 1 THEN (select geom from punto_inicial_por_lindero_con_punto_nw)
+		WHEN criterio_punto_inicial = 2 THEN (select geom from punto_inicial_por_lindero_porcentaje_n)
+	END as geom
+	FROM parametros
+)
+, puntos_ordenados as (
+	SELECT case when id-m+1 <= 0 then total + id-m else id-m+1 end as id, geom , st_x(geom) x, st_y(geom) y FROM
+		(
+		SELECT row_number() OVER (ORDER BY path) AS id
+			,m
+			,path
+			,geom
+			,total
+		FROM (
+			SELECT (ST_DumpPoints(ST_ForceRHR(poligono_creado))).* AS dp
+				,ST_NPoints(poligono_creado) total
+				,poligono_creado
+			FROM t
+			) AS a
+			,(
+				SELECT row_number() OVER (ORDER BY path) AS m
+					,st_distance(puntos_terreno.geom, punto_inicial.geom) AS dist
+				FROM puntos_terreno,punto_inicial
+				ORDER BY dist limit 1
+			) b
+		) t
+		where id <> total
+	order by id
+)
+, cuadrantes as (
+	SELECT 'Norte' ubicacion,norte.geom as cuadrante FROM norte 
+	UNION
+	SELECT 'Este' ubicacion,este.geom as cuadrante FROM este 
+	UNION
+	SELECT 'Sur' ubicacion,sur.geom as cuadrante FROM sur 
+	UNION
+	SELECT 'Oeste' ubicacion,oeste.geom as cuadrante FROM oeste
+)
+, lineas_colindancia_desde_hasta as (
+	select *
+		,(SELECT id from puntos_ordenados WHERE st_intersects(puntos_ordenados.geom, st_startpoint(lineas_colindancia.geom))) desde
+		,(SELECT id from puntos_ordenados WHERE st_intersects(puntos_ordenados.geom, st_endpoint(lineas_colindancia.geom))) hasta
+	from lineas_colindancia
+	order by desde
+)
+, colindantes as (
+	SELECT row_number() OVER (ORDER BY desde) AS id, t_id,desde,hasta,ubicacion,geom FROM
+	(
+		select * 
+			,st_length(st_intersection(geom,cuadrante))/st_length(geom) as porcentaje 
+			,max(st_length(st_intersection(geom,cuadrante))/st_length(geom)) over (partition by geom) as max_porce
+		from lineas_colindancia_desde_hasta, cuadrantes where st_intersects(geom,cuadrante)
+	) a
+	where porcentaje = max_porce
+) 
+SELECT 
+  id
+  ,desde
+  ,hasta
+  ,ubicacion
+  ,nupre
+  ,CASE WHEN numero_predial is null and fmi IS NULL and nombre IS NULL THEN 'ÁREA INDETERMINADA'
+    ELSE COALESCE(numero_predial || ';','') || COALESCE('FMI: ' || fmi || ';','') || COALESCE('Nombre: ' || nombre ,'') 
+   END as predio
+  ,predio.t_id
+  ,COALESCE(interesado, 'INDETERMINADO') AS interesado
+  ,round(st_length(colindantes.geom)::numeric,2) distancia
+FROM
+colindantes
+LEFT JOIN $P!{datasetName}.terreno ON terreno.t_id = colindantes.t_id
+LEFT JOIN $P!{datasetName}.uebaunit ON colindantes.t_id = ue_terreno
+LEFT JOIN $P!{datasetName}.predio ON predio.t_id = baunit_predio
+LEFT JOIN
+(
+  SELECT t_id,
+	array_to_string(array_agg(( coalesce(primer_nombre,'') || coalesce(' ' || segundo_nombre, '') || coalesce(' ' || primer_apellido, '') || coalesce(' ' || segundo_apellido, '') ) 
+				|| ( coalesce(razon_social, '') ) 
+				|| ', ' || (select dispname from $P!{datasetName}.col_interesadodocumentotipo where ilicode = tipo_documento) || ': '
+				|| documento_identidad 
+				|| CASE WHEN (SELECT incluir_tipo_derecho FROM parametros) THEN 
+					' (' || (select dispname from $P!{datasetName}.col_derechotipo where ilicode = tipo_derecho) || ')' --opcional: ver tipo de derecho de cada interesado 
+				  ELSE '' END
+				) , '; ')
+			  as interesado
+  FROM 
+  (	
+	--navegar agrupación de interesados
+	SELECT * FROM
+		$P!{datasetName}.predio
+		LEFT JOIN
+		(
+			select 
+			  primer_nombre
+			  ,segundo_nombre
+			  ,primer_apellido
+			  ,segundo_apellido
+			  ,razon_social
+			  ,tipo_documento
+			  ,documento_identidad
+			  ,unidad_predio
+			  ,col_derecho.tipo as tipo_derecho
+			from 
+			  $P!{datasetName}.col_derecho
+			  JOIN $P!{datasetName}.la_agrupacion_interesados on la_agrupacion_interesados.t_id = interesado_la_agrupacion_interesados 
+			  JOIN $P!{datasetName}.miembros on agrupacion = la_agrupacion_interesados.t_id
+			  JOIN $P!{datasetName}.col_interesado on col_interesado.t_id = miembros.interesados_col_interesado
+		 ) agrupacion  ON predio.t_id = agrupacion.unidad_predio
+	UNION
+	--navegar agrupación de interesados
+	SELECT * FROM
+		$P!{datasetName}.predio
+		LEFT JOIN
+		(
+			select 			
+			  primer_nombre
+			  ,segundo_nombre
+			  ,primer_apellido
+			  ,segundo_apellido
+			  ,razon_social
+			  ,tipo_documento
+			  ,documento_identidad
+			  ,unidad_predio
+			  ,col_derecho.tipo as tipo_derecho
+			from 
+			  $P!{datasetName}.col_derecho
+			  JOIN $P!{datasetName}.col_interesado on col_interesado.t_id =interesado_col_interesado
+		) interesado ON predio.t_id = interesado.unidad_predio
+  ) interesados
+  group by t_id
+) interesados on interesados.t_id = predio.t_id
+ORDER BY id
+--ORDER BY array_position(Array ['Norte','Este','Sur','Oeste'], ubicacion), degrees(st_azimuth(ST_centroid(geom), ST_ClosestPoint(geom,cuadrante)))]]>
+	</queryString>
+	<field name="id" class="java.lang.Long"/>
+	<field name="desde" class="java.lang.Long"/>
+	<field name="hasta" class="java.lang.Long"/>
+	<field name="ubicacion" class="java.lang.String"/>
+	<field name="nupre" class="java.lang.String"/>
+	<field name="predio" class="java.lang.String"/>
+	<field name="t_id" class="java.lang.Long"/>
+	<field name="interesado" class="java.lang.String"/>
+	<field name="distancia" class="java.math.BigDecimal"/>
+	<title>
+		<band height="21">
+			<rectangle>
+				<reportElement mode="Transparent" x="0" y="0" width="165" height="21" uuid="234b18ee-2337-4944-943c-57fa632a18f4">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+			</rectangle>
+			<staticText>
+				<reportElement x="0" y="0" width="165" height="21" uuid="f1001fa9-207f-468c-bb38-8429e996a395">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[LINDERO]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement mode="Transparent" x="165" y="0" width="365" height="21" uuid="40088c49-cf39-4761-ac96-eaf968613343"/>
+			</rectangle>
+			<staticText>
+				<reportElement x="165" y="0" width="365" height="21" uuid="84dedb79-4e9b-4c22-b08f-6bd4345c6d13"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[COLINDANTE]]></text>
+			</staticText>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="20" splitType="Stretch">
+			<rectangle>
+				<reportElement mode="Transparent" x="165" y="0" width="365" height="20" uuid="fa589699-2219-4109-a95e-c73afef45fe4"/>
+			</rectangle>
+			<rectangle>
+				<reportElement mode="Transparent" x="0" y="0" width="165" height="20" uuid="15489fda-aeea-445e-8d61-7f5d16b10a76">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+			</rectangle>
+			<staticText>
+				<reportElement x="0" y="0" width="20" height="20" uuid="5f2f2770-d51b-4ac6-b960-b332208ab4b2">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.2"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[No.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="20" y="0" width="40" height="20" uuid="f58b40f8-8b05-4431-842f-3b5a8c37efad">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.2"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[DESDE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="60" y="0" width="40" height="20" uuid="02757768-ca50-4d07-a03b-3bd993441499">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.2"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[HASTA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="100" y="0" width="65" height="20" uuid="4d5a49ff-8ee2-41d1-b768-ba6ac9b177ed">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.2"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+					<paragraph lineSpacingSize="0.0"/>
+				</textElement>
+				<text><![CDATA[LONGITUD (m)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="165" y="0" width="165" height="20" uuid="40d92345-151b-4e74-a853-e142b424719d">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.2"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[PREDIO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="330" y="0" width="200" height="20" uuid="ec485c61-11d0-45d2-9a7a-1ef7277ed1f1">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.2"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[INTERESADO]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="15" splitType="Prevent">
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="20" height="15" isPrintWhenDetailOverflows="true" uuid="9c960c62-ea92-41ec-8b3f-8906c2792c99">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.2"/>
+					<leftPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isItalic="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{id}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="">
+				<reportElement stretchType="RelativeToBandHeight" x="20" y="0" width="40" height="15" isPrintWhenDetailOverflows="true" uuid="becce9cf-2e1d-4863-9008-9bc5ccfe03c9">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.2"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{desde}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="">
+				<reportElement stretchType="RelativeToBandHeight" x="60" y="0" width="40" height="15" isPrintWhenDetailOverflows="true" uuid="e9c4fcf3-43da-4f4c-b8f9-7ef03c16a6d9">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.2"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{hasta}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,###.00">
+				<reportElement stretchType="RelativeToBandHeight" x="100" y="0" width="65" height="15" isPrintWhenDetailOverflows="true" uuid="b7c05ef6-36f7-445d-90b3-c94392e2c56b">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.2"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7"/>
+					<paragraph rightIndent="15"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{distancia}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="RelativeToBandHeight" x="165" y="0" width="165" height="15" isPrintWhenDetailOverflows="true" uuid="5abee6f6-246c-492c-88d9-22aa82fd357d">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<box topPadding="5" bottomPadding="5">
+					<pen lineWidth="0.2"/>
+					<leftPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7"/>
+					<paragraph lineSpacing="Single" lineSpacingSize="1.5" leftIndent="5" rightIndent="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{predio}.replaceAll( ";", "\n")]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00">
+				<reportElement stretchType="RelativeToTallestObject" x="330" y="0" width="200" height="15" isPrintWhenDetailOverflows="true" uuid="bdd97402-bdab-42d3-be6c-6da0aa5e9fa7">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<box topPadding="5" bottomPadding="5">
+					<pen lineWidth="0.2"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7"/>
+					<paragraph lineSpacing="Single" lineSpacingSize="1.5" leftIndent="5" rightIndent="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{interesado}.replaceAll( ";", "\n")]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="1">
+			<line>
+				<reportElement x="0" y="0" width="530" height="1" uuid="29389f40-9e1f-434e-b4d5-d5668c2661aa"/>
+			</line>
+		</band>
+	</columnFooter>
+</jasperReport>
