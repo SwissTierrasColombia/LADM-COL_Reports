@@ -5,6 +5,7 @@
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="ladmcolV221"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="net.sf.jasperreports.print.create.bookmarks" value="true"/>
 	<parameter name="title" class="java.lang.String"/>
 	<parameter name="mapSubReport1" class="java.lang.String"/>
 	<parameter name="id" class="java.lang.Integer"/>
@@ -18,6 +19,7 @@
   ,predio.nupre 
   ,predio.numero_predial
   ,predio.nombre 
+  ,predio.u_local_id
   ,departamento 
   ,municipio 
   ,zona 
@@ -44,6 +46,7 @@ WHERE terreno.t_id =  $P{id}]]>
 	<field name="x" class="java.lang.Double"/>
 	<field name="y" class="java.lang.Double"/>
 	<field name="codigo" class="java.lang.String"/>
+	<field name="u_local_id" class="java.lang.String"/>
 	<background>
 		<band height="800">
 			<rectangle>
@@ -399,7 +402,7 @@ WHERE terreno.t_id =  $P{id}]]>
 					<font size="6"/>
 					<paragraph leftIndent="5"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{numero_predial_anterior}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{u_local_id}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="10" y="453" width="105" height="10" uuid="dcbe5130-bcd0-4069-962c-f856fc052d71">
@@ -412,7 +415,7 @@ WHERE terreno.t_id =  $P{id}]]>
 					<font size="6"/>
 					<paragraph leftIndent="5"/>
 				</textElement>
-				<text><![CDATA[NÚMERO PREDIAL ANTERIOR]]></text>
+				<text><![CDATA[ID PROYECTO]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
 				<reportElement x="115" y="463" width="160" height="10" uuid="3f0392c0-4e72-46c5-91c6-e74ad0ce0a64"/>
@@ -821,7 +824,7 @@ La vigencia de este certificado será de tres meses, a partir de su fecha de exp
 				<textElement textAlignment="Center">
 					<font size="14"/>
 				</textElement>
-				<text><![CDATA[INFORME DE COLINDANCIA]]></text>
+				<text><![CDATA[PLANO]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
 				<reportElement x="115" y="513" width="160" height="10" uuid="c7bbcc2a-5a44-40d2-924d-19dcc13e30a9"/>
@@ -997,29 +1000,6 @@ La vigencia de este certificado será de tres meses, a partir de su fecha de exp
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["sub_report_coordinates.jasper"]]></subreportExpression>
 			</subreport>
-		</band>
-		<band height="90">
-			<subreport>
-				<reportElement x="14" y="60" width="536" height="30" uuid="f5a3ca74-1509-4daa-b231-4b2d65551523"/>
-				<subreportParameter name="id">
-					<subreportParameterExpression><![CDATA[$P{id}]]></subreportParameterExpression>
-				</subreportParameter>
-				<subreportParameter name="criterio_punto_inicial">
-					<subreportParameterExpression><![CDATA[$P{criterio_punto_inicial}]]></subreportParameterExpression>
-				</subreportParameter>
-				<subreportParameter name="datasetName">
-					<subreportParameterExpression><![CDATA[$P{datasetName}]]></subreportParameterExpression>
-				</subreportParameter>
-				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-				<subreportExpression><![CDATA["sub_report_signatures.jasper"]]></subreportExpression>
-			</subreport>
-			<staticText>
-				<reportElement x="0" y="10" width="560" height="19" forecolor="#000000" uuid="dfb5380a-2fb4-4df9-a5c9-bca23310600e"/>
-				<textElement textAlignment="Center">
-					<font size="14"/>
-				</textElement>
-				<text><![CDATA[FIRMAS]]></text>
-			</staticText>
 		</band>
 	</detail>
 </jasperReport>
