@@ -30,7 +30,11 @@
                                 "fontSize": "8px",
                                 "label": "[point_number]",
                                 "type": "text",
-                                "fontWeight": "bold"
+                                "fontWeight": "bold",
+                                "allowOverruns": false,
+                                "haloRadius": "1.0",
+                                "haloColor": "#FFFFFF",
+                                "haloOpacity": "0.7"
                             }
                         ]},
                         "version": "2"
@@ -56,7 +60,10 @@
                                 "label": "[predio]",
                                 "type": "text",
                                 "fontWeight": "bold",
-                                "labelAlign": "cm"
+                                "labelAlign": "cm",
+                                "haloRadius": "1.0",
+                                "haloColor": "#FFFFFF",
+                                "haloOpacity": "0.7"
                             }
                         ]},
                         "version": "2"
@@ -79,10 +86,14 @@
                                 },
                                 {
                                     "fontFamily": "sans-serif",
-                                    "fontSize": "5px",
+                                    "fontSize": "6px",
                                     "label": "[predio]",
                                     "type": "text",
-                                    "labelAlign": "cm"
+                                    "goodnessOfFit": 0.1,
+                                    "allowOverruns":true,
+                                    "haloRadius": "1.0",
+                                    "haloColor": "#FFFFFF",
+                                    "haloOpacity": "0.7"
                                 }
                             ]
                         },
