@@ -232,7 +232,7 @@ SELECT
    END as predio
   ,COALESCE(interesado, 'INDETERMINADO') AS interesado
   ,round(st_length(colindantes.geom)::numeric,2) distancia
-  ,(select array_to_string( array_agg(puntos_ordenados.id || ': N=' || round(st_y(puntos_ordenados.geom)::numeric,2) || ', E=' || round(st_x(puntos_ordenados.geom)::numeric,2) ), '; ') from puntos_ordenados WHERE st_intersects(colindantes.geom,puntos_ordenados.geom) and puntos_ordenados.id not in (desde, hasta) ) as nodos
+  ,(select array_to_string( array_agg(puntos_ordenados.id || ': N=' || round(st_y(puntos_ordenados.geom)::numeric,2) || ' metros (m.), E=' || round(st_x(puntos_ordenados.geom)::numeric,2) || ' metros (m.)'), '; ') from puntos_ordenados WHERE st_intersects(colindantes.geom,puntos_ordenados.geom) and puntos_ordenados.id not in (desde, hasta) ) as nodos
   ,degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2)))
   ,CASE WHEN degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2))) between 360-(select tolerancia_sentidos from parametros) and 360 or degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2))) between 0 and (select tolerancia_sentidos from parametros) THEN 'norte'
 	  WHEN degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2))) between (select tolerancia_sentidos from parametros) and 90-(select tolerancia_sentidos from parametros) THEN 'noreste'
@@ -342,7 +342,7 @@ WHERE ubicacion ='3_Sur' ORDER BY colindantes.id]]>
 					<font size="9"/>
 					<paragraph lineSpacing="Single" lineSpacingSize="2.0" firstLineIndent="20" leftIndent="5" rightIndent="5"/>
 				</textElement>
-				<textFieldExpression><![CDATA["<b>LINDERO " + $F{id} + ":</b> Con " /* + $F{interesado}  + " en "*/ + $F{predio} +". Partiendo del punto " + $F{desde} + " con coordenadas N=" + $F{yi} + ", E=" + $F{xi} + ($F{nodos} != null ? " en línea quebrada" :" en línea recta") + " y en sentido " + $F{sentido} +  ($F{nodos} != null ? " pasando por los puntos y coordenadas " + $F{nodos} + ", con una distancia acumulada de " :" en distancia de ") + $F{distancia} + "m hasta el punto " + $F{hasta} + " con coordenadas N=" + $F{yf} + ", E=" + $F{xf} +($V{REPORT_COUNT}.equals($F{total_linderos}.intValue()) ? ", con el cual cierra el polígono." : ".")]]></textFieldExpression>
+				<textFieldExpression><![CDATA["<b>LINDERO " + $F{id} + ":</b> Con "  + $F{interesado}  + /*" en " + $F{predio} +*/ ". Partiendo del punto " + $F{desde} + " con coordenadas N=" + $F{yi} + " metros (m.), E=" + $F{xi} + " metros (m.)" + ($F{nodos} != null ? " en línea quebrada" :" en línea recta") + " y en sentido " + $F{sentido} +  ($F{nodos} != null ? " pasando por los puntos y coordenadas " + $F{nodos} + ", con una distancia acumulada de " :" en distancia de ") + $F{distancia} + " metros (m.) hasta el punto " + $F{hasta} + " con coordenadas N=" + $F{yf} + " metros (m.), E="  + $F{xf} + " metros (m.)" +($V{REPORT_COUNT}.equals($F{total_linderos}.intValue()) ? ", con el cual cierra el polígono." : ".")]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
