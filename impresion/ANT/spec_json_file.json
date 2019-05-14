@@ -34,7 +34,37 @@
                                 "allowOverruns": false,
                                 "haloRadius": "1.0",
                                 "haloColor": "#FFFFFF",
-                                "haloOpacity": "0.7"
+                                "haloOpacity": "0.7",
+								"conflictResolution": true
+                            }
+                        ]},
+                        "version": "2"
+                    },
+                    "type": "geojson"
+                },
+				{
+                    "geoJson": "",
+                    "name": "cambio_colindancia",
+                    "style": {
+                        "*": {"symbolizers": [
+                            {
+                                "strokeWidth": 2,
+                                "fillOpacity": 0.1,
+                                "type": "line",
+                                "strokeColor": "#9b794e",
+                                "strokeOpacity": 1
+                            },
+                            {
+                                "fontFamily": "sans-serif",
+                                "fontSize": "7px",
+                                "label": "[longitud]",
+                                "type": "text",
+                                "fontWeight": "bold",
+                                "labelAlign": "cm",
+                                "haloRadius": "1.0",
+                                "haloColor": "#FFFFFF",
+                                "haloOpacity": "0.7",
+								"followLine": true
                             }
                         ]},
                         "version": "2"
@@ -56,14 +86,15 @@
                             },
                             {
                                 "fontFamily": "sans-serif",
-                                "fontSize": "10px",
+                                "fontSize": "8px",
                                 "label": "[predio]",
                                 "type": "text",
                                 "fontWeight": "bold",
                                 "labelAlign": "cm",
                                 "haloRadius": "1.0",
                                 "haloColor": "#FFFFFF",
-                                "haloOpacity": "0.7"
+                                "haloOpacity": "0.7",
+								"autoWrap": 130 
                             }
                         ]},
                         "version": "2"
@@ -88,12 +119,15 @@
                                     "fontFamily": "sans-serif",
                                     "fontSize": "6px",
                                     "label": "[predio]",
+									"labelAlign": "cm",
                                     "type": "text",
                                     "goodnessOfFit": 0.1,
                                     "allowOverruns":true,
                                     "haloRadius": "1.0",
                                     "haloColor": "#FFFFFF",
-                                    "haloOpacity": "0.7"
+                                    "haloOpacity": "0.7",
+								    "autoWrap": 75,
+									"conflictResolution": true
                                 }
                             ]
                         },
@@ -147,10 +181,11 @@
                           },
                           {
                               "fontFamily": "sans-serif",
-                              "fontSize": "4px",
+                              "fontSize": "3px",
                               "label": "[predio]",
                               "type": "text",
-                              "labelAlign": "cm"
+                              "labelAlign": "cm",
+						      "autoWrap": 75
                           }
                       ]
                   },
