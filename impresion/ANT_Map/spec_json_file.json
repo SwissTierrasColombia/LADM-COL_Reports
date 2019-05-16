@@ -57,6 +57,7 @@
                             {
                                 "fontFamily": "sans-serif",
                                 "fontSize": "7px",
+                                "fontColor": "#582900",
                                 "label": "[longitud]",
                                 "type": "text",
                                 "fontWeight": "bold",
@@ -64,7 +65,8 @@
                                 "haloRadius": "1.0",
                                 "haloColor": "#FFFFFF",
                                 "haloOpacity": "0.7",
-								"followLine": true
+                                "followLine": true,
+                                "labelYOffset": 4.5
                             }
                         ]},
                         "version": "2"
