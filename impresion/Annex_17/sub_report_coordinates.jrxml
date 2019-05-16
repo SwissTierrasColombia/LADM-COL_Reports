@@ -1,0 +1,402 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.3.1.final using JasperReports Library version 6.3.1  -->
+<!-- 2018-10-17T14:45:17 -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="sub_report_coordinates" pageWidth="595" pageHeight="842" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="20" uuid="8044c259-bf6b-4072-8923-78bca3eb0308">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="ladmcolV221"/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="539"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="447"/>
+	<parameter name="id" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[66040]]></defaultValueExpression>
+	</parameter>
+	<parameter name="criterio_punto_inicial" class="java.lang.Integer"/>
+	<parameter name="datasetName" class="java.lang.String"/>
+	<queryString language="SQL">
+		<![CDATA[WITH 
+parametros AS (
+  SELECT
+    $P{id}  	AS poligono_t_id,
+     $P{criterio_punto_inicial}  		AS criterio_punto_inicial, --tipo de criterio para seleccionar el punto inicial del terreno, valores posibles: 1,2
+    4		AS criterio_observador, --1: Centroide, 2: Centro del extent, 3: punto en la superficie, 4: Punto mas cercano al centroide dentro del poligono
+    true	AS incluir_tipo_derecho --Mostrar el tipo de derecho de cada interesado (booleano)
+),
+t AS ( --Orienta los vertices del terreno en sentido horario
+	SELECT t_id, ST_ForceRHR(poligono_creado) as poligono_creado FROM $P!{datasetName}.terreno AS t, parametros WHERE t.t_id = poligono_t_id
+),
+--bordes de la extension del poligono
+a AS (
+	SELECT ST_SetSRID(ST_MakePoint(st_xmin(t.poligono_creado), st_ymax(t.poligono_creado)), ST_SRID(t.poligono_creado)) AS p FROM t
+),
+b AS (
+	SELECT ST_SetSRID(ST_MakePoint(st_xmax(t.poligono_creado), st_ymax(t.poligono_creado)), ST_SRID(t.poligono_creado)) AS p FROM t
+),
+c AS (
+	SELECT ST_SetSRID(ST_MakePoint(st_xmax(t.poligono_creado), st_ymin(t.poligono_creado)), ST_SRID(t.poligono_creado)) AS p FROM t
+),
+d AS (
+	SELECT ST_SetSRID(ST_MakePoint(st_xmin(t.poligono_creado), st_ymin(t.poligono_creado)), ST_SRID(t.poligono_creado)) AS p FROM t
+),
+--Punto medio (ubicación del observador para la definicion de las cardinalidades)
+m AS (
+  SELECT
+    CASE WHEN criterio_observador = 1 THEN --centroide del poligono
+      ( SELECT ST_SetSRID(ST_MakePoint(st_x(ST_centroid(t.poligono_creado)), st_y(ST_centroid(t.poligono_creado))), ST_SRID(t.poligono_creado)) AS p FROM t )
+    WHEN criterio_observador = 2 THEN --Centro del extent
+      ( SELECT ST_SetSRID(ST_MakePoint(st_x(ST_centroid(st_envelope(t.poligono_creado))), st_y(ST_centroid(st_envelope(t.poligono_creado)))), ST_SRID(t.poligono_creado)) AS p FROM t )
+    WHEN criterio_observador = 3 THEN --Punto en la superficie
+      ( SELECT ST_SetSRID(ST_PointOnSurface(poligono_creado), ST_SRID(t.poligono_creado)) AS p FROM t )
+    WHEN criterio_observador = 4 THEN --Punto mas cercano al centroide pero que se intersecte el poligono si esta fuera
+      ( SELECT ST_SetSRID(ST_MakePoint(st_x( ST_ClosestPoint( poligono_creado, ST_centroid(t.poligono_creado))), st_y( ST_ClosestPoint( poligono_creado,ST_centroid(t.poligono_creado)))), ST_SRID(t.poligono_creado)) AS p FROM t )
+    ELSE --defecto: Centro del extent
+      ( SELECT ST_SetSRID(ST_MakePoint(st_x(ST_centroid(st_envelope(t.poligono_creado))), st_y(ST_centroid(st_envelope(t.poligono_creado)))), ST_SRID(t.poligono_creado)) AS p FROM t )
+    END as p
+    FROM parametros
+),
+--Cuadrantes del polígono desde el observador a cada una de las esquinas de la extensión del polígono
+norte AS (
+	SELECT ST_SetSRID(ST_MakePolygon(ST_MakeLine(ARRAY [a.p, b.p, m.p, a.p])), ST_SRID(t.poligono_creado)) geom FROM t,a,b,m
+),
+este AS (
+	SELECT ST_SetSRID(ST_MakePolygon(ST_MakeLine(ARRAY [m.p, b.p, c.p, m.p])), ST_SRID(t.poligono_creado)) geom FROM t,b,c,m
+),
+sur AS (
+	SELECT ST_SetSRID(ST_MakePolygon(ST_MakeLine(ARRAY [m.p, c.p, d.p, m.p])), ST_SRID(t.poligono_creado)) geom FROM t,m,c,d
+),
+oeste AS (
+	SELECT ST_SetSRID(ST_MakePolygon(ST_MakeLine(ARRAY [a.p, m.p, d.p, a.p])), ST_SRID(t.poligono_creado)) geom FROM t,a,m,d
+)
+,limite_poligono as(
+	SELECT t_id, ST_Boundary(poligono_creado) geom FROM t
+)
+,limite_vecinos as (  --obtiene el limite de los terrenos colindantes, filtrados por bounding box
+	select o.t_id, ST_Boundary(o.poligono_creado) geom from t, $P!{datasetName}.terreno o where o.poligono_creado && st_envelope(t.poligono_creado) and t.t_id <> o.t_id
+)
+,pre_colindancias as ( --inteseccion entre el limite del poligono y los terrenos cercanos, añade la geometria de los limites sin adjacencia
+	SELECT limite_vecinos.t_id, st_intersection(limite_poligono.geom,limite_vecinos.geom) geom  FROM limite_poligono,limite_vecinos where st_intersects(limite_poligono.geom,limite_vecinos.geom) and limite_poligono.t_id <> limite_vecinos.t_id
+	union 
+	SELECT null as t_id, ST_Difference(limite_poligono.geom, a.geom) geom
+	FROM limite_poligono,
+	(
+		select ST_LineMerge(ST_Union(geom)) geom from limite_vecinos
+	) a 
+)
+, tmp_colindantes as (
+	select  t_id,ST_LineMerge(ST_Union(geom)) geom from 
+	(
+		SELECT
+		  simple.t_id,
+		  simple.simple_geom as geom,
+		  ST_GeometryType(simple.simple_geom) as geom_type,
+		  ST_AsEWKT(simple.simple_geom) as geom_wkt
+		FROM (
+		  SELECT
+		    dumped.*,
+		    (dumped.geom_dump).geom as simple_geom,
+		    (dumped.geom_dump).path as path
+		  FROM (
+		    SELECT *, ST_Dump(geom) AS geom_dump FROM pre_colindancias
+		  ) as dumped
+		) AS simple
+
+	) a
+	group by t_id
+)
+, lineas_colindancia as ( --contiene las lineas de cambio de colindancia todas las lineas son parte simple
+	SELECT * FROM
+	(
+		SELECT
+		  simple.t_id,
+		  simple.simple_geom as geom
+		FROM (
+		  SELECT
+		    dumped.*,
+		    (dumped.geom_dump).geom as simple_geom,
+		    (dumped.geom_dump).path as path
+		  FROM (
+		    SELECT *, ST_Dump(geom) AS geom_dump FROM (select * from tmp_colindantes where ST_GeometryType(geom) = 'ST_MultiLineString') a
+		  ) as dumped
+		) AS simple			
+	) a 
+	UNION 
+	select * from tmp_colindantes where ST_GeometryType(geom) <> 'ST_MultiLineString'
+)
+, puntos_terreno as (
+	SELECT (ST_DumpPoints(poligono_creado)).* AS dp
+	FROM t
+)
+--Criterio 1: el punto inicial del terreno es el primer punto del lindero que intersecte con el punto ubicado mas cerca de la esquina nw del polígono
+, punto_nw as (
+	SELECT 	geom
+		,st_distance(geom, nw) AS dist
+	FROM 	puntos_terreno,
+		(SELECT ST_SetSRID(ST_MakePoint(st_xmin(st_envelope(poligono_creado)), st_ymax(st_envelope(poligono_creado))), ST_SRID(poligono_creado)) as nw FROM t ) a
+	ORDER BY dist limit 1
+)
+, punto_inicial_por_lindero_con_punto_nw as (
+	select st_startpoint(lineas_colindancia.geom) geom from lineas_colindancia, punto_nw where st_intersects(lineas_colindancia.geom, punto_nw.geom ) and not st_intersects(st_endpoint(lineas_colindancia.geom), punto_nw.geom )  limit 1
+)
+
+--Criterio 2: el punto inicial del terreno es el primer punto del lindero que tenga mayor porcentaje de su longitud sobre el cuadrante norte del poligono
+, punto_inicial_por_lindero_porcentaje_n as(
+	select 	round((st_length(st_intersection(lineas_colindancia.geom, norte.geom))/st_length(lineas_colindancia.geom))::numeric,2) dist, 
+		st_startpoint(lineas_colindancia.geom) geom 
+		,st_distance(lineas_colindancia.geom,nw) distance_to_nw
+		from lineas_colindancia
+			,norte
+			,(SELECT ST_SetSRID(ST_MakePoint(st_xmin(st_envelope(poligono_creado)), st_ymax(st_envelope(poligono_creado))), ST_SRID(poligono_creado)) as nw FROM t ) a
+		where st_intersects(lineas_colindancia.geom, norte.geom)  order by dist desc, distance_to_nw
+		limit 1
+)
+--Criterio para definir el punto inicial del terreno
+,punto_inicial as (
+	SELECT 
+		CASE WHEN criterio_punto_inicial = 1 THEN (select geom from punto_inicial_por_lindero_con_punto_nw)
+		WHEN criterio_punto_inicial = 2 THEN (select geom from punto_inicial_por_lindero_porcentaje_n)
+	END as geom
+	FROM parametros
+)
+, puntos_ordenados as (
+	SELECT case when id-m+1 <= 0 then total + id-m else id-m+1 end as id, geom , st_x(geom) x, st_y(geom) y FROM
+		(
+		SELECT row_number() OVER (ORDER BY path) AS id
+			,m
+			,path
+			,geom
+			,total
+		FROM (
+			SELECT (ST_DumpPoints(ST_ForceRHR(poligono_creado))).* AS dp
+				,ST_NPoints(poligono_creado) total
+				,poligono_creado
+			FROM t
+			) AS a
+			,(
+				SELECT row_number() OVER (ORDER BY path) AS m
+					,st_distance(puntos_terreno.geom, punto_inicial.geom) AS dist
+				FROM puntos_terreno,punto_inicial
+				ORDER BY dist limit 1
+			) b
+		) t
+		where id <> total
+	order by id
+)
+select * from
+(
+	select c1.id as "from", c2.id as "to", c1.x, c1.y, st_distance(c1.geom,c2.geom) as dist from puntos_ordenados c1, puntos_ordenados c2 where c1.id +1  = c2.id 
+	union
+	select c1.id as "from", c2.id as "to", c1.x, c1.y, st_distance(c1.geom,c2.geom) as dist from (select * from puntos_ordenados order by id desc limit 1) c1, (select * from puntos_ordenados order by id asc limit 1) c2
+) t order by "from"]]>
+	</queryString>
+	<field name="from" class="java.lang.Long"/>
+	<field name="to" class="java.lang.Long"/>
+	<field name="x" class="java.lang.Double"/>
+	<field name="y" class="java.lang.Double"/>
+	<field name="dist" class="java.lang.Double"/>
+	<sortField name="from"/>
+	<title>
+		<band height="21">
+			<rectangle>
+				<reportElement mode="Transparent" x="0" y="0" width="265" height="21" uuid="234b18ee-2337-4944-943c-57fa632a18f4">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+			</rectangle>
+			<staticText>
+				<reportElement x="0" y="0" width="265" height="21" uuid="f1001fa9-207f-468c-bb38-8429e996a395">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[COORDENADAS]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement mode="Transparent" x="265" y="0" width="265" height="21" uuid="40088c49-cf39-4761-ac96-eaf968613343"/>
+			</rectangle>
+			<staticText>
+				<reportElement x="265" y="0" width="265" height="21" uuid="84dedb79-4e9b-4c22-b08f-6bd4345c6d13"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[DISTANCIAS]]></text>
+			</staticText>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="20" splitType="Stretch">
+			<rectangle>
+				<reportElement mode="Transparent" x="265" y="0" width="265" height="20" uuid="fa589699-2219-4109-a95e-c73afef45fe4"/>
+			</rectangle>
+			<rectangle>
+				<reportElement mode="Transparent" x="0" y="0" width="265" height="20" uuid="15489fda-aeea-445e-8d61-7f5d16b10a76"/>
+			</rectangle>
+			<staticText>
+				<reportElement x="0" y="0" width="65" height="20" uuid="5f2f2770-d51b-4ac6-b960-b332208ab4b2">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.2"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[NODO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="65" y="0" width="100" height="20" uuid="f58b40f8-8b05-4431-842f-3b5a8c37efad">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.2"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[NORTE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="165" y="0" width="100" height="20" uuid="02757768-ca50-4d07-a03b-3bd993441499">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.2"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[ESTE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="265" y="0" width="74" height="20" uuid="40d92345-151b-4e74-a853-e142b424719d">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.2"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[DESDE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="339" y="0" width="74" height="20" uuid="004f36d8-1791-4642-a8f5-58f7a80570b8">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.2"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[HASTA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="413" y="0" width="117" height="20" uuid="ec485c61-11d0-45d2-9a7a-1ef7277ed1f1">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.2"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[DISTANCIA (m)]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="15" splitType="Stretch">
+			<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+			<textField>
+				<reportElement x="0" y="0" width="65" height="15" uuid="9c960c62-ea92-41ec-8b3f-8906c2792c99">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.2"/>
+					<leftPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{from}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="265" y="0" width="74" height="15" uuid="5abee6f6-246c-492c-88d9-22aa82fd357d">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.2"/>
+					<leftPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{from}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="339" y="0" width="74" height="15" uuid="eb42d93c-f90d-4f72-b1af-d16089e304cb">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.2"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{to}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="413" y="0" width="117" height="15" uuid="bdd97402-bdab-42d3-be6c-6da0aa5e9fa7">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.2"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{dist}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,###.00">
+				<reportElement x="65" y="0" width="100" height="15" uuid="becce9cf-2e1d-4863-9008-9bc5ccfe03c9">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.2"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{y}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,###.00">
+				<reportElement x="165" y="0" width="100" height="15" uuid="b7c05ef6-36f7-445d-90b3-c94392e2c56b">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.2"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{x}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="1">
+			<line>
+				<reportElement x="0" y="0" width="530" height="1" uuid="29389f40-9e1f-434e-b4d5-d5668c2661aa"/>
+			</line>
+		</band>
+	</columnFooter>
+</jasperReport>
