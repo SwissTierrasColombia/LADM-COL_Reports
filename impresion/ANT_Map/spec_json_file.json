@@ -121,15 +121,14 @@
                                     "fontFamily": "sans-serif",
                                     "fontSize": "6px",
                                     "label": "[predio]",
-									"labelAlign": "cm",
                                     "type": "text",
                                     "goodnessOfFit": 0.1,
-                                    "allowOverruns":true,
                                     "haloRadius": "1.0",
                                     "haloColor": "#FFFFFF",
                                     "haloOpacity": "0.7",
 								    "autoWrap": 75,
-									"conflictResolution": true
+									"conflictResolution": true,
+									"maxDisplacement": 300
                                 }
                             ]
                         },
