@@ -77,10 +77,11 @@ set CMD_LINE_ARGS=%$
 :execute
 @rem Setup the command line
 
+set ENCODING=UTF-8
 set CLASSPATH=%APP_HOME%\lib\*
 
 @rem Execute print
-"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %PRINT_OPTS%  -classpath "%CLASSPATH%" org.mapfish.print.cli.Main %CMD_LINE_ARGS%
+"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %PRINT_OPTS% -Dfile.encoding=%ENCODING% -classpath "%CLASSPATH%" org.mapfish.print.cli.Main %CMD_LINE_ARGS%
 
 :end
 @rem End local scope for the variables with windows NT shell

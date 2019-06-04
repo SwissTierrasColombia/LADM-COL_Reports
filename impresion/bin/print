@@ -60,6 +60,7 @@ cd "`dirname \"$PRG\"`/.." >&-
 APP_HOME="`pwd -P`"
 cd "$SAVED" >&-
 
+ENCODING=UTF-8
 CLASSPATH=$APP_HOME/lib/*
 
 # Determine the Java command to use to start the JVM.
@@ -157,4 +158,4 @@ function splitJvmOpts() {
 eval splitJvmOpts $DEFAULT_JVM_OPTS $JAVA_OPTS $PRINT_OPTS
 
 
-exec "$JAVACMD" "${JVM_OPTS[@]}" -classpath "$CLASSPATH" org.mapfish.print.cli.Main "$@"
+exec "$JAVACMD" "${JVM_OPTS[@]}" -Dfile.encoding="$ENCODING" -classpath "$CLASSPATH" org.mapfish.print.cli.Main "$@"
