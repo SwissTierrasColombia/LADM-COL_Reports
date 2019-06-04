@@ -320,6 +320,26 @@ WHERE terreno.t_id =  $P{id}]]>
 	<detail>
 		<band height="715">
 			<rectangle>
+				<reportElement mode="Transparent" x="10" y="680" width="540" height="29" uuid="21e55b7c-158b-4cfc-aea6-5e1f8a8166c8"/>
+			</rectangle>
+			<staticText>
+				<reportElement x="10" y="680" width="540" height="29" uuid="d9797641-71de-4a23-b4d1-abfac801ba60">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="5"/>
+					<paragraph leftIndent="5"/>
+				</textElement>
+				<text><![CDATA[Plano generado a partir de la información validada por el IGAC en el marco del proyecto de catastro multipropósito]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="10" y="670" width="540" height="10" uuid="10b8610f-b594-45db-8af1-57ccd167eee2"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[FIRMA AUTORIZADA]]></text>
+			</staticText>
+			<rectangle>
 				<reportElement mode="Transparent" x="10" y="443" width="265" height="80" uuid="b33eadc0-022a-488e-ae7a-88e350284a9e"/>
 			</rectangle>
 			<subreport>
@@ -564,51 +584,7 @@ WHERE terreno.t_id =  $P{id}]]>
 				<reportElement mode="Transparent" x="10" y="593" width="265" height="65" uuid="0927a29b-d74e-4769-81ec-87eaefa0c00c"/>
 			</rectangle>
 			<rectangle>
-				<reportElement mode="Transparent" x="390" y="664" width="160" height="10" uuid="a8b240ef-e428-4118-b1cb-123af4415402"/>
-			</rectangle>
-			<staticText>
-				<reportElement x="390" y="664" width="160" height="10" uuid="10b8610f-b594-45db-8af1-57ccd167eee2"/>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font size="7" isBold="true"/>
-				</textElement>
-				<text><![CDATA[FIRMA AUTORIZADA]]></text>
-			</staticText>
-			<rectangle>
-				<reportElement mode="Transparent" x="390" y="674" width="160" height="35" uuid="d109efd1-b062-4932-9015-101f26cd719b"/>
-			</rectangle>
-			<staticText>
-				<reportElement x="390" y="699" width="160" height="10" uuid="1357f6e4-f1d2-46f3-a67e-8c937cd7e8b3"/>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font size="5"/>
-				</textElement>
-				<text><![CDATA[Fecha de identificación del predio: DD/MM/AAAA]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="10" y="664" width="380" height="10" uuid="c05838cb-5e43-4909-bcac-9e4801645a13"/>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font size="7" isBold="true"/>
-				</textElement>
-				<text><![CDATA[OBSERVACIONES]]></text>
-			</staticText>
-			<rectangle>
-				<reportElement mode="Transparent" x="10" y="674" width="380" height="35" uuid="21e55b7c-158b-4cfc-aea6-5e1f8a8166c8"/>
-			</rectangle>
-			<staticText>
-				<reportElement x="10" y="674" width="380" height="35" uuid="d9797641-71de-4a23-b4d1-abfac801ba60">
-					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
-				</reportElement>
-				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font size="5"/>
-					<paragraph leftIndent="10"/>
-				</textElement>
-				<text><![CDATA[La inscripción en catastro no constituye título de dominio, ni sanea los vicios que tenga una titulación o una posesión.
-Resolución 070 de 2011, Articulo 42.
-Si la información cartográfica es diferente a la jurídica, el usuario debe adjuntar las pruebas respectivas.
-Los datos contenidos en este documento fueron inscritos según Resolución No. 5106
-La vigencia de este certificado será de tres meses, a partir de su fecha de expedición.]]></text>
-			</staticText>
-			<rectangle>
-				<reportElement mode="Transparent" x="10" y="664" width="380" height="10" uuid="4bd6cb91-387e-430a-ab51-6f3dc969ba95"/>
+				<reportElement mode="Transparent" x="10" y="670" width="540" height="10" uuid="a8b240ef-e428-4118-b1cb-123af4415402"/>
 			</rectangle>
 			<staticText>
 				<reportElement x="10" y="544" width="37" height="7" uuid="cf6109cc-c353-464e-bd12-1ce4ba4e1b4f">

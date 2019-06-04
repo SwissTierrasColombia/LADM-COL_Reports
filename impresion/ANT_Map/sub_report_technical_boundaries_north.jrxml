@@ -254,11 +254,11 @@ LEFT JOIN
   SELECT t_id,
 	array_to_string(array_agg(( coalesce(primer_nombre,'') || coalesce(' ' || segundo_nombre, '') || coalesce(' ' || primer_apellido, '') || coalesce(' ' || segundo_apellido, '') ) 
 				|| ( coalesce(razon_social, '') ) 
-				|| ', ' || (select dispname from $P!{datasetName}.col_interesadodocumentotipo where ilicode = tipo_documento) || ': '
-				|| documento_identidad 
-				|| CASE WHEN (SELECT incluir_tipo_derecho FROM parametros) THEN 
-					' (' || (select dispname from $P!{datasetName}.col_derechotipo where ilicode = tipo_derecho) || ')' --opcional: ver tipo de derecho de cada interesado 
-				  ELSE '' END
+				--|| ', ' || (select dispname from $P!{datasetName}.col_interesadodocumentotipo where ilicode = tipo_documento) || ': '
+				--|| documento_identidad 
+				--|| CASE WHEN (SELECT incluir_tipo_derecho FROM parametros) THEN 
+					--' (' || (select dispname from $P!{datasetName}.col_derechotipo where ilicode = tipo_derecho) || ')' --opcional: ver tipo de derecho de cada interesado 
+				  --ELSE '' END
 				) , '; ')
 			  as interesado
   FROM 
@@ -274,10 +274,10 @@ LEFT JOIN
 			  ,primer_apellido
 			  ,segundo_apellido
 			  ,razon_social
-			  ,tipo_documento
-			  ,documento_identidad
+			  --,tipo_documento
+			 -- ,documento_identidad
 			  ,unidad_predio
-			  ,col_derecho.tipo as tipo_derecho
+			 -- ,col_derecho.tipo as tipo_derecho
 			from 
 			  $P!{datasetName}.col_derecho
 			  JOIN $P!{datasetName}.la_agrupacion_interesados on la_agrupacion_interesados.t_id = interesado_la_agrupacion_interesados 
@@ -296,10 +296,10 @@ LEFT JOIN
 			  ,primer_apellido
 			  ,segundo_apellido
 			  ,razon_social
-			  ,tipo_documento
-			  ,documento_identidad
+			 -- ,tipo_documento
+			 -- ,documento_identidad
 			  ,unidad_predio
-			  ,col_derecho.tipo as tipo_derecho
+			  --,col_derecho.tipo as tipo_derecho
 			from 
 			  $P!{datasetName}.col_derecho
 			  JOIN $P!{datasetName}.col_interesado on col_interesado.t_id =interesado_col_interesado
