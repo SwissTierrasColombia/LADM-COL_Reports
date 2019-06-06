@@ -25,8 +25,8 @@
 		<![CDATA[WITH 
 parametros AS (
   SELECT
-     $P{id}  	AS poligono_t_id,
-      $P{criterio_punto_inicial} 		AS criterio_punto_inicial, --tipo de criterio para seleccionar el punto inicial del terreno, valores posibles: 1,2
+     $P{id} 	AS poligono_t_id, --
+      1 		AS criterio_punto_inicial, --tipo de criterio para seleccionar el punto inicial del terreno, valores posibles: 1,2
     4		AS criterio_observador, --1: Centroide, 2: Centro del extent, 3: punto en la superficie, 4: Punto mas cercano al centroide dentro del poligono
     false	AS incluir_tipo_derecho, --Mostrar el tipo de derecho de cada interesado (booleano)
     15		as tolerancia_sentidos --tolerancia en grados para la definicion del sentido de una linea
@@ -80,7 +80,7 @@ oeste AS (
 	SELECT t_id, ST_Boundary(poligono_creado) geom FROM t
 )
 ,limite_vecinos as (  --obtiene el limite de los terrenos colindantes, filtrados por bounding box
-	select o.t_id, ST_Boundary(o.poligono_creado) geom from t, $P!{datasetName}.terreno o where o.poligono_creado && st_envelope(t.poligono_creado) and t.t_id <> o.t_id
+	select o.t_id, ST_Boundary(o.poligono_creado) geom from t, $P!{datasetName}.terreno o where o.poligono_creado && st_envelope(t.poligono_creado) and t.t_id <> o.t_id 
 )
 ,pre_colindancias as ( --inteseccion entre el limite del poligono y los terrenos cercanos, añade la geometria de los limites sin adjacencia
 	SELECT limite_vecinos.t_id, st_intersection(limite_poligono.geom,limite_vecinos.geom) geom  FROM limite_poligono,limite_vecinos where st_intersects(limite_poligono.geom,limite_vecinos.geom) and limite_poligono.t_id <> limite_vecinos.t_id
@@ -108,7 +108,6 @@ oeste AS (
 		    SELECT *, ST_Dump(geom) AS geom_dump FROM pre_colindancias
 		  ) as dumped
 		) AS simple
-
 	) a
 	group by t_id
 )
@@ -146,7 +145,6 @@ oeste AS (
 , punto_inicial_por_lindero_con_punto_nw as (
 	select st_startpoint(lineas_colindancia.geom) geom from lineas_colindancia, punto_nw where st_intersects(lineas_colindancia.geom, punto_nw.geom ) and not st_intersects(st_endpoint(lineas_colindancia.geom), punto_nw.geom )  limit 1
 )
-
 --Criterio 2: el punto inicial del terreno es el primer punto del lindero que tenga mayor porcentaje de su longitud sobre el cuadrante norte del poligono
 , punto_inicial_por_lindero_porcentaje_n as(
 	select 	round((st_length(st_intersection(lineas_colindancia.geom, norte.geom))/st_length(lineas_colindancia.geom))::numeric,2) dist, 
@@ -215,22 +213,59 @@ oeste AS (
 		from lineas_colindancia_desde_hasta, cuadrantes where st_intersects(geom,cuadrante)
 	) a
 	where porcentaje = max_porce
-) 
-
-SELECT 
-  id
+),
+predios_seleccionados as (
+	select baunit_predio as t_id_predio, colindantes.t_id as t_id_colindante from colindantes
+	left join $P!{datasetName}.uebaunit ON colindantes.t_id = ue_terreno 
+),
+derechos_seleccionados AS (
+	 SELECT DISTINCT col_derecho.t_id as t_id_derecho, predios_seleccionados.t_id_colindante  
+	 FROM predios_seleccionados LEFT JOIN $P!{datasetName}.col_derecho 
+	 ON col_derecho.unidad_predio = predios_seleccionados.t_id_predio
+ ),
+ derecho_interesados AS (
+	 SELECT DISTINCT col_derecho.interesado_col_interesado, col_derecho.t_id as t_id_derecho, derechos_seleccionados.t_id_colindante  
+	 FROM derechos_seleccionados LEFT JOIN $P!{datasetName}.col_derecho 
+	 ON col_derecho.t_id = derechos_seleccionados.t_id_derecho WHERE col_derecho.interesado_col_interesado IS NOT NULL
+ ),
+ derecho_agrupacion_interesados AS (
+	 SELECT DISTINCT col_derecho.interesado_la_agrupacion_interesados, miembros.interesados_col_interesado, derechos_seleccionados.t_id_colindante 
+	 FROM derechos_seleccionados LEFT JOIN $P!{datasetName}.col_derecho 
+	 ON col_derecho.t_id = derechos_seleccionados.t_id_derecho
+	 LEFT JOIN $P!{datasetName}.miembros 
+	 ON col_derecho.interesado_la_agrupacion_interesados = miembros.agrupacion
+	 WHERE col_derecho.interesado_la_agrupacion_interesados IS NOT NULL
+ ),
+ info_interesado as (
+		select
+	 	col_interesado.p_local_id as local_id
+	 	,(case when col_interesado.t_id is not null then 'interesado' end) as agrupacion_interesado
+	 	,(coalesce(col_interesado.primer_nombre,'') || coalesce(' ' || col_interesado.segundo_nombre, '') || coalesce(' ' || col_interesado.primer_apellido, '') || coalesce(' ' || col_interesado.segundo_apellido, '')  
+				|| coalesce(col_interesado.razon_social, '') ) as nombre,
+		t_id_colindante
+ 		from derecho_interesados LEFT JOIN $P!{datasetName}.col_interesado ON col_interesado.t_id = derecho_interesados.interesado_col_interesado
+ ),
+ info_agrupacion as (
+ select
+		col_interesado.p_local_id as local_id
+		,(case when col_interesado.t_id is not null then 'agrupacion' end) as agrupacion_interesado
+	 	,(coalesce(col_interesado.primer_nombre,'') || coalesce(' ' || col_interesado.segundo_nombre, '') || coalesce(' ' || col_interesado.primer_apellido, '') || coalesce(' ' || col_interesado.segundo_apellido, '')  
+				|| coalesce(col_interesado.razon_social, '') ) as nombre,
+		t_id_colindante
+		from derecho_agrupacion_interesados LEFT JOIN $P!{datasetName}.col_interesado ON col_interesado.t_id = derecho_agrupacion_interesados.interesados_col_interesado order by local_id limit 1
+ ),
+ info_total_interesados as (select * from info_interesado union all select * from info_agrupacion)
+ select 
+   id
   ,desde
   ,hasta
   ,ubicacion
-  ,nupre
   ,round(st_x(st_startpoint(colindantes.geom))::numeric,2) xi
   ,round(st_y(st_startpoint(colindantes.geom))::numeric,2) yi
   ,round(st_x(st_endpoint(colindantes.geom))::numeric,2) xf
   ,round(st_y(st_endpoint(colindantes.geom))::numeric,2) yf
-  ,CASE WHEN numero_predial is null and fmi IS NULL and nombre IS NULL THEN 'ÁREA INDETERMINADA'
-    ELSE COALESCE('predio catastral número: ' || numero_predial || ' ','') || COALESCE('FMI: ' || fmi || ' ','') || COALESCE('Nombre: ' || nombre ,'') 
-   END as predio
-  ,COALESCE(interesado, 'INDETERMINADO') AS interesado
+  ,COALESCE(info_total_interesados.nombre, 'INDETERMINADO') AS interesado
+  ,COALESCE(info_total_interesados.agrupacion_interesado, 'INDETERMINADO') AS tipo_interesado
   ,round(st_length(colindantes.geom)::numeric,2) distancia
   ,(select array_to_string( array_agg(puntos_ordenados.id || ': N=' || round(st_y(puntos_ordenados.geom)::numeric,2) || ' metros (m.), E=' || round(st_x(puntos_ordenados.geom)::numeric,2) || ' metros (m.)'), '; ') from puntos_ordenados WHERE st_intersects(colindantes.geom,puntos_ordenados.geom) and puntos_ordenados.id not in (desde, hasta) ) as nodos
   ,degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2)))
@@ -244,82 +279,19 @@ SELECT
 	  WHEN degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2))) between 270+(select tolerancia_sentidos from parametros) and 360-(select tolerancia_sentidos from parametros) THEN 'noroeste'
   END as sentido
   ,(select count(*) from colindantes) as total_linderos
-FROM
-colindantes 
-LEFT JOIN $P!{datasetName}.terreno ON terreno.t_id = colindantes.t_id
-LEFT JOIN $P!{datasetName}.uebaunit ON colindantes.t_id = ue_terreno
-LEFT JOIN $P!{datasetName}.predio ON predio.t_id = baunit_predio
-LEFT JOIN
-(
-  SELECT t_id,
-	array_to_string(array_agg(( coalesce(primer_nombre,'') || coalesce(' ' || segundo_nombre, '') || coalesce(' ' || primer_apellido, '') || coalesce(' ' || segundo_apellido, '') ) 
-				|| ( coalesce(razon_social, '') ) 
-				--|| ', ' || (select dispname from $P!{datasetName}.col_interesadodocumentotipo where ilicode = tipo_documento) || ': '
-				--|| documento_identidad 
-				--|| CASE WHEN (SELECT incluir_tipo_derecho FROM parametros) THEN 
-					--' (' || (select dispname from $P!{datasetName}.col_derechotipo where ilicode = tipo_derecho) || ')' --opcional: ver tipo de derecho de cada interesado 
-				  --ELSE '' END
-				) , '; ')
-			  as interesado
-  FROM 
-  (	
-	--navegar agrupación de interesados
-	SELECT * FROM
-		$P!{datasetName}.predio
-		LEFT JOIN
-		(
-			select 
-			  primer_nombre
-			  ,segundo_nombre
-			  ,primer_apellido
-			  ,segundo_apellido
-			  ,razon_social
-			  --,tipo_documento
-			 -- ,documento_identidad
-			  ,unidad_predio
-			 -- ,col_derecho.tipo as tipo_derecho
-			from 
-			  $P!{datasetName}.col_derecho
-			  JOIN $P!{datasetName}.la_agrupacion_interesados on la_agrupacion_interesados.t_id = interesado_la_agrupacion_interesados 
-			  JOIN $P!{datasetName}.miembros on agrupacion = la_agrupacion_interesados.t_id
-			  JOIN $P!{datasetName}.col_interesado on col_interesado.t_id = miembros.interesados_col_interesado
-		 ) agrupacion  ON predio.t_id = agrupacion.unidad_predio
-	UNION
-	--navegar agrupación de interesados
-	SELECT * FROM
-		$P!{datasetName}.predio
-		LEFT JOIN
-		(
-			select 			
-			  primer_nombre
-			  ,segundo_nombre
-			  ,primer_apellido
-			  ,segundo_apellido
-			  ,razon_social
-			 -- ,tipo_documento
-			 -- ,documento_identidad
-			  ,unidad_predio
-			  --,col_derecho.tipo as tipo_derecho
-			from 
-			  $P!{datasetName}.col_derecho
-			  JOIN $P!{datasetName}.col_interesado on col_interesado.t_id =interesado_col_interesado
-		) interesado ON predio.t_id = interesado.unidad_predio
-  ) interesados
-  group by t_id
-) interesados on interesados.t_id = predio.t_id
-WHERE ubicacion ='1_Norte' ORDER BY colindantes.id]]>
+ from colindantes left join info_total_interesados on colindantes.t_id = info_total_interesados.t_id_colindante
+ where ubicacion = '1_Norte']]>
 	</queryString>
 	<field name="id" class="java.lang.Long"/>
 	<field name="desde" class="java.lang.Long"/>
 	<field name="hasta" class="java.lang.Long"/>
 	<field name="ubicacion" class="java.lang.String"/>
-	<field name="nupre" class="java.lang.String"/>
 	<field name="xi" class="java.math.BigDecimal"/>
 	<field name="yi" class="java.math.BigDecimal"/>
 	<field name="xf" class="java.math.BigDecimal"/>
 	<field name="yf" class="java.math.BigDecimal"/>
-	<field name="predio" class="java.lang.String"/>
 	<field name="interesado" class="java.lang.String"/>
+	<field name="tipo_interesado" class="java.lang.String"/>
 	<field name="distancia" class="java.math.BigDecimal"/>
 	<field name="nodos" class="java.lang.String"/>
 	<field name="degrees" class="java.lang.Double"/>
@@ -342,7 +314,7 @@ WHERE ubicacion ='1_Norte' ORDER BY colindantes.id]]>
 					<font size="9"/>
 					<paragraph lineSpacing="Single" lineSpacingSize="1.0" firstLineIndent="10" leftIndent="5" rightIndent="5" tabStopWidth="20"/>
 				</textElement>
-				<textFieldExpression><![CDATA["<b>LINDERO " + $F{id}+ /*" en " + $F{predio} +*/ ":</b> Partiendo del punto " + $F{desde} + " con coordenadas N=" + $F{yi} + " metros (m.), E=" + $F{xi} + " metros (m.)" + ($F{nodos} != null ? " en línea quebrada" :" en línea recta") + " y en sentido " + $F{sentido} +  ($F{nodos} != null ? " pasando por los puntos y coordenadas " + $F{nodos} + ", con una distancia acumulada de " :" en distancia de ") + $F{distancia} + " metros (m.) hasta el punto " + $F{hasta} + " con coordenadas N=" + $F{yf} + " metros (m.), E="  + $F{xf} + " metros (m.)" +($V{REPORT_COUNT}.equals($F{total_linderos}.intValue()) ? ", con el cual cierra el polígono," : ",")  + " colindando con "  + $F{interesado}  +"."]]></textFieldExpression>
+				<textFieldExpression><![CDATA["<b>LINDERO " + $F{id}+ ":</b> Partiendo del punto " + $F{desde} + " con coordenadas N=" + $F{yi} + " metros (m.), E=" + $F{xi} + " metros (m.)" + ($F{nodos} != null ? " en línea quebrada" :" en línea recta") + " y en sentido " + $F{sentido} +  ($F{nodos} != null ? " pasando por los puntos y coordenadas " + $F{nodos} + ", con una distancia acumulada de " :" en distancia de ") + $F{distancia} + " metros (m.) hasta el punto " + $F{hasta} + " con coordenadas N=" + $F{yf} + " metros (m.), E="  + $F{xf} + " metros (m.)" +($V{REPORT_COUNT}.equals($F{total_linderos}.intValue()) ? ", con el cual cierra el polígono," : ",")  + " colindando con "  + ($F{tipo_interesado}.equals("agrupacion")? "la agrupación conformada por "+ $F{interesado} +" y otros": $F{interesado})  +"."]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
