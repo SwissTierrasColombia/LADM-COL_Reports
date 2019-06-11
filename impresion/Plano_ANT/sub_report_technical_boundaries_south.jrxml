@@ -25,14 +25,14 @@
 		<![CDATA[WITH 
 parametros AS (
   SELECT
-     $P{id} 	AS poligono_t_id, --
-      1 		AS criterio_punto_inicial, --tipo de criterio para seleccionar el punto inicial del terreno, valores posibles: 1,2
-    4		AS criterio_observador, --1: Centroide, 2: Centro del extent, 3: punto en la superficie, 4: Punto mas cercano al centroide dentro del poligono
+     $P{id}  AS poligono_t_id, 
+      1 	AS criterio_punto_inicial, --tipo de criterio para seleccionar el punto inicial del terreno, valores posibles: 1,2
+    4		AS criterio_observador, --1: Centroide, 2: Centro del extent, 3: punto en la superficie, 4: Punto mas cercano al centroide dentro del poligono 
     false	AS incluir_tipo_derecho, --Mostrar el tipo de derecho de cada interesado (booleano)
     15		as tolerancia_sentidos --tolerancia en grados para la definicion del sentido de una linea
 ),
 t AS ( --Orienta los vertices del terreno en sentido horario
-	SELECT t_id, ST_ForceRHR(poligono_creado) as poligono_creado FROM $P!{datasetName}.terreno AS t, parametros WHERE t.t_id = poligono_t_id
+	SELECT t_id, ST_ForceRHR(poligono_creado) as poligono_creado FROM $P!{datasetName}.terreno AS t, parametros WHERE t.t_id = poligono_t_id 
 ),
 --bordes de la extension del poligono
 a AS (
@@ -47,7 +47,7 @@ c AS (
 d AS (
 	SELECT ST_SetSRID(ST_MakePoint(st_xmin(t.poligono_creado), st_ymin(t.poligono_creado)), ST_SRID(t.poligono_creado)) AS p FROM t
 ),
---Punto medio (ubicación del observador para la definicion de las cardinalidades)
+--Punto medio (ubicaci�n del observador para la definicion de las cardinalidades)
 m AS (
   SELECT
     CASE WHEN criterio_observador = 1 THEN --centroide del poligono
@@ -63,7 +63,7 @@ m AS (
     END as p
     FROM parametros
 ),
---Cuadrantes del polígono desde el observador a cada una de las esquinas de la extensión del polígono
+--Cuadrantes del pol�gono desde el observador a cada una de las esquinas de la extensi�n del pol�gono
 norte AS (
 	SELECT ST_SetSRID(ST_MakePolygon(ST_MakeLine(ARRAY [a.p, b.p, m.p, a.p])), ST_SRID(t.poligono_creado)) geom FROM t,a,b,m
 ),
@@ -82,7 +82,7 @@ oeste AS (
 ,limite_vecinos as (  --obtiene el limite de los terrenos colindantes, filtrados por bounding box
 	select o.t_id, ST_Boundary(o.poligono_creado) geom from t, $P!{datasetName}.terreno o where o.poligono_creado && st_envelope(t.poligono_creado) and t.t_id <> o.t_id 
 )
-,pre_colindancias as ( --inteseccion entre el limite del poligono y los terrenos cercanos, añade la geometria de los limites sin adjacencia
+,pre_colindancias as ( --inteseccion entre el limite del poligono y los terrenos cercanos, a�ade la geometria de los limites sin adjacencia
 	SELECT limite_vecinos.t_id, st_intersection(limite_poligono.geom,limite_vecinos.geom) geom  FROM limite_poligono,limite_vecinos where st_intersects(limite_poligono.geom,limite_vecinos.geom) and limite_poligono.t_id <> limite_vecinos.t_id
 	union 
 	SELECT null as t_id, ST_Difference(limite_poligono.geom, a.geom) geom
@@ -134,7 +134,7 @@ oeste AS (
 	SELECT (ST_DumpPoints(poligono_creado)).* AS dp
 	FROM t
 )
---Criterio 1: el punto inicial del terreno es el primer punto del lindero que intersecte con el punto ubicado mas cerca de la esquina nw del polígono
+--Criterio 1: el punto inicial del terreno es el primer punto del lindero que intersecte con el punto ubicado mas cerca de la esquina nw del pol�gono
 , punto_nw as (
 	SELECT 	geom
 		,st_distance(geom, nw) AS dist
@@ -229,31 +229,38 @@ derechos_seleccionados AS (
 	 ON col_derecho.t_id = derechos_seleccionados.t_id_derecho WHERE col_derecho.interesado_col_interesado IS NOT NULL
  ),
  derecho_agrupacion_interesados AS (
-	 SELECT DISTINCT col_derecho.interesado_la_agrupacion_interesados, miembros.interesados_col_interesado, derechos_seleccionados.t_id_colindante 
+	 SELECT DISTINCT col_derecho.interesado_la_agrupacion_interesados, miembros.interesados_col_interesado, derechos_seleccionados.t_id_colindante, miembros.agrupacion 
 	 FROM derechos_seleccionados LEFT JOIN $P!{datasetName}.col_derecho 
 	 ON col_derecho.t_id = derechos_seleccionados.t_id_derecho
 	 LEFT JOIN $P!{datasetName}.miembros 
 	 ON col_derecho.interesado_la_agrupacion_interesados = miembros.agrupacion
 	 WHERE col_derecho.interesado_la_agrupacion_interesados IS NOT NULL
  ),
+ info_agrupacion_filter as (
+		select distinct on (agrupacion) agrupacion
+		,col_interesado.p_local_id as local_id
+		,(case when col_interesado.t_id is not null then 'agrupacion' end) as agrupacion_interesado
+	 	,(coalesce(col_interesado.primer_nombre,'') || coalesce(' ' || col_interesado.segundo_nombre, '') || coalesce(' ' || col_interesado.primer_apellido, '') || coalesce(' ' || col_interesado.segundo_apellido, '')  
+				|| coalesce(col_interesado.razon_social, '') ) as nombre
+		,t_id_colindante
+		from derecho_agrupacion_interesados LEFT JOIN $P!{datasetName}.col_interesado ON col_interesado.t_id = derecho_agrupacion_interesados.interesados_col_interesado order by agrupacion
+ ),
  info_interesado as (
 		select
 	 	col_interesado.p_local_id as local_id
 	 	,(case when col_interesado.t_id is not null then 'interesado' end) as agrupacion_interesado
 	 	,(coalesce(col_interesado.primer_nombre,'') || coalesce(' ' || col_interesado.segundo_nombre, '') || coalesce(' ' || col_interesado.primer_apellido, '') || coalesce(' ' || col_interesado.segundo_apellido, '')  
-				|| coalesce(col_interesado.razon_social, '') ) as nombre,
-		t_id_colindante
+				|| coalesce(col_interesado.razon_social, '') ) as nombre
+		,t_id_colindante
  		from derecho_interesados LEFT JOIN $P!{datasetName}.col_interesado ON col_interesado.t_id = derecho_interesados.interesado_col_interesado
  ),
  info_agrupacion as (
- select
-		col_interesado.p_local_id as local_id
-		,(case when col_interesado.t_id is not null then 'agrupacion' end) as agrupacion_interesado
-	 	,(coalesce(col_interesado.primer_nombre,'') || coalesce(' ' || col_interesado.segundo_nombre, '') || coalesce(' ' || col_interesado.primer_apellido, '') || coalesce(' ' || col_interesado.segundo_apellido, '')  
-				|| coalesce(col_interesado.razon_social, '') ) as nombre,
-		t_id_colindante
-		from derecho_agrupacion_interesados LEFT JOIN $P!{datasetName}.col_interesado ON col_interesado.t_id = derecho_agrupacion_interesados.interesados_col_interesado order by local_id limit 1
- ),
+		select local_id
+		,agrupacion_interesado
+		,nombre
+		,t_id_colindante
+		from info_agrupacion_filter
+),
  info_total_interesados as (select * from info_interesado union all select * from info_agrupacion)
  select 
    id
