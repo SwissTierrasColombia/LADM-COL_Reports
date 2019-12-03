@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.6.0.final using JasperReports Library version 6.6.0  -->
+<!-- Created with Jaspersoft Studio version 6.10.0.final using JasperReports Library version 6.10.0-unknown  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="sub_report_boundaries" pageWidth="595" pageHeight="842" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="20" uuid="8044c259-bf6b-4072-8923-78bca3eb0308">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="New Data Adapter "/>
@@ -32,57 +32,57 @@ parametros AS (
     15		as tolerancia_sentidos --tolerancia en grados para la definicion del sentido de una linea
 ),
 t AS ( --Orienta los vertices del terreno en sentido horario
-	SELECT t_id, ST_ForceRHR(poligono_creado) as poligono_creado FROM $P!{datasetName}.terreno AS t, parametros WHERE t.t_id = poligono_t_id 
+	SELECT t_id, ST_ForceRHR(geometria) as geometria FROM $P!{datasetName}.op_terreno AS t, parametros WHERE t.t_id = poligono_t_id
 ),
 --bordes de la extension del poligono
 a AS (
-	SELECT ST_SetSRID(ST_MakePoint(st_xmin(t.poligono_creado), st_ymax(t.poligono_creado)), ST_SRID(t.poligono_creado)) AS p FROM t
+	SELECT ST_SetSRID(ST_MakePoint(st_xmin(t.geometria), st_ymax(t.geometria)), ST_SRID(t.geometria)) AS p FROM t
 ),
 b AS (
-	SELECT ST_SetSRID(ST_MakePoint(st_xmax(t.poligono_creado), st_ymax(t.poligono_creado)), ST_SRID(t.poligono_creado)) AS p FROM t
+	SELECT ST_SetSRID(ST_MakePoint(st_xmax(t.geometria), st_ymax(t.geometria)), ST_SRID(t.geometria)) AS p FROM t
 ),
 c AS (
-	SELECT ST_SetSRID(ST_MakePoint(st_xmax(t.poligono_creado), st_ymin(t.poligono_creado)), ST_SRID(t.poligono_creado)) AS p FROM t
+	SELECT ST_SetSRID(ST_MakePoint(st_xmax(t.geometria), st_ymin(t.geometria)), ST_SRID(t.geometria)) AS p FROM t
 ),
 d AS (
-	SELECT ST_SetSRID(ST_MakePoint(st_xmin(t.poligono_creado), st_ymin(t.poligono_creado)), ST_SRID(t.poligono_creado)) AS p FROM t
+	SELECT ST_SetSRID(ST_MakePoint(st_xmin(t.geometria), st_ymin(t.geometria)), ST_SRID(t.geometria)) AS p FROM t
 ),
---Punto medio (ubicaci�n del observador para la definicion de las cardinalidades)
+--Punto medio (ubicaci?n del observador para la definicion de las cardinalidades)
 m AS (
   SELECT
     CASE WHEN criterio_observador = 1 THEN --centroide del poligono
-      ( SELECT ST_SetSRID(ST_MakePoint(st_x(ST_centroid(t.poligono_creado)), st_y(ST_centroid(t.poligono_creado))), ST_SRID(t.poligono_creado)) AS p FROM t )
+      ( SELECT ST_SetSRID(ST_MakePoint(st_x(ST_centroid(t.geometria)), st_y(ST_centroid(t.geometria))), ST_SRID(t.geometria)) AS p FROM t )
     WHEN criterio_observador = 2 THEN --Centro del extent
-      ( SELECT ST_SetSRID(ST_MakePoint(st_x(ST_centroid(st_envelope(t.poligono_creado))), st_y(ST_centroid(st_envelope(t.poligono_creado)))), ST_SRID(t.poligono_creado)) AS p FROM t )
+      ( SELECT ST_SetSRID(ST_MakePoint(st_x(ST_centroid(st_envelope(t.geometria))), st_y(ST_centroid(st_envelope(t.geometria)))), ST_SRID(t.geometria)) AS p FROM t )
     WHEN criterio_observador = 3 THEN --Punto en la superficie
-      ( SELECT ST_SetSRID(ST_PointOnSurface(poligono_creado), ST_SRID(t.poligono_creado)) AS p FROM t )
+      ( SELECT ST_SetSRID(ST_PointOnSurface(geometria), ST_SRID(t.geometria)) AS p FROM t )
     WHEN criterio_observador = 4 THEN --Punto mas cercano al centroide pero que se intersecte el poligono si esta fuera
-      ( SELECT ST_SetSRID(ST_MakePoint(st_x( ST_ClosestPoint( poligono_creado, ST_centroid(t.poligono_creado))), st_y( ST_ClosestPoint( poligono_creado,ST_centroid(t.poligono_creado)))), ST_SRID(t.poligono_creado)) AS p FROM t )
+      ( SELECT ST_SetSRID(ST_MakePoint(st_x( ST_ClosestPoint( geometria, ST_centroid(t.geometria))), st_y( ST_ClosestPoint( geometria,ST_centroid(t.geometria)))), ST_SRID(t.geometria)) AS p FROM t )
     ELSE --defecto: Centro del extent
-      ( SELECT ST_SetSRID(ST_MakePoint(st_x(ST_centroid(st_envelope(t.poligono_creado))), st_y(ST_centroid(st_envelope(t.poligono_creado)))), ST_SRID(t.poligono_creado)) AS p FROM t )
+      ( SELECT ST_SetSRID(ST_MakePoint(st_x(ST_centroid(st_envelope(t.geometria))), st_y(ST_centroid(st_envelope(t.geometria)))), ST_SRID(t.geometria)) AS p FROM t )
     END as p
     FROM parametros
 ),
---Cuadrantes del pol�gono desde el observador a cada una de las esquinas de la extensi�n del pol�gono
+--Cuadrantes del pol?gono desde el observador a cada una de las esquinas de la extensi?n del pol?gono
 norte AS (
-	SELECT ST_SetSRID(ST_MakePolygon(ST_MakeLine(ARRAY [a.p, b.p, m.p, a.p])), ST_SRID(t.poligono_creado)) geom FROM t,a,b,m
+	SELECT ST_SetSRID(ST_MakePolygon(ST_MakeLine(ARRAY [a.p, b.p, m.p, a.p])), ST_SRID(t.geometria)) geom FROM t,a,b,m
 ),
 este AS (
-	SELECT ST_SetSRID(ST_MakePolygon(ST_MakeLine(ARRAY [m.p, b.p, c.p, m.p])), ST_SRID(t.poligono_creado)) geom FROM t,b,c,m
+	SELECT ST_SetSRID(ST_MakePolygon(ST_MakeLine(ARRAY [m.p, b.p, c.p, m.p])), ST_SRID(t.geometria)) geom FROM t,b,c,m
 ),
 sur AS (
-	SELECT ST_SetSRID(ST_MakePolygon(ST_MakeLine(ARRAY [m.p, c.p, d.p, m.p])), ST_SRID(t.poligono_creado)) geom FROM t,m,c,d
+	SELECT ST_SetSRID(ST_MakePolygon(ST_MakeLine(ARRAY [m.p, c.p, d.p, m.p])), ST_SRID(t.geometria)) geom FROM t,m,c,d
 ),
 oeste AS (
-	SELECT ST_SetSRID(ST_MakePolygon(ST_MakeLine(ARRAY [a.p, m.p, d.p, a.p])), ST_SRID(t.poligono_creado)) geom FROM t,a,m,d
+	SELECT ST_SetSRID(ST_MakePolygon(ST_MakeLine(ARRAY [a.p, m.p, d.p, a.p])), ST_SRID(t.geometria)) geom FROM t,a,m,d
 )
 ,limite_poligono as(
-	SELECT t_id, ST_Boundary(poligono_creado) geom FROM t
+	SELECT t_id, ST_Boundary(geometria) geom FROM t
 )
 ,limite_vecinos as (  --obtiene el limite de los terrenos colindantes, filtrados por bounding box
-	select o.t_id, ST_Boundary(o.poligono_creado) geom from t, $P!{datasetName}.terreno o where o.poligono_creado && st_envelope(t.poligono_creado) and t.t_id <> o.t_id 
+	select o.t_id, ST_Boundary(o.geometria) geom from t, $P!{datasetName}.op_terreno o where o.geometria && st_envelope(t.geometria) and t.t_id <> o.t_id 
 )
-,pre_colindancias as ( --inteseccion entre el limite del poligono y los terrenos cercanos, a�ade la geometria de los limites sin adjacencia
+,pre_colindancias as ( --inteseccion entre el limite del poligono y los terrenos cercanos, a?ade la geometria de los limites sin adjacencia
 	SELECT limite_vecinos.t_id, st_intersection(limite_poligono.geom,limite_vecinos.geom) geom  FROM limite_poligono,limite_vecinos where st_intersects(limite_poligono.geom,limite_vecinos.geom) and limite_poligono.t_id <> limite_vecinos.t_id
 	union 
 	SELECT null as t_id, ST_Difference(limite_poligono.geom, a.geom) geom
@@ -131,15 +131,15 @@ oeste AS (
 	select * from tmp_colindantes where ST_GeometryType(geom) <> 'ST_MultiLineString'
 )
 , puntos_terreno as (
-	SELECT (ST_DumpPoints(poligono_creado)).* AS dp
+	SELECT (ST_DumpPoints(geometria)).* AS dp
 	FROM t
 )
---Criterio 1: el punto inicial del terreno es el primer punto del lindero que intersecte con el punto ubicado mas cerca de la esquina nw del pol�gono
+--Criterio 1: el punto inicial del terreno es el primer punto del lindero que intersecte con el punto ubicado mas cerca de la esquina nw del pol?gono
 , punto_nw as (
 	SELECT 	geom
 		,st_distance(geom, nw) AS dist
 	FROM 	puntos_terreno,
-		(SELECT ST_SetSRID(ST_MakePoint(st_xmin(st_envelope(poligono_creado)), st_ymax(st_envelope(poligono_creado))), ST_SRID(poligono_creado)) as nw FROM t ) a
+		(SELECT ST_SetSRID(ST_MakePoint(st_xmin(st_envelope(geometria)), st_ymax(st_envelope(geometria))), ST_SRID(geometria)) as nw FROM t ) a
 	ORDER BY dist limit 1
 )
 , punto_inicial_por_lindero_con_punto_nw as (
@@ -152,7 +152,7 @@ oeste AS (
 		,st_distance(lineas_colindancia.geom,nw) distance_to_nw
 		from lineas_colindancia
 			,norte
-			,(SELECT ST_SetSRID(ST_MakePoint(st_xmin(st_envelope(poligono_creado)), st_ymax(st_envelope(poligono_creado))), ST_SRID(poligono_creado)) as nw FROM t ) a
+			,(SELECT ST_SetSRID(ST_MakePoint(st_xmin(st_envelope(geometria)), st_ymax(st_envelope(geometria))), ST_SRID(geometria)) as nw FROM t ) a
 		where st_intersects(lineas_colindancia.geom, norte.geom)  order by dist desc, distance_to_nw
 		limit 1
 )
@@ -173,9 +173,9 @@ oeste AS (
 			,geom
 			,total
 		FROM (
-			SELECT (ST_DumpPoints(ST_ForceRHR(poligono_creado))).* AS dp
-				,ST_NPoints(poligono_creado) total
-				,poligono_creado
+			SELECT (ST_DumpPoints(ST_ForceRHR(geometria))).* AS dp
+				,ST_NPoints(geometria) total
+				,geometria
 			FROM t
 			) AS a
 			,(
@@ -215,44 +215,44 @@ oeste AS (
 	where porcentaje = max_porce
 ),
 predios_seleccionados as (
-	select baunit_predio as t_id_predio, colindantes.t_id as t_id_colindante from colindantes
-	left join $P!{datasetName}.uebaunit ON colindantes.t_id = ue_terreno 
+	select baunit as t_id_predio, colindantes.t_id as t_id_colindante from colindantes
+	left join $P!{datasetName}.col_uebaunit ON colindantes.t_id = ue_op_terreno 
 ),
 derechos_seleccionados AS (
-	 SELECT DISTINCT col_derecho.t_id as t_id_derecho, predios_seleccionados.t_id_colindante  
-	 FROM predios_seleccionados LEFT JOIN $P!{datasetName}.col_derecho 
-	 ON col_derecho.unidad_predio = predios_seleccionados.t_id_predio
+	 SELECT DISTINCT op_derecho.t_id as t_id_derecho, predios_seleccionados.t_id_colindante  
+	 FROM predios_seleccionados LEFT JOIN $P!{datasetName}.op_derecho 
+	 ON op_derecho.unidad = predios_seleccionados.t_id_predio
  ),
  derecho_interesados AS (
-	 SELECT DISTINCT col_derecho.interesado_col_interesado, col_derecho.t_id as t_id_derecho, derechos_seleccionados.t_id_colindante  
-	 FROM derechos_seleccionados LEFT JOIN $P!{datasetName}.col_derecho 
-	 ON col_derecho.t_id = derechos_seleccionados.t_id_derecho WHERE col_derecho.interesado_col_interesado IS NOT NULL
+	 SELECT DISTINCT op_derecho.interesado_op_interesado, op_derecho.t_id as t_id_derecho, derechos_seleccionados.t_id_colindante  
+	 FROM derechos_seleccionados LEFT JOIN $P!{datasetName}.op_derecho 
+	 ON op_derecho.t_id = derechos_seleccionados.t_id_derecho WHERE op_derecho.interesado_op_interesado IS NOT NULL
  ),
  derecho_agrupacion_interesados AS (
-	 SELECT DISTINCT col_derecho.interesado_la_agrupacion_interesados, miembros.interesados_col_interesado, derechos_seleccionados.t_id_colindante, miembros.agrupacion 
-	 FROM derechos_seleccionados LEFT JOIN $P!{datasetName}.col_derecho 
-	 ON col_derecho.t_id = derechos_seleccionados.t_id_derecho
-	 LEFT JOIN $P!{datasetName}.miembros 
-	 ON col_derecho.interesado_la_agrupacion_interesados = miembros.agrupacion
-	 WHERE col_derecho.interesado_la_agrupacion_interesados IS NOT NULL
+	 SELECT DISTINCT op_derecho.interesado_op_agrupacion_interesados, col_miembros.interesado_op_interesado, derechos_seleccionados.t_id_colindante, col_miembros.agrupacion 
+	 FROM derechos_seleccionados LEFT JOIN $P!{datasetName}.op_derecho 
+	 ON op_derecho.t_id = derechos_seleccionados.t_id_derecho
+	 LEFT JOIN $P!{datasetName}.col_miembros 
+	 ON op_derecho.interesado_op_agrupacion_interesados = col_miembros.agrupacion
+	 WHERE op_derecho.interesado_op_agrupacion_interesados IS NOT NULL
  ),
  info_agrupacion_filter as (
 		select distinct on (agrupacion) agrupacion
-		,col_interesado.p_local_id as local_id
-		,(case when col_interesado.t_id is not null then 'agrupacion' end) as agrupacion_interesado
-	 	,(coalesce(col_interesado.primer_nombre,'') || coalesce(' ' || col_interesado.segundo_nombre, '') || coalesce(' ' || col_interesado.primer_apellido, '') || coalesce(' ' || col_interesado.segundo_apellido, '')  
-				|| coalesce(col_interesado.razon_social, '') ) as nombre
+		,op_interesado.local_id as local_id
+		,(case when op_interesado.t_id is not null then 'agrupacion' end) as agrupacion_interesado
+	 	,(coalesce(op_interesado.primer_nombre,'') || coalesce(' ' || op_interesado.segundo_nombre, '') || coalesce(' ' || op_interesado.primer_apellido, '') || coalesce(' ' || op_interesado.segundo_apellido, '')  
+				|| coalesce(op_interesado.razon_social, '') ) as nombre
 		,t_id_colindante
-		from derecho_agrupacion_interesados LEFT JOIN $P!{datasetName}.col_interesado ON col_interesado.t_id = derecho_agrupacion_interesados.interesados_col_interesado order by agrupacion
+		from derecho_agrupacion_interesados LEFT JOIN $P!{datasetName}.op_interesado ON op_interesado.t_id = derecho_agrupacion_interesados.interesado_op_interesado order by agrupacion
  ),
  info_interesado as (
 		select
-	 	col_interesado.p_local_id as local_id
-	 	,(case when col_interesado.t_id is not null then 'interesado' end) as agrupacion_interesado
-	 	,(coalesce(col_interesado.primer_nombre,'') || coalesce(' ' || col_interesado.segundo_nombre, '') || coalesce(' ' || col_interesado.primer_apellido, '') || coalesce(' ' || col_interesado.segundo_apellido, '')  
-				|| coalesce(col_interesado.razon_social, '') ) as nombre
+	 	op_interesado.local_id as local_id
+	 	,(case when op_interesado.t_id is not null then 'interesado' end) as agrupacion_interesado
+	 	,(coalesce(op_interesado.primer_nombre,'') || coalesce(' ' || op_interesado.segundo_nombre, '') || coalesce(' ' || op_interesado.primer_apellido, '') || coalesce(' ' || op_interesado.segundo_apellido, '')  
+				|| coalesce(op_interesado.razon_social, '') ) as nombre
 		,t_id_colindante
- 		from derecho_interesados LEFT JOIN $P!{datasetName}.col_interesado ON col_interesado.t_id = derecho_interesados.interesado_col_interesado
+ 		from derecho_interesados LEFT JOIN $P!{datasetName}.op_interesado ON op_interesado.t_id = derecho_interesados.interesado_op_interesado
  ),
  info_agrupacion as (
 		select local_id

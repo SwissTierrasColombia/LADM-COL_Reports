@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.6.0.final using JasperReports Library version 6.6.0  -->
+<!-- Created with Jaspersoft Studio version 6.10.0.final using JasperReports Library version 6.10.0-unknown  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="9a3e59f5-6675-48cf-ad74-9c42b5a5b290">
 	<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.HorizontalRowLayout"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
@@ -17,127 +17,126 @@
 		<![CDATA[WITH terrenos_seleccionados AS
   (SELECT $P{id} AS ue_terreno
    WHERE '764' <> 'NULL' --12425  12424 12005
-
-   UNION SELECT uebaunit.ue_terreno
-   FROM $P!{datasetName}.predio
-   LEFT JOIN $P!{datasetName}.uebaunit ON predio.t_id = uebaunit.baunit_predio
-   WHERE uebaunit.ue_terreno IS NOT NULL
+   UNION SELECT col_uebaunit.ue_op_terreno
+   FROM $P!{datasetName}.op_predio 
+   LEFT JOIN $P!{datasetName}.col_uebaunit ON op_predio.t_id = col_uebaunit.baunit  
+   WHERE col_uebaunit.ue_op_terreno IS NOT NULL
      AND CASE
              WHEN 'NULL' = 'NULL' THEN 1 = 2
-             ELSE predio.fmi = 'NULL'
+             ELSE op_predio.matricula_inmobiliaria = 'NULL'
          END
-   UNION SELECT uebaunit.ue_terreno
-   FROM $P!{datasetName}.predio
-   LEFT JOIN $P!{datasetName}.uebaunit ON predio.t_id = uebaunit.baunit_predio
-   WHERE uebaunit.ue_terreno IS NOT NULL
+   UNION SELECT col_uebaunit.ue_op_terreno
+   FROM $P!{datasetName}.op_predio  
+   LEFT JOIN $P!{datasetName}.col_uebaunit ON op_predio.t_id = col_uebaunit.baunit  
+   WHERE col_uebaunit.ue_op_terreno IS NOT NULL
      AND CASE
              WHEN 'NULL' = 'NULL' THEN 1 = 2
-             ELSE predio.numero_predial = 'NULL'
+             ELSE op_predio.numero_predial = 'NULL'
          END
-   UNION SELECT uebaunit.ue_terreno
-   FROM $P!{datasetName}.predio
-   LEFT JOIN $P!{datasetName}.uebaunit ON predio.t_id = uebaunit.baunit_predio
-   WHERE uebaunit.ue_terreno IS NOT NULL
+   UNION SELECT col_uebaunit.ue_op_terreno
+   FROM $P!{datasetName}.op_predio  
+   LEFT JOIN $P!{datasetName}.col_uebaunit ON op_predio.t_id = col_uebaunit.baunit  
+   WHERE col_uebaunit.ue_op_terreno IS NOT NULL
      AND CASE
              WHEN 'NULL' = 'NULL' THEN 1 = 2
-             ELSE predio.numero_predial_anterior = 'NULL'
+             ELSE op_predio.numero_predial_anterior = 'NULL'
          END ),
      predios_seleccionados AS
-  (SELECT uebaunit.baunit_predio AS t_id
-   FROM $P!{datasetName}.uebaunit
-   WHERE uebaunit.ue_terreno = $P{id}
+  (SELECT col_uebaunit.baunit AS t_id
+   FROM $P!{datasetName}.col_uebaunit  
+   WHERE col_uebaunit.ue_op_terreno = 1522--$P{id}
      AND '764' <> 'NULL'
    UNION SELECT t_id
-   FROM $P!{datasetName}.predio
+   FROM $P!{datasetName}.op_predio 
    WHERE CASE
              WHEN 'NULL' = 'NULL' THEN 1 = 2
-             ELSE predio.fmi = 'NULL'
+             ELSE op_predio.matricula_inmobiliaria = 'NULL'
          END
    UNION SELECT t_id
-   FROM $P!{datasetName}.predio
+   FROM $P!{datasetName}.op_predio 
    WHERE CASE
              WHEN 'NULL' = 'NULL' THEN 1 = 2
-             ELSE predio.numero_predial = 'NULL'
+             ELSE op_predio.numero_predial = 'NULL'
          END
    UNION SELECT t_id
-   FROM $P!{datasetName}.predio
+   FROM $P!{datasetName}.op_predio 
    WHERE CASE
              WHEN 'NULL' = 'NULL' THEN 1 = 2
-             ELSE predio.numero_predial_anterior = 'NULL'
+             ELSE op_predio.numero_predial_anterior = 'NULL'
          END ),
      derechos_seleccionados AS
-  (SELECT DISTINCT col_derecho.t_id
-   FROM $P!{datasetName}.col_derecho
-   WHERE col_derecho.unidad_predio IN
+  (SELECT DISTINCT op_derecho.t_id
+   FROM $P!{datasetName}.op_derecho 
+   WHERE op_derecho.unidad IN
        (SELECT *
         FROM predios_seleccionados) ),
      derecho_interesados AS
-  (SELECT DISTINCT col_derecho.interesado_col_interesado,
-                   col_derecho.t_id
-   FROM $P!{datasetName}.col_derecho
-   WHERE col_derecho.t_id IN
+  (SELECT DISTINCT op_derecho.interesado_op_interesado,
+                   op_derecho.t_id
+   FROM $P!{datasetName}.op_derecho 
+   WHERE op_derecho.t_id IN
        (SELECT *
         FROM derechos_seleccionados)
-     AND col_derecho.interesado_col_interesado IS NOT NULL ),
+     AND op_derecho.interesado_op_interesado IS NOT NULL ),
      derecho_agrupacion_interesados AS
-  (SELECT DISTINCT col_derecho.interesado_la_agrupacion_interesados,
-                   miembros.interesados_col_interesado
-   FROM $P!{datasetName}.col_derecho
-   LEFT JOIN $P!{datasetName}.miembros ON col_derecho.interesado_la_agrupacion_interesados = miembros.agrupacion
-   WHERE col_derecho.t_id IN
+  (SELECT DISTINCT op_derecho.interesado_op_agrupacion_interesados,
+                   col_miembros.interesado_op_interesado
+   FROM $P!{datasetName}.op_derecho 
+   LEFT JOIN $P!{datasetName}.col_miembros ON op_derecho.interesado_op_agrupacion_interesados = col_miembros.agrupacion
+   WHERE op_derecho.t_id IN
        (SELECT *
         FROM derechos_seleccionados)
-     AND col_derecho.interesado_la_agrupacion_interesados IS NOT NULL ),
+     AND op_derecho.interesado_op_agrupacion_interesados IS NOT NULL ),
      info_terreno AS
-  (SELECT terreno.area_calculada ,
-          st_x(st_transform(st_centroid(terreno.poligono_creado), 4326)) AS x ,
-          st_y(st_transform(st_centroid(poligono_creado), 4326)) AS y
-   FROM $P!{datasetName}.terreno
-   WHERE terreno.t_id IN
+  (SELECT op_terreno.area_terreno,
+          st_x(st_transform(st_centroid(op_terreno.geometria), 4326)) AS x ,
+          st_y(st_transform(st_centroid(geometria), 4326)) AS y
+   FROM $P!{datasetName}.op_terreno 
+   WHERE op_terreno.t_id IN
        (SELECT *
         FROM terrenos_seleccionados) ),
      info_predio AS
-  (SELECT predio.fmi AS fmi ,
-          predio.nupre AS nupre ,
-          predio.numero_predial AS numero_predial ,
-          predio.nombre AS nombre ,
-          predio.u_local_id ,
-          predio.departamento ,
-          predio.municipio ,
-          predio.zona ,
-          predio.numero_predial_anterior ,
-          predio.u_espacio_de_nombres || predio.u_local_id AS codigo
-   FROM $P!{datasetName}.predio
-   WHERE predio.t_id IN
+  (SELECT op_predio.matricula_inmobiliaria AS fmi ,
+          op_predio.nupre AS nupre ,
+          op_predio.numero_predial AS numero_predial ,
+          op_predio.nombre AS nombre ,
+          op_predio.local_id ,
+          op_predio.departamento ,
+          op_predio.municipio ,
+          --op_predio.zona ,
+          op_predio.numero_predial_anterior ,
+          op_predio.espacio_de_nombres || op_predio.local_id AS codigo
+   FROM $P!{datasetName}.op_predio 
+   WHERE op_predio.t_id IN
        (SELECT *
         FROM predios_seleccionados) ),
      info_interesado AS
-  (SELECT col_interesado.p_local_id AS local_id ,
+  (SELECT op_interesado.local_id AS local_id ,
           (CASE
-               WHEN col_interesado.t_id IS NOT NULL THEN 'interesado'
+               WHEN op_interesado.t_id IS NOT NULL THEN 'interesado'
            END) AS agrupacion_interesado ,
-          (coalesce(col_interesado.primer_nombre, '') || coalesce(' ' || col_interesado.segundo_nombre, '') || coalesce(' ' || col_interesado.primer_apellido, '') || coalesce(' ' || col_interesado.segundo_apellido, '') || coalesce(col_interesado.razon_social, '')) AS nombre
+          (coalesce(op_interesado.primer_nombre, '') || coalesce(' ' || op_interesado.segundo_nombre, '') || coalesce(' ' || op_interesado.primer_apellido, '') || coalesce(' ' || op_interesado.segundo_apellido, '') || coalesce(op_interesado.razon_social, '')) AS nombre
    FROM derecho_interesados
-   LEFT JOIN $P!{datasetName}.col_interesado ON col_interesado.t_id = derecho_interesados.interesado_col_interesado
-   UNION SELECT col_interesado.p_local_id AS local_id ,
+   LEFT JOIN $P!{datasetName}.op_interesado ON op_interesado.t_id = derecho_interesados.interesado_op_interesado 
+   UNION SELECT op_interesado.local_id AS local_id ,
                 (CASE
-                     WHEN col_interesado.t_id IS NOT NULL THEN 'agrupacion'
+                     WHEN op_interesado.t_id IS NOT NULL THEN 'agrupacion'
                  END) AS agrupacion_interesado ,
-                (coalesce(col_interesado.primer_nombre, '') || coalesce(' ' || col_interesado.segundo_nombre, '') || coalesce(' ' || col_interesado.primer_apellido, '') || coalesce(' ' || col_interesado.segundo_apellido, '') || coalesce(col_interesado.razon_social, '')) AS nombre
+                (coalesce(op_interesado.primer_nombre, '') || coalesce(' ' || op_interesado.segundo_nombre, '') || coalesce(' ' || op_interesado.primer_apellido, '') || coalesce(' ' || op_interesado.segundo_apellido, '') || coalesce(op_interesado.razon_social, '')) AS nombre
    FROM derecho_agrupacion_interesados
-   LEFT JOIN $P!{datasetName}.col_interesado ON col_interesado.t_id = derecho_agrupacion_interesados.interesados_col_interesado
+   LEFT JOIN $P!{datasetName}.op_interesado ON op_interesado.t_id = derecho_agrupacion_interesados.interesado_op_interesado
    ORDER BY local_id
    LIMIT 1)
 SELECT info_predio.fmi ,
        info_predio.nupre ,
        info_predio.numero_predial ,
        info_predio.nombre ,
-       info_predio.u_local_id ,
+       info_predio.local_id ,
        info_predio.departamento ,
        info_predio.municipio ,
-       info_predio.zona ,
+       --info_predio.zona ,
        info_predio.numero_predial_anterior ,
-       info_terreno.area_calculada ,
+       info_terreno.area_terreno ,
        info_terreno.x ,
        info_terreno.y ,
        info_predio.codigo ,
@@ -153,7 +152,6 @@ FROM info_terreno ,
 	<field name="nombre" class="java.lang.String"/>
 	<field name="departamento" class="java.lang.String"/>
 	<field name="municipio" class="java.lang.String"/>
-	<field name="zona" class="java.lang.String"/>
 	<field name="numero_predial_anterior" class="java.lang.String"/>
 	<field name="area_calculada" class="java.lang.Double"/>
 	<field name="x" class="java.lang.Double"/>
@@ -277,7 +275,7 @@ FROM info_terreno ,
 					<font size="7"/>
 					<paragraph leftIndent="5"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{zona}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[RIGHT(LEFT($F{numero_predial},7),2)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement x="195" y="31" width="55" height="10" uuid="8b4df3d7-652d-40da-ae5c-8dc26ade01b7"/>
