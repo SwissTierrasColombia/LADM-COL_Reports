@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.3.1.final using JasperReports Library version 6.3.1  -->
-<!-- 2018-10-17T14:43:28 -->
+<!-- Created with Jaspersoft Studio version 6.10.0.final using JasperReports Library version 6.10.0-unknown  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="9a3e59f5-6675-48cf-ad74-9c42b5a5b290">
 	<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.HorizontalRowLayout"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
@@ -15,23 +14,23 @@
 	<parameter name="datasetName" class="java.lang.String"/>
 	<queryString>
 		<![CDATA[SELECT 
-  predio.fmi 
-  ,predio.nupre 
-  ,predio.numero_predial
-  ,predio.nombre 
+  op_predio.matricula_inmobiliaria 
+  ,op_predio.nupre 
+  ,op_predio.numero_predial
+  ,op_predio.nombre 
   ,departamento 
   ,municipio 
-  ,zona 
+  --,zona 
   ,numero_predial_anterior
-  ,area_calculada
-  ,st_x(st_transform(st_centroid(poligono_creado),4326)) as x
-  ,st_y(st_transform(st_centroid(poligono_creado),4326)) as y
-  ,u_espacio_de_nombres || u_local_id as codigo
+  ,area_terreno
+  ,st_x(st_transform(st_centroid(geometria),4326)) as x
+  ,st_y(st_transform(st_centroid(geometria),4326)) as y
+  ,op_predio.espacio_de_nombres || op_predio.local_id as codigo
 FROM 
-  $P!{datasetName}.terreno 
-  LEFT JOIN $P!{datasetName}.uebaunit ON terreno.t_id = uebaunit.ue_terreno 
-  LEFT JOIN $P!{datasetName}.predio ON predio.t_id = uebaunit.baunit_predio 
-WHERE terreno.t_id =  $P{id}  ]]>
+  $P!{datasetName}.op_terreno   
+  LEFT JOIN $P!{datasetName}.col_uebaunit ON op_terreno.t_id = col_uebaunit.ue_op_terreno 
+  LEFT JOIN $P!{datasetName}.op_predio ON op_predio.t_id = col_uebaunit.baunit
+WHERE op_terreno.t_id =  $P{id}]]>
 	</queryString>
 	<field name="fmi" class="java.lang.String"/>
 	<field name="nupre" class="java.lang.String"/>
@@ -39,7 +38,6 @@ WHERE terreno.t_id =  $P{id}  ]]>
 	<field name="nombre" class="java.lang.String"/>
 	<field name="departamento" class="java.lang.String"/>
 	<field name="municipio" class="java.lang.String"/>
-	<field name="zona" class="java.lang.String"/>
 	<field name="numero_predial_anterior" class="java.lang.String"/>
 	<field name="area_calculada" class="java.lang.Double"/>
 	<field name="x" class="java.lang.Double"/>
@@ -160,7 +158,7 @@ WHERE terreno.t_id =  $P{id}  ]]>
 					<font size="7"/>
 					<paragraph leftIndent="5"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{zona}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[RIGHT(LEFT($F{numero_predial},7),2)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement x="195" y="31" width="55" height="10" uuid="8b4df3d7-652d-40da-ae5c-8dc26ade01b7"/>
