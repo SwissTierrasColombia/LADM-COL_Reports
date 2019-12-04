@@ -14,10 +14,10 @@
 	<parameter name="datasetName" class="java.lang.String"/>
 	<queryString>
 		<![CDATA[SELECT 
-  op_predio.matricula_inmobiliaria 
-  ,op_predio.nupre 
-  ,op_predio.numero_predial
-  ,op_predio.nombre 
+  op_predio.matricula_inmobiliaria as matricula_inmobiliaria
+  ,op_predio.nupre as nupre
+  ,op_predio.numero_predial as numero_predial
+  ,op_predio.nombre as nombre
   ,departamento 
   ,municipio 
   --,zona 
@@ -39,7 +39,7 @@ WHERE op_terreno.t_id =  $P{id}]]>
 	<field name="departamento" class="java.lang.String"/>
 	<field name="municipio" class="java.lang.String"/>
 	<field name="numero_predial_anterior" class="java.lang.String"/>
-	<field name="area_calculada" class="java.lang.Double"/>
+	<field name="area_terreno" class="java.lang.Double"/>
 	<field name="x" class="java.lang.Double"/>
 	<field name="y" class="java.lang.Double"/>
 	<field name="codigo" class="java.lang.String"/>
@@ -494,7 +494,7 @@ WHERE op_terreno.t_id =  $P{id}]]>
 					<font size="6"/>
 					<paragraph leftIndent="5"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{area_calculada} + " m2"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{area_terreno} + " m2"]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="10" y="493" width="105" height="10" uuid="c6a159dc-0247-4705-a5d2-6772b06783dc">

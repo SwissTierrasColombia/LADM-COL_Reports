@@ -153,11 +153,11 @@ FROM info_terreno ,
 	<field name="departamento" class="java.lang.String"/>
 	<field name="municipio" class="java.lang.String"/>
 	<field name="numero_predial_anterior" class="java.lang.String"/>
-	<field name="area_calculada" class="java.lang.Double"/>
+	<field name="area_terreno" class="java.lang.Double"/>
 	<field name="x" class="java.lang.Double"/>
 	<field name="y" class="java.lang.Double"/>
 	<field name="codigo" class="java.lang.String"/>
-	<field name="u_local_id" class="java.lang.String"/>
+	<field name="local_id" class="java.lang.String"/>
 	<field name="interesado_nombre" class="java.lang.String"/>
 	<field name="diferenciacion" class="java.lang.String"/>
 	<background>
@@ -535,7 +535,7 @@ FROM info_terreno ,
 					<font size="6"/>
 					<paragraph leftIndent="5"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{u_local_id}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{local_id}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="10" y="453" width="105" height="10" uuid="dcbe5130-bcd0-4069-962c-f856fc052d71">
@@ -631,7 +631,7 @@ FROM info_terreno ,
 					<font size="6"/>
 					<paragraph leftIndent="5"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{area_calculada} + " m2"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{area_terreno} + " m2"]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="10" y="493" width="105" height="10" uuid="c6a159dc-0247-4705-a5d2-6772b06783dc">
