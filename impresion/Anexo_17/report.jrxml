@@ -32,7 +32,7 @@ FROM
   LEFT JOIN $P!{datasetName}.op_predio ON op_predio.t_id = col_uebaunit.baunit
 WHERE op_terreno.t_id =  $P{id}]]>
 	</queryString>
-	<field name="fmi" class="java.lang.String"/>
+	<field name="matricula_inmobiliaria" class="java.lang.String"/>
 	<field name="nupre" class="java.lang.String"/>
 	<field name="numero_predial" class="java.lang.String"/>
 	<field name="nombre" class="java.lang.String"/>
@@ -446,7 +446,7 @@ WHERE op_terreno.t_id =  $P{id}]]>
 					<font size="6"/>
 					<paragraph leftIndent="5"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{fmi}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{matricula_inmobiliaria}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="10" y="473" width="105" height="10" uuid="5eef9b88-b7ce-47c0-8281-2eda29efd156">

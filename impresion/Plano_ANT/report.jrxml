@@ -44,7 +44,7 @@
      predios_seleccionados AS
   (SELECT col_uebaunit.baunit AS t_id
    FROM $P!{datasetName}.col_uebaunit  
-   WHERE col_uebaunit.ue_op_terreno = 1522--$P{id}
+   WHERE col_uebaunit.ue_op_terreno = $P{id}
      AND '764' <> 'NULL'
    UNION SELECT t_id
    FROM $P!{datasetName}.op_predio 
