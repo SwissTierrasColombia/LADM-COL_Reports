@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.10.0.final using JasperReports Library version 6.10.0-unknown  -->
+<!-- Created with Jaspersoft Studio version 6.12.2.final using JasperReports Library version 6.12.2-75c5e90a222ab406e416cbf590a5397028a52de3  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="sub_report_coordinates" pageWidth="595" pageHeight="842" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="20" uuid="8044c259-bf6b-4072-8923-78bca3eb0308">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="New Data Adapter "/>
@@ -23,13 +23,13 @@
 		<![CDATA[WITH 
 parametros AS (
   SELECT
-    $P{id} 	AS poligono_t_id, --
-     $P{criterio_punto_inicial}  		AS criterio_punto_inicial, --tipo de criterio para seleccionar el punto inicial del terreno, valores posibles: 1,2 
+    $P{id} AS poligono_t_id,
+     $P{criterio_punto_inicial} AS criterio_punto_inicial, --tipo de criterio para seleccionar el punto inicial del terreno, valores posibles: 1,2 
     4		AS criterio_observador, --1: Centroide, 2: Centro del extent, 3: punto en la superficie, 4: Punto mas cercano al centroide dentro del poligono
     true	AS incluir_tipo_derecho --Mostrar el tipo de derecho de cada interesado (booleano)
 ),
 t AS ( --Orienta los vertices del terreno en sentido horario
-	SELECT t_id, ST_ForceRHR(geometria) as geometria FROM $P!{datasetName}.op_terreno AS t, parametros WHERE t.t_id = poligono_t_id 
+	SELECT t_id, ST_ForceRHR(geometria) as geometria FROM $P!{datasetName}.lc_terreno AS t, parametros WHERE t.t_id = poligono_t_id 
 ),
 --bordes de la extension del poligono
 a AS (
@@ -77,7 +77,7 @@ oeste AS (
 	SELECT t_id, ST_Boundary(geometria) geom FROM t
 )
 ,limite_vecinos as (  --obtiene el limite de los terrenos colindantes, filtrados por bounding box
-	select o.t_id, ST_Boundary(o.geometria) geom from t, $P!{datasetName}.op_terreno o where o.geometria && st_envelope(t.geometria) and t.t_id <> o.t_id 
+	select o.t_id, ST_Boundary(o.geometria) geom from t, $P!{datasetName}.lc_terreno o where o.geometria && st_envelope(t.geometria) and t.t_id <> o.t_id 
 )
 ,pre_colindancias as ( --inteseccion entre el limite del poligono y los terrenos cercanos, añade la geometria de los limites sin adjacencia
 	SELECT limite_vecinos.t_id, st_intersection(limite_poligono.geom,limite_vecinos.geom) geom  FROM limite_poligono,limite_vecinos where st_intersects(limite_poligono.geom,limite_vecinos.geom) and limite_poligono.t_id <> limite_vecinos.t_id
@@ -191,7 +191,8 @@ select * from
 	select c1.id as "from", c2.id as "to", c1.x, c1.y, st_distance(c1.geom,c2.geom) as dist from puntos_ordenados c1, puntos_ordenados c2 where c1.id +1  = c2.id 
 	union
 	select c1.id as "from", c2.id as "to", c1.x, c1.y, st_distance(c1.geom,c2.geom) as dist from (select * from puntos_ordenados order by id desc limit 1) c1, (select * from puntos_ordenados order by id asc limit 1) c2
-) t order by "from"]]>
+) t order by "from"
+]]>
 	</queryString>
 	<field name="from" class="java.lang.Long"/>
 	<field name="to" class="java.lang.Long"/>

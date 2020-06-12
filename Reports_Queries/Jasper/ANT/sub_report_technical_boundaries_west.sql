@@ -8,7 +8,7 @@ parametros AS (
     15		as tolerancia_sentidos --tolerancia en grados para la definicion del sentido de una linea
 ),
 t AS ( --Orienta los vertices del terreno en sentido horario
-	SELECT t_id, ST_ForceRHR(geometria) as geometria FROM ladmcol_2_9_6.op_terreno AS t, parametros WHERE t.t_id = poligono_t_id --ladmcol_2_9_6
+	SELECT t_id, ST_ForceRHR(geometria) as geometria FROM ladm_lev_cat_v1.lc_terreno AS t, parametros WHERE t.t_id = poligono_t_id --ladm_lev_cat_v1
 ),
 --bordes de la extension del poligono
 a AS (
@@ -56,7 +56,7 @@ oeste AS (
 	SELECT t_id, ST_Boundary(geometria) geom FROM t
 )
 ,limite_vecinos as (  --obtiene el limite de los terrenos colindantes, filtrados por bounding box
-	select o.t_id, ST_Boundary(o.geometria) geom from t, ladmcol_2_9_6.op_terreno o where o.geometria && st_envelope(t.geometria) and t.t_id <> o.t_id 
+	select o.t_id, ST_Boundary(o.geometria) geom from t, ladm_lev_cat_v1.lc_terreno o where o.geometria && st_envelope(t.geometria) and t.t_id <> o.t_id
 )
 ,pre_colindancias as ( --inteseccion entre el limite del poligono y los terrenos cercanos, a?ade la geometria de los limites sin adjacencia
 	SELECT limite_vecinos.t_id, st_intersection(limite_poligono.geom,limite_vecinos.geom) geom  FROM limite_poligono,limite_vecinos where st_intersects(limite_poligono.geom,limite_vecinos.geom) and limite_poligono.t_id <> limite_vecinos.t_id
@@ -192,43 +192,43 @@ oeste AS (
 ),
 predios_seleccionados as (
 	select baunit as t_id_predio, colindantes.t_id as t_id_colindante from colindantes
-	left join ladmcol_2_9_6.col_uebaunit ON colindantes.t_id = ue_op_terreno 
+	left join ladm_lev_cat_v1.col_uebaunit ON colindantes.t_id = ue_lc_terreno
 ),
 derechos_seleccionados AS (
-	 SELECT DISTINCT op_derecho.t_id as t_id_derecho, predios_seleccionados.t_id_colindante  
-	 FROM predios_seleccionados LEFT JOIN ladmcol_2_9_6.op_derecho 
-	 ON op_derecho.unidad = predios_seleccionados.t_id_predio
+	 SELECT DISTINCT lc_derecho.t_id as t_id_derecho, predios_seleccionados.t_id_colindante
+	 FROM predios_seleccionados LEFT JOIN ladm_lev_cat_v1.lc_derecho
+	 ON lc_derecho.unidad = predios_seleccionados.t_id_predio
  ),
  derecho_interesados AS (
-	 SELECT DISTINCT op_derecho.interesado_op_interesado, op_derecho.t_id as t_id_derecho, derechos_seleccionados.t_id_colindante  
-	 FROM derechos_seleccionados LEFT JOIN ladmcol_2_9_6.op_derecho 
-	 ON op_derecho.t_id = derechos_seleccionados.t_id_derecho WHERE op_derecho.interesado_op_interesado IS NOT NULL
+	 SELECT DISTINCT lc_derecho.interesado_lc_interesado, lc_derecho.t_id as t_id_derecho, derechos_seleccionados.t_id_colindante
+	 FROM derechos_seleccionados LEFT JOIN ladm_lev_cat_v1.lc_derecho
+	 ON lc_derecho.t_id = derechos_seleccionados.t_id_derecho WHERE lc_derecho.interesado_lc_interesado IS NOT NULL
  ),
  derecho_agrupacion_interesados AS (
-	 SELECT DISTINCT op_derecho.interesado_op_agrupacion_interesados, col_miembros.interesado_op_interesado, derechos_seleccionados.t_id_colindante, col_miembros.agrupacion 
-	 FROM derechos_seleccionados LEFT JOIN ladmcol_2_9_6.op_derecho 
-	 ON op_derecho.t_id = derechos_seleccionados.t_id_derecho
-	 LEFT JOIN ladmcol_2_9_6.col_miembros 
-	 ON op_derecho.interesado_op_agrupacion_interesados = col_miembros.agrupacion
-	 WHERE op_derecho.interesado_op_agrupacion_interesados IS NOT NULL
+	 SELECT DISTINCT lc_derecho.interesado_lc_agrupacioninteresados, col_miembros.interesado_lc_interesado, derechos_seleccionados.t_id_colindante, col_miembros.agrupacion
+	 FROM derechos_seleccionados LEFT JOIN ladm_lev_cat_v1.lc_derecho
+	 ON lc_derecho.t_id = derechos_seleccionados.t_id_derecho
+	 LEFT JOIN ladm_lev_cat_v1.col_miembros
+	 ON lc_derecho.interesado_lc_agrupacioninteresados = col_miembros.agrupacion
+	 WHERE lc_derecho.interesado_lc_agrupacioninteresados IS NOT NULL
  ),
  info_agrupacion_filter as (
 		select distinct on (agrupacion) agrupacion
-		,op_interesado.local_id as local_id
-		,(case when op_interesado.t_id is not null then 'agrupacion' end) as agrupacion_interesado
-	 	,(coalesce(op_interesado.primer_nombre,'') || coalesce(' ' || op_interesado.segundo_nombre, '') || coalesce(' ' || op_interesado.primer_apellido, '') || coalesce(' ' || op_interesado.segundo_apellido, '')  
-				|| coalesce(op_interesado.razon_social, '') ) as nombre
+		,lc_interesado.local_id as local_id
+		,(case when lc_interesado.t_id is not null then 'agrupacion' end) as agrupacion_interesado
+	 	,(coalesce(lc_interesado.primer_nombre,'') || coalesce(' ' || lc_interesado.segundo_nombre, '') || coalesce(' ' || lc_interesado.primer_apellido, '') || coalesce(' ' || lc_interesado.segundo_apellido, '')
+				|| coalesce(lc_interesado.razon_social, '') ) as nombre
 		,t_id_colindante
-		from derecho_agrupacion_interesados LEFT JOIN ladmcol_2_9_6.op_interesado ON op_interesado.t_id = derecho_agrupacion_interesados.interesado_op_interesado order by agrupacion
+		from derecho_agrupacion_interesados LEFT JOIN ladm_lev_cat_v1.lc_interesado ON lc_interesado.t_id = derecho_agrupacion_interesados.interesado_lc_interesado order by agrupacion
  ),
  info_interesado as (
 		select
-	 	op_interesado.local_id as local_id
-	 	,(case when op_interesado.t_id is not null then 'interesado' end) as agrupacion_interesado
-	 	,(coalesce(op_interesado.primer_nombre,'') || coalesce(' ' || op_interesado.segundo_nombre, '') || coalesce(' ' || op_interesado.primer_apellido, '') || coalesce(' ' || op_interesado.segundo_apellido, '')  
-				|| coalesce(op_interesado.razon_social, '') ) as nombre
+	 	lc_interesado.local_id as local_id
+	 	,(case when lc_interesado.t_id is not null then 'interesado' end) as agrupacion_interesado
+	 	,(coalesce(lc_interesado.primer_nombre,'') || coalesce(' ' || lc_interesado.segundo_nombre, '') || coalesce(' ' || lc_interesado.primer_apellido, '') || coalesce(' ' || lc_interesado.segundo_apellido, '')
+				|| coalesce(lc_interesado.razon_social, '') ) as nombre
 		,t_id_colindante
- 		from derecho_interesados LEFT JOIN ladmcol_2_9_6.op_interesado ON op_interesado.t_id = derecho_interesados.interesado_op_interesado
+ 		from derecho_interesados LEFT JOIN ladm_lev_cat_v1.lc_interesado ON lc_interesado.t_id = derecho_interesados.interesado_lc_interesado
  ),
  info_agrupacion as (
 		select local_id

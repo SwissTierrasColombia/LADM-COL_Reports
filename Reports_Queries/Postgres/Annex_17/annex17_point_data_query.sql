@@ -9,7 +9,7 @@ WITH parametros
                     AS (
                     	SELECT t_id
                     		,ST_ForceRHR(geometria) AS geometria --parametrizar geometria
-                    	FROM ladmcol_2_9_6.op_terreno AS t --parametrizar schema y tabla
+                    	FROM ladm_lev_cat_v1.lc_terreno AS t --parametrizar schema y tabla
                     		,parametros
                     	WHERE t.t_id = poligono_t_id --parametrizar atributo
                     	)
@@ -106,7 +106,7 @@ WITH parametros
                     	SELECT o.t_id
                     		,ST_Boundary(o.geometria) geom
                     	FROM t
-                    		,ladmcol_2_9_6.op_terreno o --parametrizar terreno
+                    		,ladm_lev_cat_v1.lc_terreno o --parametrizar terreno
                     	WHERE o.geometria && st_envelope(t.geometria) --parametrizar geometria
                     		AND t.t_id <> o.t_id
                     	)

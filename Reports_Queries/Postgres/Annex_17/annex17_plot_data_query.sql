@@ -10,9 +10,9 @@ SELECT array_to_json(array_agg(features)) AS features
                                         ) AS l
                                     )) AS properties
                                 ,ST_AsGeoJSON(geometria)::json AS geometry --parametrizar geometria
-                            FROM ladmcol_2_9_6.op_terreno AS l --parametrizar schema y tabla
-                            LEFT JOIN ladmcol_2_9_6.col_uebaunit ON l.t_id = ue_op_terreno --parametrizar schema, tabla y atributo
-                            LEFT JOIN ladmcol_2_9_6.op_predio ON op_predio.t_id = baunit --parametrizar schema, tabla y atributo
+                            FROM ladm_lev_cat_v1.lc_terreno AS l --parametrizar schema y tabla
+                            LEFT JOIN ladm_lev_cat_v1.col_uebaunit ON l.t_id = ue_lc_terreno --parametrizar schema, tabla y atributo
+                            LEFT JOIN ladm_lev_cat_v1.lc_predio ON lc_predio.t_id = baunit --parametrizar schema, tabla y atributo
                             where l.t_id = 1522 --parametrizar where
                             ) AS f
                         ) AS ff;

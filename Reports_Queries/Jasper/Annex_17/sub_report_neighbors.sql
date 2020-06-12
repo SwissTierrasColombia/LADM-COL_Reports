@@ -7,7 +7,7 @@ parametros AS (
     true	AS incluir_tipo_derecho --Mostrar el tipo de derecho de cada interesado (booleano)
 ),
 t AS ( --Orienta los vertices del terreno en sentido horario
-	SELECT t_id, ST_ForceRHR(geometria) as geometria FROM ladmcol_2_9_6.op_terreno AS t, parametros WHERE t.t_id = poligono_t_id --$P!{datasetName}
+	SELECT t_id, ST_ForceRHR(geometria) as geometria FROM ladm_lev_cat_v1.lc_terreno AS t, parametros WHERE t.t_id = poligono_t_id --$P!{datasetName}
 ),
 --bordes de la extension del poligono
 a AS (
@@ -22,7 +22,7 @@ c AS (
 d AS (
 	SELECT ST_SetSRID(ST_MakePoint(st_xmin(t.geometria), st_ymin(t.geometria)), ST_SRID(t.geometria)) AS p FROM t
 ),
---Punto medio (ubicaci髇 del observador para la definicion de las cardinalidades)
+--Punto medio (ubicaci贸n del observador para la definicion de las cardinalidades)
 m AS (
   SELECT
     CASE WHEN criterio_observador = 1 THEN --centroide del poligono
@@ -38,7 +38,7 @@ m AS (
     END as p
     FROM parametros
 ),
---Cuadrantes del pol韌ono desde el observador a cada una de las esquinas de la extensi髇 del pol韌ono
+--Cuadrantes del pol铆gono desde el observador a cada una de las esquinas de la extensi贸n del pol铆gono
 norte AS (
 	SELECT ST_SetSRID(ST_MakePolygon(ST_MakeLine(ARRAY [a.p, b.p, m.p, a.p])), ST_SRID(t.geometria)) geom FROM t,a,b,m
 ),
@@ -55,9 +55,9 @@ oeste AS (
 	SELECT t_id, ST_Boundary(geometria) geom FROM t
 )
 ,limite_vecinos as (  --obtiene el limite de los terrenos colindantes, filtrados por bounding box
-	select o.t_id, ST_Boundary(o.geometria) geom from t, ladmcol_2_9_6.op_terreno o where o.geometria && st_envelope(t.geometria) and t.t_id <> o.t_id --$P!{datasetName}
+	select o.t_id, ST_Boundary(o.geometria) geom from t, ladm_lev_cat_v1.lc_terreno o where o.geometria && st_envelope(t.geometria) and t.t_id <> o.t_id --$P!{datasetName}
 )
-,pre_colindancias as ( --inteseccion entre el limite del poligono y los terrenos cercanos, a馻de la geometria de los limites sin adjacencia
+,pre_colindancias as ( --inteseccion entre el limite del poligono y los terrenos cercanos, a帽ade la geometria de los limites sin adjacencia
 	SELECT limite_vecinos.t_id, st_intersection(limite_poligono.geom,limite_vecinos.geom) geom  FROM limite_poligono,limite_vecinos where st_intersects(limite_poligono.geom,limite_vecinos.geom) and limite_poligono.t_id <> limite_vecinos.t_id
 	union 
 	SELECT null as t_id, ST_Difference(limite_poligono.geom, a.geom) geom
@@ -109,7 +109,7 @@ oeste AS (
 	SELECT (ST_DumpPoints(geometria)).* AS dp
 	FROM t
 )
---Criterio 1: el punto inicial del terreno es el primer punto del lindero que intersecte con el punto ubicado mas cerca de la esquina nw del pol韌ono
+--Criterio 1: el punto inicial del terreno es el primer punto del lindero que intersecte con el punto ubicado mas cerca de la esquina nw del pol铆gono
 , punto_nw as (
 	SELECT 	geom
 		,st_distance(geom, nw) AS dist
@@ -195,34 +195,34 @@ SELECT
   ,hasta
   ,ubicacion
   ,nupre
-  ,CASE WHEN numero_predial is null and matricula_inmobiliaria IS NULL and nombre IS NULL THEN '罵EA INDETERMINADA'
+  ,CASE WHEN numero_predial is null and matricula_inmobiliaria IS NULL and nombre IS NULL THEN '脕REA INDETERMINADA'
     ELSE COALESCE(numero_predial || ';','') || COALESCE('FMI: ' || matricula_inmobiliaria || ';','') || COALESCE('Nombre: ' || nombre ,'') 
    END as predio
-  ,op_predio.t_id
+  ,lc_predio.t_id
   ,COALESCE(interesado, 'INDETERMINADO') AS interesado
   ,round(st_length(colindantes.geom)::numeric,2) distancia
 FROM
 colindantes
-LEFT JOIN ladmcol_2_9_6.op_terreno ON op_terreno.t_id = colindantes.t_id --$P!{datasetName}
-LEFT JOIN ladmcol_2_9_6.col_uebaunit ON colindantes.t_id = ue_op_terreno --$P!{datasetName}
-LEFT JOIN ladmcol_2_9_6.op_predio ON op_predio.t_id = baunit --$P!{datasetName}
+LEFT JOIN ladm_lev_cat_v1.lc_terreno ON lc_terreno.t_id = colindantes.t_id --$P!{datasetName}
+LEFT JOIN ladm_lev_cat_v1.col_uebaunit ON colindantes.t_id = ue_lc_terreno --$P!{datasetName}
+LEFT JOIN ladm_lev_cat_v1.lc_predio ON lc_predio.t_id = baunit --$P!{datasetName}
 LEFT JOIN
 (
   SELECT t_id,
 	array_to_string(array_agg(( coalesce(primer_nombre,'') || coalesce(' ' || segundo_nombre, '') || coalesce(' ' || primer_apellido, '') || coalesce(' ' || segundo_apellido, '') ) 
 				|| ( coalesce(razon_social, '') ) 
-				|| ', ' || (select dispname from ladmcol_2_9_6.op_interesadodocumentotipo where t_id = tipo_documento) || ': ' --$P!{datasetName}
+				|| ', ' || (select dispname from ladm_lev_cat_v1.lc_interesadodocumentotipo where t_id = tipo_documento) || ': ' --$P!{datasetName}
 				|| documento_identidad 
 				|| CASE WHEN (SELECT incluir_tipo_derecho FROM parametros) THEN 
-					' (' || (select dispname from ladmcol_2_9_6.op_derechotipo where t_id = tipo_derecho) || ')' --opcional: ver tipo de derecho de cada interesado $P!{datasetName} 
+					' (' || (select dispname from ladm_lev_cat_v1.lc_derechotipo where t_id = tipo_derecho) || ')' --opcional: ver tipo de derecho de cada interesado $P!{datasetName}
 				  ELSE '' END
 				) , '; ')
 			  as interesado
   FROM 
   (	
-	--navegar agrupaci髇 de interesados
+	--navegar agrupaci贸n de interesados
 	SELECT * FROM
-		ladmcol_2_9_6.op_predio -- $P!{datasetName}
+		ladm_lev_cat_v1.lc_predio -- $P!{datasetName}
 		LEFT JOIN
 		(
 			select 
@@ -234,17 +234,17 @@ LEFT JOIN
 			  ,tipo_documento
 			  ,documento_identidad
 			  ,unidad
-			  ,op_derecho.tipo as tipo_derecho
+			  ,lc_derecho.tipo as tipo_derecho
 			from 
-			  ladmcol_2_9_6.op_derecho --$P!{datasetName}
-			  JOIN ladmcol_2_9_6.op_agrupacion_interesados on op_agrupacion_interesados.t_id = interesado_op_agrupacion_interesados --$P!{datasetName} 
-			  JOIN ladmcol_2_9_6.col_miembros on agrupacion = op_agrupacion_interesados.t_id --$P!{datasetName}
-			  JOIN ladmcol_2_9_6.op_interesado on op_interesado.t_id = col_miembros.interesado_op_interesado --$P!{datasetName}
-		 ) agrupacion  ON op_predio.t_id = agrupacion.unidad
+			  ladm_lev_cat_v1.lc_derecho --$P!{datasetName}
+			  JOIN ladm_lev_cat_v1.lc_agrupacioninteresados on lc_agrupacioninteresados.t_id = interesado_lc_agrupacioninteresados --$P!{datasetName}
+			  JOIN ladm_lev_cat_v1.col_miembros on agrupacion = lc_agrupacioninteresados.t_id --$P!{datasetName}
+			  JOIN ladm_lev_cat_v1.lc_interesado on lc_interesado.t_id = col_miembros.interesado_lc_interesado --$P!{datasetName}
+		 ) agrupacion  ON lc_predio.t_id = agrupacion.unidad
 	UNION
-	--navegar agrupaci髇 de interesados
+	--navegar agrupaci贸n de interesados
 	SELECT * FROM
-		ladmcol_2_9_6.op_predio --$P!{datasetName}
+		ladm_lev_cat_v1.lc_predio --$P!{datasetName}
 		LEFT JOIN
 		(
 			select 			
@@ -256,12 +256,12 @@ LEFT JOIN
 			  ,tipo_documento
 			  ,documento_identidad
 			  ,unidad
-			  ,op_derecho.tipo as tipo_derecho
+			  ,lc_derecho.tipo as tipo_derecho
 			from 
-			  ladmcol_2_9_6.op_derecho --$P!{datasetName}
-			  JOIN ladmcol_2_9_6.op_interesado on op_interesado.t_id =interesado_op_interesado --$P!{datasetName}
-		) interesado ON op_predio.t_id = interesado.unidad
+			  ladm_lev_cat_v1.lc_derecho --$P!{datasetName}
+			  JOIN ladm_lev_cat_v1.lc_interesado on lc_interesado.t_id =interesado_lc_interesado --$P!{datasetName}
+		) interesado ON lc_predio.t_id = interesado.unidad
   ) interesados
   group by t_id
-) interesados on interesados.t_id = op_predio.t_id
+) interesados on interesados.t_id = lc_predio.t_id
 ORDER BY id

@@ -1,8 +1,8 @@
 SELECT 
-  op_predio.matricula_inmobiliaria 
-  ,op_predio.nupre 
-  ,op_predio.numero_predial
-  ,op_predio.nombre 
+  lc_predio.matricula_inmobiliaria
+  ,lc_predio.nupre
+  ,lc_predio.numero_predial
+  ,lc_predio.nombre
   ,departamento 
   ,municipio 
   --,zona 
@@ -10,9 +10,9 @@ SELECT
   ,area_terreno
   ,st_x(st_transform(st_centroid(geometria),4326)) as x
   ,st_y(st_transform(st_centroid(geometria),4326)) as y
-  ,op_predio.espacio_de_nombres || op_predio.local_id as codigo
+  ,lc_predio.espacio_de_nombres || lc_predio.local_id as codigo
 FROM 
-  ladmcol_2_9_6.op_terreno   --parametrizar schema $P!{datasetName}
-  LEFT JOIN ladmcol_2_9_6.col_uebaunit ON op_terreno.t_id = col_uebaunit.ue_op_terreno --parametrizar schema $P!{datasetName}
-  LEFT JOIN ladmcol_2_9_6.op_predio ON op_predio.t_id = col_uebaunit.baunit  --parametrizar schema $P!{datasetName}
-WHERE op_terreno.t_id =  1522 -- parametrizar $P{id}
+  ladm_lev_cat_v1.lc_terreno   --parametrizar schema $P!{datasetName}
+  LEFT JOIN ladm_lev_cat_v1.col_uebaunit ON lc_terreno.t_id = col_uebaunit.ue_lc_terreno --parametrizar schema $P!{datasetName}
+  LEFT JOIN ladm_lev_cat_v1.lc_predio ON lc_predio.t_id = col_uebaunit.baunit  --parametrizar schema $P!{datasetName}
+WHERE lc_terreno.t_id =  1522 -- parametrizar $P{id}

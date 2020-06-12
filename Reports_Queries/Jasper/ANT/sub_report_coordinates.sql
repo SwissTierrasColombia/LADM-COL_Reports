@@ -7,7 +7,7 @@ parametros AS (
     true	AS incluir_tipo_derecho --Mostrar el tipo de derecho de cada interesado (booleano)
 ),
 t AS ( --Orienta los vertices del terreno en sentido horario
-	SELECT t_id, ST_ForceRHR(geometria) as geometria FROM ladmcol_2_9_6.op_terreno AS t, parametros WHERE t.t_id = poligono_t_id --parametrizar $P!{datasetName}
+	SELECT t_id, ST_ForceRHR(geometria) as geometria FROM ladm_lev_cat_v1.lc_terreno AS t, parametros WHERE t.t_id = poligono_t_id --parametrizar $P!{datasetName}
 ),
 --bordes de la extension del poligono
 a AS (
@@ -22,7 +22,7 @@ c AS (
 d AS (
 	SELECT ST_SetSRID(ST_MakePoint(st_xmin(t.geometria), st_ymin(t.geometria)), ST_SRID(t.geometria)) AS p FROM t
 ),
---Punto medio (ubicación del observador para la definicion de las cardinalidades)
+--Punto medio (ubicaciÃ³n del observador para la definicion de las cardinalidades)
 m AS (
   SELECT
     CASE WHEN criterio_observador = 1 THEN --centroide del poligono
@@ -38,7 +38,7 @@ m AS (
     END as p
     FROM parametros
 ),
---Cuadrantes del polígono desde el observador a cada una de las esquinas de la extensión del polígono
+--Cuadrantes del polÃ­gono desde el observador a cada una de las esquinas de la extensiÃ³n del polÃ­gono
 norte AS (
 	SELECT ST_SetSRID(ST_MakePolygon(ST_MakeLine(ARRAY [a.p, b.p, m.p, a.p])), ST_SRID(t.geometria)) geom FROM t,a,b,m
 ),
@@ -55,9 +55,9 @@ oeste AS (
 	SELECT t_id, ST_Boundary(geometria) geom FROM t
 )
 ,limite_vecinos as (  --obtiene el limite de los terrenos colindantes, filtrados por bounding box
-	select o.t_id, ST_Boundary(o.geometria) geom from t, ladmcol_2_9_6.op_terreno o where o.geometria && st_envelope(t.geometria) and t.t_id <> o.t_id -- parametrizar $P!{datasetName}
+	select o.t_id, ST_Boundary(o.geometria) geom from t, ladm_lev_cat_v1.lc_terreno o where o.geometria && st_envelope(t.geometria) and t.t_id <> o.t_id -- parametrizar $P!{datasetName}
 )
-,pre_colindancias as ( --inteseccion entre el limite del poligono y los terrenos cercanos, añade la geometria de los limites sin adjacencia
+,pre_colindancias as ( --inteseccion entre el limite del poligono y los terrenos cercanos, aÃ±ade la geometria de los limites sin adjacencia
 	SELECT limite_vecinos.t_id, st_intersection(limite_poligono.geom,limite_vecinos.geom) geom  FROM limite_poligono,limite_vecinos where st_intersects(limite_poligono.geom,limite_vecinos.geom) and limite_poligono.t_id <> limite_vecinos.t_id
 	union 
 	SELECT null as t_id, ST_Difference(limite_poligono.geom, a.geom) geom
@@ -110,7 +110,7 @@ oeste AS (
 	SELECT (ST_DumpPoints(geometria)).* AS dp
 	FROM t
 )
---Criterio 1: el punto inicial del terreno es el primer punto del lindero que intersecte con el punto ubicado mas cerca de la esquina nw del polígono
+--Criterio 1: el punto inicial del terreno es el primer punto del lindero que intersecte con el punto ubicado mas cerca de la esquina nw del polÃ­gono
 , punto_nw as (
 	SELECT 	geom
 		,st_distance(geom, nw) AS dist

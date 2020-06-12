@@ -10,6 +10,6 @@ SELECT array_to_json(array_agg(features)) AS features
                     						SELECT t_id AS t_id
                     						) AS l
                     					)) AS properties
-                            FROM ladmcol_2_9_6.op_construccion AS c --Parametrizar schema y nombre de tabla
+                            FROM ladm_lev_cat_v1.lc_construccion AS c --Parametrizar schema y nombre de tabla
                     		) AS f
                         ) AS ff
