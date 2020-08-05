@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.12.2.final using JasperReports Library version 6.12.2-75c5e90a222ab406e416cbf590a5397028a52de3  -->
+<!-- Created with Jaspersoft Studio version 6.5.1.final using JasperReports Library version 6.5.1  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="9a3e59f5-6675-48cf-ad74-9c42b5a5b290">
 	<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.HorizontalRowLayout"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
@@ -682,7 +682,7 @@ La vigencia de este certificado será de tres meses, a partir de su fecha de exp
 					<font size="5"/>
 					<paragraph leftIndent="5"/>
 				</textElement>
-				<text><![CDATA[1.000.000]]></text>
+				<text><![CDATA[2.000.000]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="47" y="551" width="113" height="7" uuid="c8e3b91c-df29-450a-9a2d-b65502b2faa9">
@@ -695,7 +695,7 @@ La vigencia de este certificado será de tres meses, a partir de su fecha de exp
 					<font size="5"/>
 					<paragraph leftIndent="5"/>
 				</textElement>
-				<text><![CDATA[Gauss - Krugger (Transveral Mercator)]]></text>
+				<text><![CDATA[Origen Nacional]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="47" y="558" width="113" height="7" uuid="e5fc4b2a-b989-4c3b-baa8-43e0bec90b3f">
@@ -708,7 +708,7 @@ La vigencia de este certificado será de tres meses, a partir de su fecha de exp
 					<font size="5"/>
 					<paragraph leftIndent="5"/>
 				</textElement>
-				<text><![CDATA[1.000.000]]></text>
+				<text><![CDATA[5.000.000]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="160" y="544" width="50" height="7" uuid="0b2b0e02-7133-40da-a041-f0aa5d6cb96a">
@@ -774,7 +774,7 @@ La vigencia de este certificado será de tres meses, a partir de su fecha de exp
 					<font size="5"/>
 					<paragraph leftIndent="5"/>
 				</textElement>
-				<text><![CDATA[4,5962]]></text>
+				<text><![CDATA[4,0]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="210" y="558" width="65" height="7" uuid="c782db10-3c0f-4d01-9f1f-7a2fd6bf1d1a">
@@ -787,7 +787,7 @@ La vigencia de este certificado será de tres meses, a partir de su fecha de exp
 					<font size="5"/>
 					<paragraph leftIndent="5"/>
 				</textElement>
-				<text><![CDATA[metro]]></text>
+				<text><![CDATA[Metro]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="210" y="565" width="65" height="7" uuid="7f2f2855-940e-4d21-a372-f6a60d7958b1">
@@ -800,7 +800,7 @@ La vigencia de este certificado será de tres meses, a partir de su fecha de exp
 					<font size="5"/>
 					<paragraph leftIndent="5"/>
 				</textElement>
-				<text><![CDATA[1,000000]]></text>
+				<text><![CDATA[0,9992]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="210" y="544" width="65" height="7" uuid="1ff8c2bf-4f30-48e2-a7dd-170662d7261f">
@@ -813,7 +813,7 @@ La vigencia de este certificado será de tres meses, a partir de su fecha de exp
 					<font size="5"/>
 					<paragraph leftIndent="5"/>
 				</textElement>
-				<text><![CDATA[-74,0775]]></text>
+				<text><![CDATA[-73,0]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="-3" y="0" width="560" height="19" forecolor="#000000" uuid="15684f3e-a901-41a1-8bd0-59266694541a"/>
