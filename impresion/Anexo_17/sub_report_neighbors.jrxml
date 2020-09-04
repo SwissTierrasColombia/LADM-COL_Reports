@@ -24,7 +24,7 @@
 parametros AS (
   SELECT
     $P{id} 	AS terreno_t_id,
-    $P{criterio_punto_inicial} 		AS criterio_punto_inicial, --tipo de criterio para seleccionar el punto inicial del terreno, valores posibles: 1,2 parametrizar
+    $P{criterio_punto_inicial} 		AS criterio_punto_inicial, --tipo de criterio para seleccionar el punto inicial del terreno, valores posibles: 1,2
      4		AS criterio_observador, --1: Centroide, 2: Centro del extent, 3: punto en la superficie, 4: Punto mas cercano al centroide dentro del poligono
 	true	AS incluir_tipo_derecho --Mostrar el tipo de derecho de cada interesado (booleano)
 ),
@@ -180,7 +180,7 @@ SELECT
   ,hasta
   ,ubicacion
   ,nupre
-  ,CASE WHEN numero_predial is null AND matricula_inmobiliaria IS NULL AND nombre IS NULL THEN 'ÁREA INDETERMINADA'
+  ,CASE WHEN numero_predial IS null AND matricula_inmobiliaria IS NULL AND nombre IS NULL THEN 'ÁREA INDETERMINADA'
     ELSE COALESCE(numero_predial || ';','') || COALESCE('FMI: ' || matricula_inmobiliaria || ';','') || COALESCE('Nombre: ' || nombre ,'')
    END AS predio
   ,lc_predio.t_id
@@ -247,7 +247,7 @@ LEFT JOIN
 			  JOIN $P!{datasetName}.lc_interesado ON lc_interesado.t_id =interesado_lc_interesado
 		) interesado ON lc_predio.t_id = interesado.unidad
   ) interesados
-  group BY t_id
+  GROUP BY t_id
 ) interesados ON interesados.t_id = lc_predio.t_id
 ORDER BY id]]>
 	</queryString>

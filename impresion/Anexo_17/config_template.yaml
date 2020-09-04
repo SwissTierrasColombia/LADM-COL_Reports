@@ -13,7 +13,7 @@ templates:
       id: !integer
         default: null
       criterio_punto_inicial: !integer
-        default: 2
+        default: 1
       title: !string
         default: "CERTIFICADO PLANO PREDIAL CATASTRAL"
       datasetName: !string

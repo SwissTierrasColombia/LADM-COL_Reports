@@ -279,18 +279,18 @@ SELECT
   ,(SELECT count(*) FROM colindantes) AS total_linderos
 FROM
 colindantes
-LEFT JOIN ladm_lev_cat_v1.lc_terreno ON lc_terreno.t_id = colindantes.t_id_terreno --$P!{datasetName}
-LEFT JOIN ladm_lev_cat_v1.col_uebaunit ON colindantes.t_id_terreno = ue_lc_terreno --$P!{datasetName}
-LEFT JOIN ladm_lev_cat_v1.lc_predio ON lc_predio.t_id = baunit --$P!{datasetName}
+LEFT JOIN ladm_lev_cat_v1.lc_terreno ON lc_terreno.t_id = colindantes.t_id_terreno 
+LEFT JOIN ladm_lev_cat_v1.col_uebaunit ON colindantes.t_id_terreno = ue_lc_terreno 
+LEFT JOIN ladm_lev_cat_v1.lc_predio ON lc_predio.t_id = baunit 
 LEFT JOIN
 (
   SELECT t_id,
 	array_to_string(array_agg(( coalesce(primer_nombre,'') || coalesce(' ' || segundo_nombre, '') || coalesce(' ' || primer_apellido, '') || coalesce(' ' || segundo_apellido, '') )
 				|| ( coalesce(razon_social, '') )
-				|| ', ' || (SELECT dispname FROM ladm_lev_cat_v1.lc_interesadodocumentotipo WHERE t_id = tipo_documento) || ': ' --$P!{datasetName}
+				|| ', ' || (SELECT dispname FROM ladm_lev_cat_v1.lc_interesadodocumentotipo WHERE t_id = tipo_documento) || ': ' 
 				|| documento_identidad
 				|| CASE WHEN (SELECT incluir_tipo_derecho FROM parametros) THEN
-					' (' || (SELECT dispname FROM ladm_lev_cat_v1.lc_derechotipo WHERE t_id = tipo_derecho) || ')' --opcional: ver tipo de derecho de cada interesado --$P!{datasetName}
+					' (' || (SELECT dispname FROM ladm_lev_cat_v1.lc_derechotipo WHERE t_id = tipo_derecho) || ')' --opcional: ver tipo de derecho de cada interesado 
 				  ELSE '' END
 				) , '; ')
 			  AS interesado
@@ -312,15 +312,15 @@ LEFT JOIN
 			  ,unidad
 			  ,lc_derecho.tipo AS tipo_derecho
 			FROM
-			  ladm_lev_cat_v1.lc_derecho --$P!{datasetName}
-			  JOIN ladm_lev_cat_v1.lc_agrupacioninteresados ON lc_agrupacioninteresados.t_id = interesado_lc_agrupacioninteresados --$P!{datasetName}
-			  JOIN ladm_lev_cat_v1.col_miembros ON agrupacion = lc_agrupacioninteresados.t_id --$P!{datasetName}
-			  JOIN ladm_lev_cat_v1.lc_interesado ON lc_interesado.t_id = col_miembros.interesado_lc_interesado --$P!{datasetName}
+			  ladm_lev_cat_v1.lc_derecho 
+			  JOIN ladm_lev_cat_v1.lc_agrupacioninteresados ON lc_agrupacioninteresados.t_id = interesado_lc_agrupacioninteresados 
+			  JOIN ladm_lev_cat_v1.col_miembros ON agrupacion = lc_agrupacioninteresados.t_id 
+			  JOIN ladm_lev_cat_v1.lc_interesado ON lc_interesado.t_id = col_miembros.interesado_lc_interesado 
 		 ) agrupacion  ON lc_predio.t_id = agrupacion.unidad
 	UNION
 	--navegar agrupación de interesados
 	SELECT * FROM
-		ladm_lev_cat_v1.lc_predio --$P!{datasetName}
+		ladm_lev_cat_v1.lc_predio 
 		LEFT JOIN
 		(
 			SELECT
@@ -334,8 +334,8 @@ LEFT JOIN
 			  ,unidad
 			  ,lc_derecho.tipo AS tipo_derecho
 			FROM
-			  ladm_lev_cat_v1.lc_derecho --$P!{datasetName}
-			  JOIN ladm_lev_cat_v1.lc_interesado ON lc_interesado.t_id =interesado_lc_interesado --$P!{datasetName}
+			  ladm_lev_cat_v1.lc_derecho 
+			  JOIN ladm_lev_cat_v1.lc_interesado ON lc_interesado.t_id =interesado_lc_interesado 
 		) interesado ON lc_predio.t_id = interesado.unidad
   ) interesados
   group BY t_id

@@ -251,17 +251,17 @@ colindantes AS (
 )
 SELECT DISTINCT ( coalesce(primer_nombre,'') || coalesce(' ' || segundo_nombre, '') || coalesce(' ' || primer_apellido, '') || coalesce(' ' || segundo_apellido, '') )
 				|| ( coalesce(razon_social, '') )  AS nombre
-	,(SELECT dispname FROM ladm_lev_cat_v1.lc_interesadodocumentotipo WHERE t_id = tipo_documento) || ': ' || documento_identidad AS documento --$P!{datasetName}
+	,(SELECT dispname FROM ladm_lev_cat_v1.lc_interesadodocumentotipo WHERE t_id = tipo_documento) || ': ' || documento_identidad AS documento
   FROM
 	colindantes
-	LEFT JOIN ladm_lev_cat_v1.lc_terreno ON lc_terreno.t_id = colindantes.t_id_terreno --$P!{datasetName}
-	LEFT JOIN ladm_lev_cat_v1.col_uebaunit ON colindantes.t_id_terreno = ue_lc_terreno --$P!{datasetName}
-	LEFT JOIN ladm_lev_cat_v1.lc_predio ON lc_predio.t_id = baunit --$P!{datasetName}
+	LEFT JOIN ladm_lev_cat_v1.lc_terreno ON lc_terreno.t_id = colindantes.t_id_terreno
+	LEFT JOIN ladm_lev_cat_v1.col_uebaunit ON colindantes.t_id_terreno = ue_lc_terreno
+	LEFT JOIN ladm_lev_cat_v1.lc_predio ON lc_predio.t_id = baunit
 	LEFT JOIN
   (
 	--navegar agrupación de interesados
 	SELECT * FROM
-		ladm_lev_cat_v1.lc_predio --$P!{datasetName}
+		ladm_lev_cat_v1.lc_predio
 		LEFT JOIN
 		(
 			SELECT
@@ -275,15 +275,15 @@ SELECT DISTINCT ( coalesce(primer_nombre,'') || coalesce(' ' || segundo_nombre, 
 			  ,unidad
 			  ,lc_derecho.tipo AS tipo_derecho
 			FROM
-			  ladm_lev_cat_v1.lc_derecho --$P!{datasetName}
-			  JOIN ladm_lev_cat_v1.lc_agrupacioninteresados ON lc_agrupacioninteresados.t_id = interesado_lc_agrupacioninteresados --$P!{datasetName}
-			  JOIN ladm_lev_cat_v1.col_miembros ON agrupacion = lc_agrupacioninteresados.t_id --$P!{datasetName}
-			  JOIN ladm_lev_cat_v1.lc_interesado ON lc_interesado.t_id = col_miembros.interesado_lc_interesado --$P!{datasetName}
+			  ladm_lev_cat_v1.lc_derecho
+			  JOIN ladm_lev_cat_v1.lc_agrupacioninteresados ON lc_agrupacioninteresados.t_id = interesado_lc_agrupacioninteresados
+			  JOIN ladm_lev_cat_v1.col_miembros ON agrupacion = lc_agrupacioninteresados.t_id
+			  JOIN ladm_lev_cat_v1.lc_interesado ON lc_interesado.t_id = col_miembros.interesado_lc_interesado
 		 ) agrupacion  ON lc_predio.t_id = agrupacion.unidad
 	UNION
 	--navegar agrupación de interesados
 	SELECT * FROM
-		ladm_lev_cat_v1.lc_predio --$P!{datasetName}
+		ladm_lev_cat_v1.lc_predio
 		LEFT JOIN
 		(
 			SELECT
@@ -297,8 +297,8 @@ SELECT DISTINCT ( coalesce(primer_nombre,'') || coalesce(' ' || segundo_nombre, 
 			  ,unidad
 			  ,lc_derecho.tipo AS tipo_derecho
 			FROM
-			  ladm_lev_cat_v1.lc_derecho --$P!{datasetName}
-			  JOIN ladm_lev_cat_v1.lc_interesado ON lc_interesado.t_id =interesado_lc_interesado --$P!{datasetName}
+			  ladm_lev_cat_v1.lc_derecho
+			  JOIN ladm_lev_cat_v1.lc_interesado ON lc_interesado.t_id =interesado_lc_interesado
 		) interesado ON lc_predio.t_id = interesado.unidad
   ) interesados ON interesados.t_id = lc_predio.t_id
   WHERE

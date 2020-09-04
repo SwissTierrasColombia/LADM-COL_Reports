@@ -118,7 +118,7 @@
                 "layer": "terreno"
             }
         },
-        "criterio_punto_inicial": 2,
+        "criterio_punto_inicial": 1,
         "overviewMap": {
           "layers": [{
               "geoJson": "",
