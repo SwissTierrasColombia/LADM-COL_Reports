@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.5.1.final using JasperReports Library version 6.5.1  -->
+<!-- Created with Jaspersoft Studio version 6.12.2.final using JasperReports Library version 6.12.2-75c5e90a222ab406e416cbf590a5397028a52de3  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="9a3e59f5-6675-48cf-ad74-9c42b5a5b290">
 	<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.HorizontalRowLayout"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
@@ -351,7 +351,7 @@ FROM info_terreno ,
 				<reportElement x="25" y="12" width="90" height="48" uuid="91b62581-b5d0-4f02-b066-1d4b3160b8fa">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
-				<imageExpression><![CDATA["logo_ant.jpg"]]></imageExpression>
+				<imageExpression><![CDATA["images/logo_ant.jpg"]]></imageExpression>
 			</image>
 			<componentElement>
 				<reportElement x="500" y="14" width="43" height="43" uuid="4fc3ba75-754a-4d31-9160-bd511dc63ac0">
@@ -944,7 +944,7 @@ FROM info_terreno ,
 				<box>
 					<pen lineColor="rgba(0, 0, 0, 0.09803922)"/>
 				</box>
-				<imageExpression><![CDATA["convenciones.png"]]></imageExpression>
+				<imageExpression><![CDATA["images/convenciones.png"]]></imageExpression>
 			</image>
 		</band>
 		<band height="70">
