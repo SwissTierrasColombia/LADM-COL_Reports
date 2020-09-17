@@ -1,7 +1,7 @@
 WITH
 parametros AS (
   SELECT
-    1432 	AS terreno_t_id --$P{id}
+    1432 AS terreno_t_id --$P{id}
 ),
 t AS (
 	SELECT t_id, ST_ForceRHR(geometria) AS geometria FROM ladm_lev_cat_v1.lc_terreno WHERE t_id = (SELECT terreno_t_id FROM parametros)
@@ -21,7 +21,7 @@ FROM (
 	FROM (
 		SELECT 'Feature' AS type,
 		row_to_json((SELECT l FROM (SELECT ROUND(st_length(lineas_colindancia.geom)::numeric, 2) AS longitud) AS l)) AS properties,
-		ST_AsGeoJSON(lineas_colindancia.geom)::json AS geometry
+		ST_AsGeoJSON(lineas_colindancia.geom, 4, 0)::json AS geometry
 		FROM lineas_colindancia
-	) as f)
-as ff;
+	) AS f)
+AS ff;

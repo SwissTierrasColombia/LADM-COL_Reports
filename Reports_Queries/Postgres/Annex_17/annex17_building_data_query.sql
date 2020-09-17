@@ -3,7 +3,7 @@ SELECT array_to_json(array_agg(features)) AS features
                     	SELECT f AS features
                     	FROM (
                     		SELECT 'Feature' AS type
-                    			,ST_AsGeoJSON(geometria)::json AS geometry --Parametrizar geometria
+                    			,ST_AsGeoJSON(geometria, 4, 0)::json AS geometry --Parametrizar geometria
                     			,row_to_json((
                     					SELECT l
                     					FROM (

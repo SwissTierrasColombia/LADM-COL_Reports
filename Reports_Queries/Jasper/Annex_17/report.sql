@@ -8,9 +8,9 @@ SELECT
   --,zona 
   ,numero_predial_anterior
   ,area_terreno
-  ,st_x(st_transform(st_centroid(geometria),4326)) as x
-  ,st_y(st_transform(st_centroid(geometria),4326)) as y
-  ,lc_predio.espacio_de_nombres || lc_predio.local_id as codigo
+  ,st_x(st_transform(st_centroid(geometria),4326)) AS x
+  ,st_y(st_transform(st_centroid(geometria),4326)) AS y
+  ,lc_predio.espacio_de_nombres || lc_predio.local_id AS codigo
 FROM 
   ladm_lev_cat_v1.lc_terreno   --parametrizar schema $P!{datasetName}
   LEFT JOIN ladm_lev_cat_v1.col_uebaunit ON lc_terreno.t_id = col_uebaunit.ue_lc_terreno --parametrizar schema $P!{datasetName}
