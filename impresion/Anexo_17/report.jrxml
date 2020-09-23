@@ -12,6 +12,8 @@
 	<parameter name="mapContext1" class="org.mapfish.print.attribute.map.MapfishMapContext"/>
 	<parameter name="criterio_punto_inicial" class="java.lang.Integer"/>
 	<parameter name="datasetName" class="java.lang.String"/>
+	<parameter name="scalebarSubReport1" class="java.lang.String"/>
+	<parameter name="northArrowSubReport1" class="java.lang.String"/>
 	<queryString>
 		<![CDATA[SELECT 
   lc_predio.matricula_inmobiliaria as matricula_inmobiliaria
@@ -341,7 +343,7 @@ WHERE lc_terreno.t_id =  $P{id}]]>
 				<reportElement mode="Transparent" x="285" y="443" width="265" height="215" uuid="e8d07db1-efe1-4bb7-ad6a-7a213ac19e45"/>
 			</rectangle>
 			<textField>
-				<reportElement x="403" y="405" width="140" height="20" forecolor="#4B4B4B" uuid="bc732c1c-1ae4-48b4-abc0-f94c445cc708"/>
+				<reportElement x="402" y="379" width="140" height="20" forecolor="#4B4B4B" uuid="bc732c1c-1ae4-48b4-abc0-f94c445cc708"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA["Escala " + String.format("1:%.0f", $P{mapContext1}.getRoundedScaleDenominator())]]></textFieldExpression>
 			</textField>
@@ -854,8 +856,22 @@ La vigencia de este certificado será de tres meses, a partir de su fecha de exp
 				</reportElement>
 				<imageExpression><![CDATA["images/convenciones.png"]]></imageExpression>
 			</image>
+			<subreport overflowType="Stretch">
+				<reportElement x="369" y="403" width="180" height="20" uuid="e725b9e6-b028-4c8e-92f2-eed0cdbd5f0f">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<subreportExpression><![CDATA[$P{scalebarSubReport1}]]></subreportExpression>
+			</subreport>
+			<subreport>
+				<reportElement x="15" y="30" width="40" height="40" uuid="72949216-5e1c-4820-95ce-ccdd6b459996">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<subreportExpression><![CDATA[$P{northArrowSubReport1}]]></subreportExpression>
+			</subreport>
 		</band>
-		<band height="70">
+		<band height="64">
 			<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 			<staticText>
 				<reportElement x="0" y="10" width="560" height="19" forecolor="#000000" uuid="96502e3c-db78-4f77-83be-d271a631da0f"/>
@@ -865,21 +881,25 @@ La vigencia de este certificado será de tres meses, a partir de su fecha de exp
 				<text><![CDATA[CUADRO DE COLINDANCIAS]]></text>
 			</staticText>
 			<subreport>
-				<reportElement x="14" y="40" width="536" height="30" uuid="91ccc0b7-8497-455b-87e7-e483941086b1"/>
-				<subreportParameter name="id">
+				<reportElement x="14" y="34" width="536" height="30" uuid="eb0c1533-fb38-4a9a-bd4d-d2194f6c2812">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<subreportParameter name="srp_id">
 					<subreportParameterExpression><![CDATA[$P{id}]]></subreportParameterExpression>
 				</subreportParameter>
-				<subreportParameter name="criterio_punto_inicial">
+				<subreportParameter name="srp_criterio_punto_inicial">
 					<subreportParameterExpression><![CDATA[$P{criterio_punto_inicial}]]></subreportParameterExpression>
 				</subreportParameter>
-				<subreportParameter name="datasetName">
+				<subreportParameter name="srp_datasetName">
 					<subreportParameterExpression><![CDATA[$P{datasetName}]]></subreportParameterExpression>
 				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-				<subreportExpression><![CDATA["sub_report_neighbors.jasper"]]></subreportExpression>
+				<subreportExpression><![CDATA["sub_report_neighbors_parts.jasper"]]></subreportExpression>
 			</subreport>
 		</band>
-		<band height="70">
+		<band height="60">
 			<staticText>
 				<reportElement x="0" y="0" width="560" height="19" forecolor="#000000" uuid="6ab642e3-12c1-4bbc-a44a-f51ec9c04477"/>
 				<textElement textAlignment="Center">
@@ -888,21 +908,26 @@ La vigencia de este certificado será de tres meses, a partir de su fecha de exp
 				<text><![CDATA[DESCRIPCIÓN TÉCNICA DE LINDEROS]]></text>
 			</staticText>
 			<subreport>
-				<reportElement x="14" y="40" width="536" height="30" uuid="ed6befaf-c5fc-40b6-bbb5-0adab23e5275"/>
-				<subreportParameter name="id">
+				<reportElement x="14" y="30" width="536" height="30" uuid="94daa88d-e7c5-44db-b166-9c534fd06bf0">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<subreportParameter name="srp_id">
 					<subreportParameterExpression><![CDATA[$P{id}]]></subreportParameterExpression>
 				</subreportParameter>
-				<subreportParameter name="criterio_punto_inicial">
+				<subreportParameter name="srp_criterio_punto_inicial">
 					<subreportParameterExpression><![CDATA[$P{criterio_punto_inicial}]]></subreportParameterExpression>
 				</subreportParameter>
-				<subreportParameter name="datasetName">
+				<subreportParameter name="srp_datasetName">
 					<subreportParameterExpression><![CDATA[$P{datasetName}]]></subreportParameterExpression>
 				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-				<subreportExpression><![CDATA["sub_report_technical_boundaries.jasper"]]></subreportExpression>
+				<subreportExpression><![CDATA["sub_report_technical_boundaries_parts.jasper"]]></subreportExpression>
 			</subreport>
 		</band>
-		<band height="80">
+		<band height="60">
 			<staticText>
 				<reportElement x="0" y="0" width="560" height="19" forecolor="#000000" uuid="38d9105f-0565-40c7-abc5-765c05da81f7"/>
 				<textElement textAlignment="Center">
@@ -911,23 +936,28 @@ La vigencia de este certificado será de tres meses, a partir de su fecha de exp
 				<text><![CDATA[CUADRO DE COORDENADAS]]></text>
 			</staticText>
 			<subreport>
-				<reportElement x="14" y="30" width="536" height="50" uuid="cb606a36-8e3f-475d-89ac-69825157136d"/>
-				<subreportParameter name="id">
+				<reportElement x="14" y="30" width="536" height="30" uuid="95784ab7-59b1-4d09-bc10-ff5020a154cb">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<subreportParameter name="srp_id">
 					<subreportParameterExpression><![CDATA[$P{id}]]></subreportParameterExpression>
 				</subreportParameter>
-				<subreportParameter name="criterio_punto_inicial">
+				<subreportParameter name="srp_criterio_punto_inicial">
 					<subreportParameterExpression><![CDATA[$P{criterio_punto_inicial}]]></subreportParameterExpression>
 				</subreportParameter>
-				<subreportParameter name="datasetName">
+				<subreportParameter name="srp_datasetName">
 					<subreportParameterExpression><![CDATA[$P{datasetName}]]></subreportParameterExpression>
 				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-				<subreportExpression><![CDATA["sub_report_coordinates.jasper"]]></subreportExpression>
+				<subreportExpression><![CDATA["sub_report_coordinates_parts.jasper"]]></subreportExpression>
 			</subreport>
 		</band>
 		<band height="90">
 			<subreport>
-				<reportElement x="14" y="60" width="536" height="30" uuid="f5a3ca74-1509-4daa-b231-4b2d65551523"/>
+				<reportElement x="14" y="42" width="536" height="30" uuid="f5a3ca74-1509-4daa-b231-4b2d65551523"/>
 				<subreportParameter name="id">
 					<subreportParameterExpression><![CDATA[$P{id}]]></subreportParameterExpression>
 				</subreportParameter>

@@ -17,8 +17,9 @@
 	<parameter name="id" class="java.lang.Integer">
 		<defaultValueExpression><![CDATA[66040]]></defaultValueExpression>
 	</parameter>
-	<parameter name="criterio_punto_inicial" class="java.lang.Integer"/>
 	<parameter name="datasetName" class="java.lang.String"/>
+	<parameter name="criterio_punto_inicial" class="java.lang.Integer"/>
+	<parameter name="parte" class="java.lang.Integer"/>
 	<queryString language="SQL">
 		<![CDATA[WITH
 -- Se definen los parametos de la consulta
@@ -196,12 +197,12 @@ puntos_lindero_ordenados AS (
 )
 SELECT "from", "to", x,y, dist FROM
 (
-	select c1.id AS "from", CASE WHEN c1.id + 1 <= c1.punto_final THEN c1.id + 1 ELSE c1.punto_final - c1.id + c1.punto_inicial  END AS "to", c1.x, c1.y, round(st_distance(c1.geom, c2.geom)::numeric, 3) AS dist, c1.geom
+	select c1.parte, c1.id AS "from", CASE WHEN c1.id + 1 <= c1.punto_final THEN c1.id + 1 ELSE c1.punto_final - c1.id + c1.punto_inicial  END AS "to", c1.x, c1.y, round(st_distance(c1.geom, c2.geom)::numeric, 3) AS dist, c1.geom
 	FROM puntos_lindero_ordenados c1 JOIN puntos_lindero_ordenados c2 ON c1.id + 1 = c2.id and c1.id < c1.punto_final
 	UNION
-	select c1.id AS "from", CASE WHEN c1.id + 1 <= c1.punto_final THEN c1.id + 1 ELSE c1.punto_final - c1.id + c1.punto_inicial  END AS "to", c1.x, c1.y, round(st_distance(c1.geom, c2.geom)::numeric, 3) AS dist, c1.geom
+	select c1.parte, c1.id AS "from", CASE WHEN c1.id + 1 <= c1.punto_final THEN c1.id + 1 ELSE c1.punto_final - c1.id + c1.punto_inicial  END AS "to", c1.x, c1.y, round(st_distance(c1.geom, c2.geom)::numeric, 3) AS dist, c1.geom
 	FROM puntos_lindero_ordenados c1 JOIN puntos_lindero_ordenados c2 ON c1.id - c1.punto_final = 0 and c2.id = c1.punto_inicial
-) puntos_resultado ORDER BY "from"]]>
+) puntos_resultado WHERE parte = $P{parte} ORDER BY "from"]]>
 	</queryString>
 	<field name="from" class="java.lang.Long"/>
 	<field name="to" class="java.lang.Long"/>
