@@ -157,7 +157,7 @@
                     "type": "geojson"
                 }
             ],
-            "projection": "EPSG:3116",
+            "projection": "EPSG:9377",
             "dpi": 250,
             "zoomToFeatures": {
                 "minScale": 50,

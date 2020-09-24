@@ -11,107 +11,29 @@
                 {
                     "geoJson": "",
                     "name": "puntoLindero",
-                    "style": {
-                        "*": {"symbolizers": [
-                            {
-                                "fillColor": "#ffaa00",
-                                "strokeWidth": 1,
-                                "fillOpacity": 1,
-                                "graphicName": "circle",
-                                "type": "point",
-                                "strokeColor": "#000",
-                                "pointRadius": 2,
-                                "strokeOpacity": 1
-                            },
-                            {
-                                "labelXOffset": "-4.0",
-                                "fontFamily": "sans-serif",
-                                "labelYOffset": "5.0",
-                                "fontSize": "8px",
-                                "label": "[point_number]",
-                                "type": "text",
-                                "fontWeight": "bold"
-                            }
-                        ]},
-                        "version": "2"
-                    },
+                    "style": "file:///styles/punto_lindero.sld",
                     "type": "geojson"
                 },
                 {
                     "geoJson": "",
                     "name": "terreno",
-                    "style": {
-                        "*": {"symbolizers": [
-                            {
-                                "fillColor": "#5E7F99",
-                                "strokeWidth": 2,
-                                "fillOpacity": 0.1,
-                                "type": "polygon",
-                                "strokeColor": "#9b794e",
-                                "strokeOpacity": 1
-                            },
-                            {
-                                "fontFamily": "sans-serif",
-                                "fontSize": "10px",
-                                "label": "[predio]",
-                                "type": "text",
-                                "fontWeight": "bold",
-                                "labelAlign": "cm"
-                            }
-                        ]},
-                        "version": "2"
-                    },
+                    "style": "file:///styles/terreno.sld",
                     "type": "geojson"
                 },
                 {
                     "geoJson": "",
                     "name": "terrenos",
-                    "style": {
-                        "*": {
-                            "symbolizers": [
-                                {
-                                    "fillColor": "#c6afaf",
-                                    "strokeWidth": 0.4,
-                                    "fillOpacity": 0,
-                                    "type": "polygon",
-                                    "strokeColor": "#9b794e",
-                                    "strokeOpacity": 1
-                                },
-                                {
-                                    "fontFamily": "sans-serif",
-                                    "fontSize": "5px",
-                                    "label": "[predio]",
-                                    "type": "text",
-                                    "labelAlign": "cm"
-                                }
-                            ]
-                        },
-                        "version": "2"
-                    },
+                    "style": "file:///styles/terrenos.sld",
                     "type": "geojson"
                 },
                 {
                     "geoJson": "",
                     "name": "construcciones",
-                    "style": {
-                        "*": {
-                            "symbolizers": [
-                                {
-                                    "fillColor": "#f70c00",
-                                    "strokeWidth": 0.4,
-                                    "fillOpacity": 0.4,
-                                    "type": "polygon",
-                                    "strokeColor": "#f70c00",
-                                    "strokeOpacity": 0.4
-                                }
-                            ]
-                        },
-                        "version": "2"
-                    },
+                    "style": "file:///styles/construccion.sld",
                     "type": "geojson"
                 }
             ],
-            "projection": "EPSG:3116",
+            "projection": "EPSG:9377",
             "dpi": 250,
             "zoomToFeatures": {
                 "minScale": 50,

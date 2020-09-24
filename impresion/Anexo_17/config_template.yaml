@@ -34,7 +34,7 @@ templates:
       northArrowDef: !northArrow
         size: 40
         default:
-          graphic: "file://NorthArrow_10.svg"
+          graphic: "file://images/NorthArrow.svg"
       overviewMap: !overviewMap
         width: 265
         height: 215
