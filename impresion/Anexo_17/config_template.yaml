@@ -39,7 +39,11 @@ templates:
         width: 265
         height: 215
         maxDpi: 400
-        zoomFactor: 20
+        style: "file:///styles/bbox.sld"
+        zoomSnapTolerance: 0.025
+        zoomLevelSnapStrategy: CLOSEST_LOWER_SCALE_ON_TIE
+        zoomLevels: !zoomLevels
+          scales: [ 100, 200, 300, 500, 1000, 2000, 2500, 3000, 5000, 7500, 10000, 15000, 20000, 25000, 50000, 100000, 500000, 1000000 ]
       overlayLayers: !staticLayers
         default:
           layers:

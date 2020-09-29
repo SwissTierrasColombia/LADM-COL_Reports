@@ -13,6 +13,8 @@
 	<parameter name="mapContext1" class="org.mapfish.print.attribute.map.MapfishMapContext"/>
 	<parameter name="criterio_punto_inicial" class="java.lang.Integer"/>
 	<parameter name="datasetName" class="java.lang.String"/>
+	<parameter name="northArrowSubReport1" class="java.lang.String"/>
+	<parameter name="scalebarSubReport1" class="java.lang.String"/>
 	<queryString>
 		<![CDATA[WITH terrenos_seleccionados AS
   (SELECT $P{id} AS ue_terreno
@@ -478,7 +480,9 @@ FROM info_terreno ,
 				<reportElement mode="Transparent" x="285" y="443" width="265" height="215" uuid="e8d07db1-efe1-4bb7-ad6a-7a213ac19e45"/>
 			</rectangle>
 			<textField>
-				<reportElement x="403" y="405" width="140" height="20" forecolor="#4B4B4B" uuid="bc732c1c-1ae4-48b4-abc0-f94c445cc708"/>
+				<reportElement x="403" y="379" width="140" height="20" forecolor="#4B4B4B" uuid="bc732c1c-1ae4-48b4-abc0-f94c445cc708">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
 				<textElement textAlignment="Right" verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA["Escala " + String.format("1:%.0f", $P{mapContext1}.getRoundedScaleDenominator())]]></textFieldExpression>
 			</textField>
@@ -913,7 +917,7 @@ FROM info_terreno ,
 				<textElement textAlignment="Center">
 					<font size="14"/>
 				</textElement>
-				<text><![CDATA[PLANO]]></text>
+				<text><![CDATA[PLANO PREDIAL]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
 				<reportElement x="115" y="513" width="160" height="10" uuid="c7bbcc2a-5a44-40d2-924d-19dcc13e30a9"/>
@@ -946,32 +950,55 @@ FROM info_terreno ,
 				</box>
 				<imageExpression><![CDATA["images/convenciones.png"]]></imageExpression>
 			</image>
+			<subreport>
+				<reportElement x="15" y="30" width="40" height="40" uuid="bc94dcd5-eef0-46c0-b977-607d0b4f14c6">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<subreportExpression><![CDATA[$P{northArrowSubReport1}]]></subreportExpression>
+			</subreport>
+			<subreport>
+				<reportElement x="369" y="403" width="180" height="20" uuid="ca404419-e767-47ad-a9e1-bf7b64e7c7f8">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<subreportExpression><![CDATA[$P{scalebarSubReport1}]]></subreportExpression>
+			</subreport>
 		</band>
-		<band height="70">
+		<band height="47">
 			<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 			<staticText>
-				<reportElement x="0" y="10" width="560" height="19" forecolor="#000000" uuid="96502e3c-db78-4f77-83be-d271a631da0f"/>
+				<reportElement x="0" y="2" width="560" height="19" forecolor="#000000" uuid="96502e3c-db78-4f77-83be-d271a631da0f"/>
 				<textElement textAlignment="Center">
 					<font size="14"/>
 				</textElement>
 				<text><![CDATA[CUADRO DE COLINDANCIAS]]></text>
 			</staticText>
 			<subreport>
-				<reportElement x="14" y="40" width="536" height="30" uuid="91ccc0b7-8497-455b-87e7-e483941086b1"/>
-				<subreportParameter name="id">
+				<reportElement x="14" y="27" width="536" height="20" uuid="314fd602-70a2-492d-b63c-b48bc0f97f70">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<subreportParameter name="srp_id">
 					<subreportParameterExpression><![CDATA[$P{id}]]></subreportParameterExpression>
 				</subreportParameter>
-				<subreportParameter name="criterio_punto_inicial">
+				<subreportParameter name="srp_criterio_punto_inicial">
 					<subreportParameterExpression><![CDATA[$P{criterio_punto_inicial}]]></subreportParameterExpression>
 				</subreportParameter>
-				<subreportParameter name="datasetName">
+				<subreportParameter name="srp_datasetName">
 					<subreportParameterExpression><![CDATA[$P{datasetName}]]></subreportParameterExpression>
 				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-				<subreportExpression><![CDATA["sub_report_neighbors.jasper"]]></subreportExpression>
+				<subreportExpression><![CDATA["sub_report_neighbors_parts.jasper"]]></subreportExpression>
 			</subreport>
 		</band>
-		<band height="74">
+		<band height="50">
 			<staticText>
 				<reportElement x="0" y="0" width="560" height="19" forecolor="#000000" uuid="6ab642e3-12c1-4bbc-a44a-f51ec9c04477"/>
 				<textElement textAlignment="Center">
@@ -980,101 +1007,26 @@ FROM info_terreno ,
 				<text><![CDATA[DESCRIPCIÓN TÉCNICA DE LINDEROS]]></text>
 			</staticText>
 			<subreport>
-				<reportElement x="14" y="44" width="536" height="30" uuid="ed6befaf-c5fc-40b6-bbb5-0adab23e5275"/>
-				<subreportParameter name="id">
+				<reportElement x="14" y="30" width="536" height="20" uuid="3871b19b-dbbb-441b-a670-c4fb0ff110b5">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<subreportParameter name="srp_id">
 					<subreportParameterExpression><![CDATA[$P{id}]]></subreportParameterExpression>
 				</subreportParameter>
-				<subreportParameter name="criterio_punto_inicial">
+				<subreportParameter name="srp_criterio_punto_inicial">
 					<subreportParameterExpression><![CDATA[$P{criterio_punto_inicial}]]></subreportParameterExpression>
 				</subreportParameter>
-				<subreportParameter name="datasetName">
+				<subreportParameter name="srp_datasetName">
 					<subreportParameterExpression><![CDATA[$P{datasetName}]]></subreportParameterExpression>
 				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-				<subreportExpression><![CDATA["sub_report_technical_boundaries_north.jasper"]]></subreportExpression>
-			</subreport>
-			<staticText>
-				<reportElement x="15" y="23" width="546" height="16" forecolor="#000000" uuid="30d1ee4d-e7e0-4592-b64e-ac900c298e65"/>
-				<textElement textAlignment="Left">
-					<font size="10" isBold="true"/>
-					<paragraph firstLineIndent="10" leftIndent="5" rightIndent="5"/>
-				</textElement>
-				<text><![CDATA[POR EL NORTE:]]></text>
-			</staticText>
-		</band>
-		<band height="50">
-			<staticText>
-				<reportElement x="15" y="0" width="544" height="16" forecolor="#000000" uuid="49bfcc4a-0a5e-496c-b303-ecabb5bc4533"/>
-				<textElement textAlignment="Left">
-					<font size="10" isBold="true"/>
-					<paragraph firstLineIndent="10" leftIndent="5" rightIndent="5"/>
-				</textElement>
-				<text><![CDATA[POR EL ESTE:]]></text>
-			</staticText>
-			<subreport>
-				<reportElement x="15" y="20" width="536" height="30" uuid="dfe359ab-9b3b-4e35-95d0-d395cd8c7ecd"/>
-				<subreportParameter name="id">
-					<subreportParameterExpression><![CDATA[$P{id}]]></subreportParameterExpression>
-				</subreportParameter>
-				<subreportParameter name="criterio_punto_inicial">
-					<subreportParameterExpression><![CDATA[$P{criterio_punto_inicial}]]></subreportParameterExpression>
-				</subreportParameter>
-				<subreportParameter name="datasetName">
-					<subreportParameterExpression><![CDATA[$P{datasetName}]]></subreportParameterExpression>
-				</subreportParameter>
-				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-				<subreportExpression><![CDATA["sub_report_technical_boundaries_east.jasper"]]></subreportExpression>
+				<subreportExpression><![CDATA["sub_report_technical_boundaries_parts.jasper"]]></subreportExpression>
 			</subreport>
 		</band>
 		<band height="50">
-			<staticText>
-				<reportElement x="15" y="0" width="544" height="16" forecolor="#000000" uuid="399b1a5d-7f2b-4d8e-8db6-c052c9fdc9d4"/>
-				<textElement textAlignment="Left">
-					<font size="10" isBold="true"/>
-					<paragraph firstLineIndent="10" leftIndent="5" rightIndent="5"/>
-				</textElement>
-				<text><![CDATA[POR EL SUR:]]></text>
-			</staticText>
-			<subreport>
-				<reportElement x="15" y="20" width="536" height="30" uuid="7b43a51a-c2ef-45ad-934f-ad36e3d060e3"/>
-				<subreportParameter name="id">
-					<subreportParameterExpression><![CDATA[$P{id}]]></subreportParameterExpression>
-				</subreportParameter>
-				<subreportParameter name="criterio_punto_inicial">
-					<subreportParameterExpression><![CDATA[$P{criterio_punto_inicial}]]></subreportParameterExpression>
-				</subreportParameter>
-				<subreportParameter name="datasetName">
-					<subreportParameterExpression><![CDATA[$P{datasetName}]]></subreportParameterExpression>
-				</subreportParameter>
-				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-				<subreportExpression><![CDATA["sub_report_technical_boundaries_south.jasper"]]></subreportExpression>
-			</subreport>
-		</band>
-		<band height="50">
-			<staticText>
-				<reportElement x="15" y="0" width="544" height="16" forecolor="#000000" uuid="849ced4d-ae40-42a7-a9dc-8e23a5398400"/>
-				<textElement textAlignment="Left">
-					<font size="10" isBold="true"/>
-					<paragraph firstLineIndent="10" leftIndent="5" rightIndent="5"/>
-				</textElement>
-				<text><![CDATA[POR EL OESTE:]]></text>
-			</staticText>
-			<subreport>
-				<reportElement x="15" y="20" width="536" height="30" uuid="36972981-4206-4dc1-a2d9-42d999eb8510"/>
-				<subreportParameter name="id">
-					<subreportParameterExpression><![CDATA[$P{id}]]></subreportParameterExpression>
-				</subreportParameter>
-				<subreportParameter name="criterio_punto_inicial">
-					<subreportParameterExpression><![CDATA[$P{criterio_punto_inicial}]]></subreportParameterExpression>
-				</subreportParameter>
-				<subreportParameter name="datasetName">
-					<subreportParameterExpression><![CDATA[$P{datasetName}]]></subreportParameterExpression>
-				</subreportParameter>
-				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-				<subreportExpression><![CDATA["sub_report_technical_boundaries_west.jasper"]]></subreportExpression>
-			</subreport>
-		</band>
-		<band height="80">
 			<staticText>
 				<reportElement x="0" y="0" width="560" height="19" forecolor="#000000" uuid="38d9105f-0565-40c7-abc5-765c05da81f7"/>
 				<textElement textAlignment="Center">
@@ -1083,18 +1035,23 @@ FROM info_terreno ,
 				<text><![CDATA[CUADRO DE COORDENADAS]]></text>
 			</staticText>
 			<subreport>
-				<reportElement x="14" y="30" width="536" height="50" uuid="cb606a36-8e3f-475d-89ac-69825157136d"/>
-				<subreportParameter name="id">
+				<reportElement x="14" y="30" width="536" height="20" uuid="ea3f2b24-a78e-4473-ad37-0b242db9cfff">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<subreportParameter name="srp_id">
 					<subreportParameterExpression><![CDATA[$P{id}]]></subreportParameterExpression>
 				</subreportParameter>
-				<subreportParameter name="criterio_punto_inicial">
+				<subreportParameter name="srp_criterio_punto_inicial">
 					<subreportParameterExpression><![CDATA[$P{criterio_punto_inicial}]]></subreportParameterExpression>
 				</subreportParameter>
-				<subreportParameter name="datasetName">
+				<subreportParameter name="srp_datasetName">
 					<subreportParameterExpression><![CDATA[$P{datasetName}]]></subreportParameterExpression>
 				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-				<subreportExpression><![CDATA["sub_report_coordinates.jasper"]]></subreportExpression>
+				<subreportExpression><![CDATA["sub_report_coordinates_parts.jasper"]]></subreportExpression>
 			</subreport>
 		</band>
 	</detail>

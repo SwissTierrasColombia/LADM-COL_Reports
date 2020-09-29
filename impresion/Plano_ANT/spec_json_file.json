@@ -1,199 +1,61 @@
 {
-    "layout": "A4 portrait",
-    "outputFormat": "pdf",
-    "attributes": {
-        "id": "",
-        "datasetName": "",
-        "map": {
-            "rotation": 0,
-            "longitudeFirst": true,
-            "layers": [
-                {
-                    "geoJson": "",
-                    "name": "puntoLindero",
-                    "style": {
-                        "*": {"symbolizers": [
-                            {
-                                "fillColor": "#ffaa00",
-                                "strokeWidth": 1,
-                                "fillOpacity": 1,
-                                "graphicName": "circle",
-                                "type": "point",
-                                "strokeColor": "#000",
-                                "pointRadius": 2,
-                                "strokeOpacity": 1
-                            },
-                            {
-                                "labelXOffset": "-4.0",
-                                "fontFamily": "sans-serif",
-                                "labelYOffset": "5.0",
-                                "fontSize": "8px",
-                                "label": "[point_number]",
-                                "type": "text",
-                                "fontWeight": "bold",
-                                "allowOverruns": false,
-                                "haloRadius": "1.0",
-                                "haloColor": "#FFFFFF",
-                                "haloOpacity": "0.7",
-								"conflictResolution": true
-                            }
-                        ]},
-                        "version": "2"
-                    },
-                    "type": "geojson"
-                },
-				{
-                    "geoJson": "",
-                    "name": "cambio_colindancia",
-                    "style": {
-                        "*": {"symbolizers": [
-                            {
-                                "strokeWidth": 2,
-                                "fillOpacity": 0.1,
-                                "type": "line",
-                                "strokeColor": "#9b794e",
-                                "strokeOpacity": 1
-                            },
-                            {
-                                "fontFamily": "sans-serif",
-                                "fontSize": "7px",
-                                "fontColor": "#582900",
-                                "label": "[longitud]",
-                                "type": "text",
-                                "fontWeight": "bold",
-                                "labelAlign": "cm",
-                                "haloRadius": "1.0",
-                                "haloColor": "#FFFFFF",
-                                "haloOpacity": "0.7",
-                                "followLine": true,
-                                "labelYOffset": 4.5
-                            }
-                        ]},
-                        "version": "2"
-                    },
-                    "type": "geojson"
-                },
-                {
-                    "geoJson": "",
-                    "name": "terreno",
-                    "style": {
-                        "*": {"symbolizers": [
-                            {
-                                "fillColor": "#5E7F99",
-                                "strokeWidth": 2,
-                                "fillOpacity": 0.1,
-                                "type": "polygon",
-                                "strokeColor": "#9b794e",
-                                "strokeOpacity": 1
-                            },
-                            {
-                                "fontFamily": "sans-serif",
-                                "fontSize": "8px",
-                                "label": "[predio]",
-                                "type": "text",
-                                "fontWeight": "bold",
-                                "labelAlign": "cm",
-                                "haloRadius": "1.0",
-                                "haloColor": "#FFFFFF",
-                                "haloOpacity": "0.7",
-								"autoWrap": 130 
-                            }
-                        ]},
-                        "version": "2"
-                    },
-                    "type": "geojson"
-                },
-                {
-                    "geoJson": "",
-                    "name": "terrenos",
-                    "style": {
-                        "*": {
-                            "symbolizers": [
-                                {
-                                    "fillColor": "#c6afaf",
-                                    "strokeWidth": 0.4,
-                                    "fillOpacity": 0,
-                                    "type": "polygon",
-                                    "strokeColor": "#9b794e",
-                                    "strokeOpacity": 1
-                                },
-                                {
-                                    "fontFamily": "sans-serif",
-                                    "fontSize": "6px",
-                                    "label": "[predio]",
-                                    "type": "text",
-                                    "goodnessOfFit": 0.1,
-                                    "haloRadius": "1.0",
-                                    "haloColor": "#FFFFFF",
-                                    "haloOpacity": "0.7",
-								    "autoWrap": 75,
-									"conflictResolution": true,
-									"maxDisplacement": 300
-                                }
-                            ]
-                        },
-                        "version": "2"
-                    },
-                    "type": "geojson"
-                },
-                {
-                    "geoJson": "",
-                    "name": "construcciones",
-                    "style": {
-                        "*": {
-                            "symbolizers": [
-                                {
-                                    "fillColor": "#f70c00",
-                                    "strokeWidth": 0.4,
-                                    "fillOpacity": 0.4,
-                                    "type": "polygon",
-                                    "strokeColor": "#f70c00",
-                                    "strokeOpacity": 0.4
-                                }
-                            ]
-                        },
-                        "version": "2"
-                    },
-                    "type": "geojson"
-                }
-            ],
-            "projection": "EPSG:9377",
-            "dpi": 250,
-            "zoomToFeatures": {
-                "minScale": 50,
-                "layer": "terreno"
-            }
+  "layout": "A4 portrait",
+  "outputFormat": "pdf",
+  "attributes": {
+    "id": "",
+    "datasetName": "",
+    "map": {
+      "rotation": 0,
+      "longitudeFirst": true,
+      "layers": [
+        {
+          "geoJson": "",
+          "name": "punto_lindero",
+          "style": "file:///styles/punto_lindero.sld",
+          "type": "geojson"
         },
-        "criterio_punto_inicial": 1,
-        "overviewMap": {
-          "layers": [{
-              "geoJson": "",
-              "name": "terrenos_all",
-              "style": {
-                  "*": {
-                      "symbolizers": [
-                          {
-                              "fillColor": "#c6afaf",
-                              "strokeWidth": 0.4,
-                              "fillOpacity": 0,
-                              "type": "polygon",
-                              "strokeColor": "#9b794e",
-                              "strokeOpacity": 0.7
-                          },
-                          {
-                              "fontFamily": "sans-serif",
-                              "fontSize": "3px",
-                              "label": "[predio]",
-                              "type": "text",
-                              "labelAlign": "cm",
-						      "autoWrap": 75
-                          }
-                      ]
-                  },
-                  "version": "2"
-              },
-              "type": "geojson"
-          }]
+        {
+          "geoJson": "",
+          "name": "terreno",
+          "style": "file:///styles/terreno.sld",
+          "type": "geojson"
+        },
+        {
+          "geoJson": "",
+          "name": "terrenos",
+          "style": "file:///styles/terrenos.sld",
+          "type": "geojson"
+        },
+        {
+          "geoJson": "",
+          "name": "construcciones",
+          "style": "file:///styles/construccion.sld",
+          "type": "geojson"
         }
+      ],
+      "projection": "EPSG:9377",
+      "dpi": 250,
+      "zoomToFeatures": {
+        "minScale": 50,
+        "layer": "terreno"
+      }
+    },
+    "criterio_punto_inicial": 1,
+    "overviewMap": {
+      "layers": [
+        {
+          "geoJson": "",
+          "name": "terrenos_overview",
+          "style": "file:///styles/terrenos_overview.sld",
+          "type": "geojson"
+        },
+        {
+          "geoJson": "",
+          "name": "terreno_overview",
+          "style": "file:///styles/terreno_overview.sld",
+          "type": "geojson"
+        }
+      ]
     }
+  }
 }

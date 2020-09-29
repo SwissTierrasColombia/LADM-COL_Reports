@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.12.2.final using JasperReports Library version 6.12.2-75c5e90a222ab406e416cbf590a5397028a52de3  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="sub_report_coordinates_parts" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="cc7ca7b2-c8a8-42ae-95ae-288f8fa5e3bc">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="PG Local"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<parameter name="srp_id" class="java.lang.Integer"/>
+	<parameter name="srp_criterio_punto_inicial" class="java.lang.Integer"/>
+	<parameter name="srp_datasetName" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT (ST_Dump(geometria)).path[1] AS parte
+       , case when ST_NumGeometries(geometria) > 1 then True else False end multi
+FROM $P!{srp_datasetName}.lc_terreno WHERE t_id = $P{srp_id}]]>
+	</queryString>
+	<field name="parte" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="parte"/>
+	</field>
+	<field name="multi" class="java.lang.Boolean">
+		<property name="com.jaspersoft.studio.field.label" value="multi"/>
+	</field>
+	<detail>
+		<band height="63" splitType="Stretch">
+			<textField>
+				<reportElement x="-20" y="-14" width="100" height="20" uuid="2a2c1157-7738-426e-82fc-3f75b28682bb">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{multi}.booleanValue()? "PARTE "+$F{parte}:""]]></textFieldExpression>
+			</textField>
+			<subreport>
+				<reportElement x="-20" y="13" width="536" height="50" uuid="09108a6b-68d7-466a-9ae9-7941e7f81fe3">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<subreportParameter name="id">
+					<subreportParameterExpression><![CDATA[$P{srp_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="criterio_punto_inicial">
+					<subreportParameterExpression><![CDATA[$P{srp_criterio_punto_inicial}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="datasetName">
+					<subreportParameterExpression><![CDATA[$P{srp_datasetName}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="parte">
+					<subreportParameterExpression><![CDATA[$F{parte}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA["sub_report_coordinates.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</detail>
+</jasperReport>

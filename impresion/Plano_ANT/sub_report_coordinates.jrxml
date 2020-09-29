@@ -19,6 +19,7 @@
 	</parameter>
 	<parameter name="criterio_punto_inicial" class="java.lang.Integer"/>
 	<parameter name="datasetName" class="java.lang.String"/>
+	<parameter name="parte" class="java.lang.Integer"/>
 	<queryString language="SQL">
 		<![CDATA[WITH
 -- Se definen los parametos de la consulta
@@ -85,22 +86,22 @@ cuadrantes_g AS (
 ),
 -- Se convierte la geometria multipoligono del terreno a partes simples
 t_simple AS (
-	SELECT t_id, (ST_Dump(geometria)).path[1] as parte, ST_ForceRHR((ST_Dump(geometria)).geom) as geom FROM $P!{datasetName}.lc_terreno WHERE t_id = (SELECT terreno_t_id FROM parametros)
+	SELECT t_id, (ST_Dump(geometria)).path[1] AS parte, ST_ForceRHR((ST_Dump(geometria)).geom) AS geom FROM $P!{datasetName}.lc_terreno WHERE t_id = (SELECT terreno_t_id FROM parametros)
 ),
 -- Se ordenan las partes del terreno empezando por la más cercana a la esquina noroeste del terreno general
-t_simple_ordenado as (
-	select row_number() OVER () as parte, t_id, geom
-	from (
-		select t_id, geom, st_distance(t_simple.geom, punto_nw_g.p) as dist from t_simple, punto_nw_g order by dist
-	) as l
+t_simple_ordenado AS (
+	SELECT row_number() OVER () AS parte, t_id, geom
+	FROM (
+		SELECT t_id, geom, st_distance(t_simple.geom, punto_nw_g.p) AS dist FROM t_simple, punto_nw_g ORDER BY dist
+	) AS l
 ),
 -- Se obtienen los vertices del bbox de cada parte del terreno
 vertices_bbox_partes AS (
-	select t_simple_ordenado.*,
-	   ST_SetSRID(ST_MakePoint(st_xmin(geom), st_ymax(geom)), ST_SRID(geom)) as p_nw,
-	   ST_SetSRID(ST_MakePoint(st_xmax(geom), st_ymax(geom)), ST_SRID(geom)) as p_ne,
-	   ST_SetSRID(ST_MakePoint(st_xmax(geom), st_ymin(geom)), ST_SRID(geom)) as p_se,
-	   ST_SetSRID(ST_MakePoint(st_xmin(geom), st_ymin(geom)), ST_SRID(geom)) as p_sw,
+	SELECT t_simple_ordenado.*,
+	   ST_SetSRID(ST_MakePoint(st_xmin(geom), st_ymax(geom)), ST_SRID(geom)) AS p_nw,
+	   ST_SetSRID(ST_MakePoint(st_xmax(geom), st_ymax(geom)), ST_SRID(geom)) AS p_ne,
+	   ST_SetSRID(ST_MakePoint(st_xmax(geom), st_ymin(geom)), ST_SRID(geom)) AS p_se,
+	   ST_SetSRID(ST_MakePoint(st_xmin(geom), st_ymin(geom)), ST_SRID(geom)) AS p_sw,
 	   CASE WHEN criterio_observador = 1 THEN  --centroide del poligono
 	   		ST_SetSRID(ST_MakePoint(st_x(ST_centroid(geom)), st_y(ST_centroid(geom))), ST_SRID(geom))
 		WHEN criterio_observador = 2 THEN  --Centro del extent
@@ -111,18 +112,18 @@ vertices_bbox_partes AS (
 		  	ST_SetSRID(ST_MakePoint(st_x(ST_ClosestPoint(geom, ST_centroid(geom))), st_y( ST_ClosestPoint(geom,ST_centroid(geom)))), ST_SRID(geom))
 		ELSE  --defecto: Centro del extent
 		  	ST_SetSRID(ST_MakePoint(st_x(ST_centroid(st_envelope(geom))), st_y(ST_centroid(st_envelope(geom)))), ST_SRID(geom))
-		END as p_medio
-	   from t_simple_ordenado, parametros
+		END AS p_medio
+	   FROM t_simple_ordenado, parametros
 ),
 -- Cuadrantes para cada una de las partes
-cuadrantes_partes as (
-	select parte, 'Norte' as ubicacion, ST_SetSRID(ST_MakePolygon(ST_MakeLine(ARRAY [p_nw, p_ne, p_medio, p_nw])), ST_SRID(geom)) as cuadrante from vertices_bbox_partes
+cuadrantes_partes AS (
+	SELECT parte, 'Norte' AS ubicacion, ST_SetSRID(ST_MakePolygon(ST_MakeLine(ARRAY [p_nw, p_ne, p_medio, p_nw])), ST_SRID(geom)) AS cuadrante FROM vertices_bbox_partes
 	union
-	select parte, 'Este' as ubicacion, ST_SetSRID(ST_MakePolygon(ST_MakeLine(ARRAY [p_medio, p_ne, p_se, p_medio])), ST_SRID(geom)) as cuadrante from vertices_bbox_partes
+	SELECT parte, 'Este' AS ubicacion, ST_SetSRID(ST_MakePolygon(ST_MakeLine(ARRAY [p_medio, p_ne, p_se, p_medio])), ST_SRID(geom)) AS cuadrante FROM vertices_bbox_partes
 	union
-	select parte, 'Sur' as ubicacion, ST_SetSRID(ST_MakePolygon(ST_MakeLine(ARRAY [p_medio, p_se, p_sw, p_medio])), ST_SRID(geom)) as cuadrante from vertices_bbox_partes
+	SELECT parte, 'Sur' AS ubicacion, ST_SetSRID(ST_MakePolygon(ST_MakeLine(ARRAY [p_medio, p_se, p_sw, p_medio])), ST_SRID(geom)) AS cuadrante FROM vertices_bbox_partes
 	union
-	select parte, 'Oeste' as ubicacion, ST_SetSRID(ST_MakePolygon(ST_MakeLine(ARRAY [p_nw, p_medio, p_sw, p_nw])), ST_SRID(geom)) as cuadrante from vertices_bbox_partes
+	SELECT parte, 'Oeste' AS ubicacion, ST_SetSRID(ST_MakePolygon(ST_MakeLine(ARRAY [p_nw, p_medio, p_sw, p_nw])), ST_SRID(geom)) AS cuadrante FROM vertices_bbox_partes
 ),
 -- Se obtienen linderos asociados a los linderos se utilizan las tablas topologicas
 linderos AS (
@@ -134,31 +135,31 @@ terrenos_asociados_linderos AS (
 ),
 -- Puntos linderos asociados al terreno
 puntos_lindero AS (
-	SELECT distinct lc_puntolindero.t_id, lc_puntolindero.geometria AS geom FROM $P!{datasetName}.lc_puntolindero JOIN $P!{datasetName}.col_puntoccl ON col_puntoccl.ccl IN (SELECT t_id FROM linderos) AND lc_puntolindero.t_id = col_puntoccl.punto_lc_puntolindero
+	SELECT DISTINCT lc_puntolindero.t_id, lc_puntolindero.geometria AS geom FROM $P!{datasetName}.lc_puntolindero JOIN $P!{datasetName}.col_puntoccl ON col_puntoccl.ccl IN (SELECT t_id FROM linderos) AND lc_puntolindero.t_id = col_puntoccl.punto_lc_puntolindero
 ),
 puntos_terrenos_simple AS (
-	select distinct on (geom) geom, parte, orden, total
-	from (
-		select (ST_DumpPoints(geom)).geom geom, parte, (ST_DumpPoints(geom)).path[2] orden, ST_NPoints(geom) total from t_simple_ordenado order by geom, parte, orden
-	) as puntos_terrenos_unicos
-	order by geom, parte, orden
+	SELECT DISTINCT ON (geom) geom, parte, orden, total
+	FROM (
+		SELECT (ST_DumpPoints(geom)).geom geom, parte, (ST_DumpPoints(geom)).path[2] orden, ST_NPoints(geom) total FROM t_simple_ordenado ORDER BY geom, parte, orden
+	) AS puntos_terrenos_unicos
+	ORDER BY geom, parte, orden
 ),
 -- Criterios para seleccionar el punto a partir del cual empiza la enumeración de los terrenos
 punto_inicial_por_lindero_con_punto_nw AS (
-	select distinct on (parte) parte, dist, orden as punto_inicial, geom, 1 as criterio from (
+	SELECT DISTINCT ON (parte) parte, dist, orden AS punto_inicial, geom, 1 AS criterio FROM (
 		SELECT 	pts.geom, pts.parte, pts.orden, pts.total,
 				st_distance(pts.geom, vbp.p_nw) AS dist
-		FROM puntos_terrenos_simple as pts JOIN vertices_bbox_partes as vbp ON pts.parte = vbp.parte
+		FROM puntos_terrenos_simple AS pts JOIN vertices_bbox_partes AS vbp ON pts.parte = vbp.parte
 		ORDER BY dist
-	) punto_inicial_parte_nw order by parte, dist
+	) punto_inicial_parte_nw ORDER BY parte, dist
 ),
 punto_inicial_por_lindero_con_punto_ne AS (
-	select distinct on (parte) parte, dist, orden as punto_inicial, geom, 2 as criterio from (
+	SELECT DISTINCT ON (parte) parte, dist, orden AS punto_inicial, geom, 2 AS criterio FROM (
 		SELECT 	pts.geom, pts.parte, pts.orden, pts.total,
 				st_distance(pts.geom, vbp.p_ne) AS dist
-		FROM puntos_terrenos_simple as pts JOIN vertices_bbox_partes as vbp ON pts.parte = vbp.parte
+		FROM puntos_terrenos_simple AS pts JOIN vertices_bbox_partes AS vbp ON pts.parte = vbp.parte
 		ORDER BY dist
-	) punto_inicial_parte_ne order by parte, dist
+	) punto_inicial_parte_ne ORDER BY parte, dist
 ),
 punto_inicial AS (
 	SELECT *
@@ -170,22 +171,21 @@ punto_inicial AS (
 	WHERE criterio = (SELECT criterio_punto_inicial FROM parametros)
 ),
 -- Preordenación de los puntos terreno
-pre_puntos_terreno_ordenados as (
-	select row_number() OVER (order by parte, reordenar) as id, geom, parte from (
-		select puntos_terrenos_simple.*, punto_inicial, case when orden - punto_inicial >=0 then orden - punto_inicial +1 else total - punto_inicial  + orden end as reordenar
-		from puntos_terrenos_simple join punto_inicial
-		on puntos_terrenos_simple.parte = punto_inicial.parte
-		order by puntos_terrenos_simple.parte, puntos_terrenos_simple.orden
-	) as puntos_ordenados_inicio order by parte, reordenar
-)
-,
+pre_puntos_terreno_ordenados AS (
+	SELECT row_number() OVER (ORDER BY parte, reordenar) AS id, geom, parte FROM (
+		SELECT puntos_terrenos_simple.*, punto_inicial, CASE WHEN orden - punto_inicial >=0 THEN orden - punto_inicial +1 ELSE total - punto_inicial  + orden END AS reordenar
+		FROM puntos_terrenos_simple JOIN punto_inicial
+		ON puntos_terrenos_simple.parte = punto_inicial.parte
+		ORDER BY puntos_terrenos_simple.parte, puntos_terrenos_simple.orden
+	) AS puntos_ordenados_inicio ORDER BY parte, reordenar
+),
 -- Se define el punto inicial y final para cada parte
-punto_inicial_final_parte as (
-	select parte, min(id) punto_inicial, max(id) punto_final from pre_puntos_terreno_ordenados group by parte
+punto_inicial_final_parte AS (
+	SELECT parte, min(id) punto_inicial, max(id) punto_final FROM pre_puntos_terreno_ordenados GROUP BY parte
 ),
 -- Puntos terrenos ordenados
-puntos_terreno_ordenados as (
-	select t1.*, t2.punto_inicial, punto_final from pre_puntos_terreno_ordenados as t1 join punto_inicial_final_parte as t2 on t1.parte = t2.parte
+puntos_terreno_ordenados AS (
+	SELECT t1.*, t2.punto_inicial, punto_final FROM pre_puntos_terreno_ordenados AS t1 JOIN punto_inicial_final_parte AS t2 ON t1.parte = t2.parte
 ),
 puntos_lindero_ordenados AS (
     SELECT * FROM (
@@ -196,12 +196,12 @@ puntos_lindero_ordenados AS (
 )
 SELECT "from", "to", x,y, dist FROM
 (
-	select c1.id AS "from", CASE WHEN c1.id + 1 <= c1.punto_final THEN c1.id + 1 ELSE c1.punto_final - c1.id + c1.punto_inicial  END AS "to", c1.x, c1.y, round(st_distance(c1.geom, c2.geom)::numeric, 3) AS dist, c1.geom
-	FROM puntos_lindero_ordenados c1 JOIN puntos_lindero_ordenados c2 ON c1.id + 1 = c2.id and c1.id < c1.punto_final
+	SELECT c1.parte, c1.id AS "from", CASE WHEN c1.id + 1 <= c1.punto_final THEN c1.id + 1 ELSE c1.punto_final - c1.id + c1.punto_inicial  END AS "to", c1.x, c1.y, round(st_distance(c1.geom, c2.geom)::numeric, 3) AS dist, c1.geom
+	FROM puntos_lindero_ordenados c1 JOIN puntos_lindero_ordenados c2 ON c1.id + 1 = c2.id AND c1.id < c1.punto_final
 	UNION
-	select c1.id AS "from", CASE WHEN c1.id + 1 <= c1.punto_final THEN c1.id + 1 ELSE c1.punto_final - c1.id + c1.punto_inicial  END AS "to", c1.x, c1.y, round(st_distance(c1.geom, c2.geom)::numeric, 3) AS dist, c1.geom
-	FROM puntos_lindero_ordenados c1 JOIN puntos_lindero_ordenados c2 ON c1.id - c1.punto_final = 0 and c2.id = c1.punto_inicial
-) puntos_resultado ORDER BY "from"]]>
+	SELECT c1.parte, c1.id AS "from", CASE WHEN c1.id + 1 <= c1.punto_final THEN c1.id + 1 ELSE c1.punto_final - c1.id + c1.punto_inicial  END AS "to", c1.x, c1.y, round(st_distance(c1.geom, c2.geom)::numeric, 3) AS dist, c1.geom
+	FROM puntos_lindero_ordenados c1 JOIN puntos_lindero_ordenados c2 ON c1.id - c1.punto_final = 0 AND c2.id = c1.punto_inicial
+) puntos_resultado WHERE parte = $P{parte} ORDER BY "from"]]>
 	</queryString>
 	<field name="from" class="java.lang.Long"/>
 	<field name="to" class="java.lang.Long"/>

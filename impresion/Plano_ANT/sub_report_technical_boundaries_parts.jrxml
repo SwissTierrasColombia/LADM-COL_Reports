@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.12.2.final using JasperReports Library version 6.12.2-75c5e90a222ab406e416cbf590a5397028a52de3  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="sub_report_technical_boundaries_parts" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="0c6dbfdd-003d-476d-adee-159544d1b3eb">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="PG Local"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<parameter name="srp_id" class="java.lang.Integer"/>
+	<parameter name="srp_criterio_punto_inicial" class="java.lang.Integer"/>
+	<parameter name="srp_datasetName" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT (ST_Dump(geometria)).path[1] AS parte
+       , case when ST_NumGeometries(geometria) > 1 then True else False end multi
+FROM $P!{srp_datasetName}.lc_terreno WHERE t_id = $P{srp_id}]]>
+	</queryString>
+	<field name="parte" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="parte"/>
+	</field>
+	<field name="multi" class="java.lang.Boolean">
+		<property name="com.jaspersoft.studio.field.label" value="multi"/>
+	</field>
+	<detail>
+		<band height="10">
+			<textField>
+				<reportElement x="-20" y="-20" width="100" height="20" uuid="0dcc1222-6864-45bb-9c62-24955f2644b2">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{multi}.booleanValue()? "PARTE "+$F{parte}:""]]></textFieldExpression>
+			</textField>
+		</band>
+		<band height="40" splitType="Stretch">
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+			<staticText>
+				<reportElement x="-20" y="0" width="100" height="20" uuid="6e87bf4b-7bf5-4d88-a3ac-ac74388aec9c">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[POR EL NORTE:]]></text>
+			</staticText>
+			<subreport>
+				<reportElement x="-20" y="30" width="536" height="10" uuid="911ad3bc-de41-44db-9bfd-66e4aa4f9a56">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<subreportParameter name="id">
+					<subreportParameterExpression><![CDATA[$P{srp_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="criterio_punto_inicial">
+					<subreportParameterExpression><![CDATA[$P{srp_criterio_punto_inicial}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="datasetName">
+					<subreportParameterExpression><![CDATA[$P{srp_datasetName}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="parte">
+					<subreportParameterExpression><![CDATA[$F{parte}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA["sub_report_technical_boundaries_north.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+		<band height="40">
+			<staticText>
+				<reportElement x="-20" y="0" width="100" height="20" uuid="a4be8f2a-2c50-4806-a2c6-e0161ea39eaf">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[POR EL ESTE:]]></text>
+			</staticText>
+			<subreport>
+				<reportElement x="-20" y="30" width="536" height="10" uuid="93bfceee-11bb-4165-8c52-498c88045e3a">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<subreportParameter name="id">
+					<subreportParameterExpression><![CDATA[$P{srp_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="criterio_punto_inicial">
+					<subreportParameterExpression><![CDATA[$P{srp_criterio_punto_inicial}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="datasetName">
+					<subreportParameterExpression><![CDATA[$P{srp_datasetName}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="parte">
+					<subreportParameterExpression><![CDATA[$F{parte}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA["sub_report_technical_boundaries_east.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+		<band height="40">
+			<staticText>
+				<reportElement x="-20" y="0" width="100" height="20" uuid="f9121870-22bb-4ffd-b40e-4b6d6917b456">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[POR EL SUR:]]></text>
+			</staticText>
+			<subreport>
+				<reportElement x="-20" y="30" width="536" height="10" uuid="5eca6cfc-fce3-4f9c-87a7-2ed8bc7a5273">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<subreportParameter name="id">
+					<subreportParameterExpression><![CDATA[$P{srp_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="criterio_punto_inicial">
+					<subreportParameterExpression><![CDATA[$P{srp_criterio_punto_inicial}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="datasetName">
+					<subreportParameterExpression><![CDATA[$P{srp_datasetName}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="parte">
+					<subreportParameterExpression><![CDATA[$F{parte}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA["sub_report_technical_boundaries_south.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+		<band height="40">
+			<staticText>
+				<reportElement x="-20" y="0" width="100" height="20" uuid="05c283dd-fafd-4c1c-9664-70e3c624e4d8">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[POR EL OESTE:]]></text>
+			</staticText>
+			<subreport>
+				<reportElement x="-20" y="30" width="536" height="10" uuid="126737a6-9e9b-4a1d-ad5c-21d2abf1977b">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<subreportParameter name="id">
+					<subreportParameterExpression><![CDATA[$P{srp_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="criterio_punto_inicial">
+					<subreportParameterExpression><![CDATA[$P{srp_criterio_punto_inicial}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="datasetName">
+					<subreportParameterExpression><![CDATA[$P{srp_datasetName}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="parte">
+					<subreportParameterExpression><![CDATA[$F{parte}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA["sub_report_technical_boundaries_west.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</detail>
+</jasperReport>

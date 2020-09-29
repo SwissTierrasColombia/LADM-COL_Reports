@@ -155,8 +155,7 @@ pre_puntos_terreno_ordenados AS (
 		ON puntos_terrenos_simple.parte = punto_inicial.parte
 		ORDER BY puntos_terrenos_simple.parte, puntos_terrenos_simple.orden
 	) AS puntos_ordenados_inicio ORDER BY parte, reordenar
-)
-,
+),
 -- Se define el punto inicial y final para cada parte
 punto_inicial_final_parte AS (
 	SELECT parte, min(id) punto_inicial, max(id) punto_final FROM pre_puntos_terreno_ordenados GROUP BY parte
@@ -174,9 +173,9 @@ puntos_lindero_ordenados AS (
 )
 SELECT "from", "to", x,y, dist FROM
 (
-	SELECT c1.id AS "from", CASE WHEN c1.id + 1 <= c1.punto_final THEN c1.id + 1 ELSE c1.punto_final - c1.id + c1.punto_inicial  END AS "to", c1.x, c1.y, round(st_distance(c1.geom, c2.geom)::numeric, 3) AS dist, c1.geom
+	SELECT c1.parte, c1.id AS "from", CASE WHEN c1.id + 1 <= c1.punto_final THEN c1.id + 1 ELSE c1.punto_final - c1.id + c1.punto_inicial  END AS "to", c1.x, c1.y, round(st_distance(c1.geom, c2.geom)::numeric, 3) AS dist, c1.geom
 	FROM puntos_lindero_ordenados c1 JOIN puntos_lindero_ordenados c2 ON c1.id + 1 = c2.id AND c1.id < c1.punto_final
 	UNION
-	SELECT c1.id AS "from", CASE WHEN c1.id + 1 <= c1.punto_final THEN c1.id + 1 ELSE c1.punto_final - c1.id + c1.punto_inicial  END AS "to", c1.x, c1.y, round(st_distance(c1.geom, c2.geom)::numeric, 3) AS dist, c1.geom
+	SELECT c1.parte, c1.id AS "from", CASE WHEN c1.id + 1 <= c1.punto_final THEN c1.id + 1 ELSE c1.punto_final - c1.id + c1.punto_inicial  END AS "to", c1.x, c1.y, round(st_distance(c1.geom, c2.geom)::numeric, 3) AS dist, c1.geom
 	FROM puntos_lindero_ordenados c1 JOIN puntos_lindero_ordenados c2 ON c1.id - c1.punto_final = 0 AND c2.id = c1.punto_inicial
-) puntos_resultado ORDER BY "from"
+) puntos_resultado WHERE parte = 1 ORDER BY "from"

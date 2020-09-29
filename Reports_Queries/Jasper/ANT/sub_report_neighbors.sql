@@ -237,9 +237,14 @@ linderos_desde_hasta AS (
 	SELECT lpif.t_id, geom, parte, desde, hasta FROM lindero_punto_inicio_fin AS lpif JOIN linderos_orientados AS lo ON lpif.t_id = lo.t_id
 ),
 linderos_colindantes AS (
-	SELECT row_number() OVER (ORDER BY desde) AS id, t_id AS t_id_linderos, desde, hasta, ubicacion, geom FROM
+	SELECT row_number() OVER (ORDER BY desde) AS id, t_id AS t_id_linderos, desde, hasta, ubicacion, geom, parte FROM
 	(
-		SELECT *
+		SELECT desde
+		    ,t_id
+		    , hasta
+		    , ubicacion
+		    , geom
+		    , ldh.parte
 			,st_length(st_intersection(geom,cuadrante))/st_length(geom) AS porcentaje
 			,max(st_length(st_intersection(geom,cuadrante))/st_length(geom)) OVER (partition BY geom) AS max_porce
 		FROM linderos_desde_hasta AS ldh JOIN cuadrantes_partes AS cp ON ldh.parte = cp.parte AND st_intersects(geom,  cuadrante)
@@ -324,4 +329,5 @@ LEFT JOIN
   ) interesados
   GROUP BY t_id
 ) interesados ON interesados.t_id = lc_predio.t_id
+WHERE parte = 1
 ORDER BY id

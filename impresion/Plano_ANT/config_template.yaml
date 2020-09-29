@@ -24,11 +24,26 @@ templates:
         height: 400
         zoomLevels: !zoomLevels
             scales: [100, 200, 300, 500, 1000, 2000, 2500, 3000, 5000, 7500, 10000, 15000, 20000, 25000, 50000, 100000, 500000]
+      scalebar: !scalebar
+        width: 180
+        height: 20
+        default:
+          align: "right"
+          fontSize: 8
+          subIntervals: true
+      northArrowDef: !northArrow
+        size: 40
+        default:
+          graphic: "file://images/NorthArrow.svg"
       overviewMap: !overviewMap
         width: 265
         height: 215
         maxDpi: 400
-        zoomFactor: 20
+        style: "file:///styles/bbox.sld"
+        zoomSnapTolerance: 0.025
+        zoomLevelSnapStrategy: CLOSEST_LOWER_SCALE_ON_TIE
+        zoomLevels: !zoomLevels
+          scales: [ 100, 200, 300, 500, 1000, 2000, 2500, 3000, 5000, 7500, 10000, 15000, 20000, 25000, 50000, 100000, 500000, 1000000 ]
       overlayLayers: !staticLayers
         default:
           layers:
@@ -96,3 +111,14 @@ templates:
         mapSubReport: mapSubReport1
         mapContext: mapContext1
     - !createOverviewMap {}
+    - !createScalebar
+      inputMapper:
+        scalebar: scalebar
+        mapContext1: mapContext
+      outputMapper:
+        scalebarSubReport: scalebarSubReport1
+    - !createNorthArrow
+      inputMapper:
+        northArrowDef: northArrow
+      outputMapper:
+        northArrowSubReport: northArrowSubReport1

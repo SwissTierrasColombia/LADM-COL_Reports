@@ -1,74 +1,61 @@
 {
-    "layout": "A4 portrait",
-    "outputFormat": "pdf",
-    "attributes": {
-        "id": "",
-        "datasetName": "",
-        "map": {
-            "rotation": 0,
-            "longitudeFirst": true,
-            "layers": [
-                {
-                    "geoJson": "",
-                    "name": "puntoLindero",
-                    "style": "file:///styles/punto_lindero.sld",
-                    "type": "geojson"
-                },
-                {
-                    "geoJson": "",
-                    "name": "terreno",
-                    "style": "file:///styles/terreno.sld",
-                    "type": "geojson"
-                },
-                {
-                    "geoJson": "",
-                    "name": "terrenos",
-                    "style": "file:///styles/terrenos.sld",
-                    "type": "geojson"
-                },
-                {
-                    "geoJson": "",
-                    "name": "construcciones",
-                    "style": "file:///styles/construccion.sld",
-                    "type": "geojson"
-                }
-            ],
-            "projection": "EPSG:9377",
-            "dpi": 250,
-            "zoomToFeatures": {
-                "minScale": 50,
-                "layer": "terreno"
-            }
+  "layout": "A4 portrait",
+  "outputFormat": "pdf",
+  "attributes": {
+    "id": "",
+    "datasetName": "",
+    "map": {
+      "rotation": 0,
+      "longitudeFirst": true,
+      "layers": [
+        {
+          "geoJson": "",
+          "name": "puntoLindero",
+          "style": "file:///styles/punto_lindero.sld",
+          "type": "geojson"
         },
-        "criterio_punto_inicial": 1,
-        "overviewMap": {
-          "layers": [{
-              "geoJson": "",
-              "name": "terrenos_all",
-              "style": {
-                  "*": {
-                      "symbolizers": [
-                          {
-                              "fillColor": "#c6afaf",
-                              "strokeWidth": 0.4,
-                              "fillOpacity": 0,
-                              "type": "polygon",
-                              "strokeColor": "#9b794e",
-                              "strokeOpacity": 0.7
-                          },
-                          {
-                              "fontFamily": "sans-serif",
-                              "fontSize": "4px",
-                              "label": "[predio]",
-                              "type": "text",
-                              "labelAlign": "cm"
-                          }
-                      ]
-                  },
-                  "version": "2"
-              },
-              "type": "geojson"
-          }]
+        {
+          "geoJson": "",
+          "name": "terreno",
+          "style": "file:///styles/terreno.sld",
+          "type": "geojson"
+        },
+        {
+          "geoJson": "",
+          "name": "terrenos",
+          "style": "file:///styles/terrenos.sld",
+          "type": "geojson"
+        },
+        {
+          "geoJson": "",
+          "name": "construcciones",
+          "style": "file:///styles/construccion.sld",
+          "type": "geojson"
         }
+      ],
+      "projection": "EPSG:9377",
+      "dpi": 250,
+      "zoomToFeatures": {
+        "minScale": 50,
+        "layer": "terreno"
+      }
+    },
+    "criterio_punto_inicial": 1,
+    "overviewMap": {
+      "layers": [
+        {
+          "geoJson": "",
+          "name": "terrenos_overview",
+          "style": "file:///styles/terrenos_overview.sld",
+          "type": "geojson"
+        },
+        {
+          "geoJson": "",
+          "name": "terreno_overview",
+          "style": "file:///styles/terreno_overview.sld",
+          "type": "geojson"
+        }
+      ]
     }
+  }
 }
