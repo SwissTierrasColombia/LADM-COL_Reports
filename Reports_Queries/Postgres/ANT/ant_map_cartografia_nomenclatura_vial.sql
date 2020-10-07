@@ -1,7 +1,7 @@
 WITH
 nomenclatura_vial AS (
 	SELECT (SELECT dispname FROM reportes_el_guamo.cc_nomenclaturavial_tipo_via WHERE t_id = tipo_via) || ' ' || numero_via AS nombre, geometria AS geom FROM reportes_el_guamo.cc_nomenclaturavial
-	WHERE geometria && (SELECT ST_Expand(ST_Envelope(geometria), 15) FROM reportes_el_guamo.lc_terreno WHERE t_id = 956)
+	WHERE geometria && (SELECT ST_Expand(ST_Envelope(geometria), 200) FROM reportes_el_guamo.lc_terreno WHERE t_id = 956)
 )
 SELECT array_to_json(array_agg(features)) AS features
 FROM (

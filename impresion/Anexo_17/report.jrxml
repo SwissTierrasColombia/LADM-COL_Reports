@@ -661,7 +661,7 @@ La vigencia de este certificado será de tres meses, a partir de su fecha de exp
 				<text><![CDATA[Falso Norte:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="47" y="544" width="113" height="7" uuid="e58f5981-461e-4f93-8ebb-2b290d0f5e40">
+				<reportElement x="47" y="544" width="93" height="7" uuid="e58f5981-461e-4f93-8ebb-2b290d0f5e40">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<box>
@@ -674,7 +674,7 @@ La vigencia de este certificado será de tres meses, a partir de su fecha de exp
 				<text><![CDATA[MAGNA - SIRGAS]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="47" y="565" width="113" height="7" uuid="892ff815-55a1-4770-8e7c-b0cef022a4af">
+				<reportElement x="47" y="565" width="93" height="7" uuid="892ff815-55a1-4770-8e7c-b0cef022a4af">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<box>
@@ -687,7 +687,7 @@ La vigencia de este certificado será de tres meses, a partir de su fecha de exp
 				<text><![CDATA[2.000.000]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="47" y="551" width="113" height="7" uuid="c8e3b91c-df29-450a-9a2d-b65502b2faa9">
+				<reportElement x="47" y="551" width="93" height="7" uuid="c8e3b91c-df29-450a-9a2d-b65502b2faa9">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<box>
@@ -700,7 +700,7 @@ La vigencia de este certificado será de tres meses, a partir de su fecha de exp
 				<text><![CDATA[Origen Nacional]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="47" y="558" width="113" height="7" uuid="e5fc4b2a-b989-4c3b-baa8-43e0bec90b3f">
+				<reportElement x="47" y="558" width="93" height="7" uuid="e5fc4b2a-b989-4c3b-baa8-43e0bec90b3f">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<box>
@@ -713,7 +713,7 @@ La vigencia de este certificado será de tres meses, a partir de su fecha de exp
 				<text><![CDATA[5.000.000]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="160" y="544" width="50" height="7" uuid="0b2b0e02-7133-40da-a041-f0aa5d6cb96a">
+				<reportElement x="140" y="544" width="59" height="7" uuid="0b2b0e02-7133-40da-a041-f0aa5d6cb96a">
 					<property name="com.jaspersoft.studio.unit.x" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
 				</reportElement>
@@ -727,7 +727,7 @@ La vigencia de este certificado será de tres meses, a partir de su fecha de exp
 				<text><![CDATA[Meridiano Central:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="160" y="565" width="50" height="7" uuid="7aea7858-cf9c-4e67-92e1-7c77030a721e">
+				<reportElement x="140" y="565" width="59" height="7" uuid="7aea7858-cf9c-4e67-92e1-7c77030a721e">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<box>
@@ -740,7 +740,7 @@ La vigencia de este certificado será de tres meses, a partir de su fecha de exp
 				<text><![CDATA[Factor de Escala:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="160" y="551" width="50" height="7" uuid="d97b2ba7-cd8d-4a28-8ecd-17d766917628">
+				<reportElement x="140" y="551" width="59" height="7" uuid="d97b2ba7-cd8d-4a28-8ecd-17d766917628">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<box>
@@ -753,7 +753,7 @@ La vigencia de este certificado será de tres meses, a partir de su fecha de exp
 				<text><![CDATA[Latitud de Origen:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="160" y="558" width="50" height="7" uuid="9a64f2d9-8c5b-4803-8103-5862fdde8eda">
+				<reportElement x="140" y="558" width="59" height="7" uuid="9a64f2d9-8c5b-4803-8103-5862fdde8eda">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<box>
@@ -766,7 +766,7 @@ La vigencia de este certificado será de tres meses, a partir de su fecha de exp
 				<text><![CDATA[Unidad Lineal:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="210" y="551" width="65" height="7" uuid="1a6b4052-533f-4345-b176-b8f0346f3d62">
+				<reportElement x="199" y="551" width="76" height="7" uuid="1a6b4052-533f-4345-b176-b8f0346f3d62">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<box>
@@ -779,7 +779,7 @@ La vigencia de este certificado será de tres meses, a partir de su fecha de exp
 				<text><![CDATA[4,0]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="210" y="558" width="65" height="7" uuid="c782db10-3c0f-4d01-9f1f-7a2fd6bf1d1a">
+				<reportElement x="199" y="558" width="76" height="7" uuid="c782db10-3c0f-4d01-9f1f-7a2fd6bf1d1a">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<box>
@@ -792,7 +792,7 @@ La vigencia de este certificado será de tres meses, a partir de su fecha de exp
 				<text><![CDATA[Metro]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="210" y="565" width="65" height="7" uuid="7f2f2855-940e-4d21-a372-f6a60d7958b1">
+				<reportElement x="199" y="565" width="76" height="7" uuid="7f2f2855-940e-4d21-a372-f6a60d7958b1">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<box>
@@ -805,7 +805,7 @@ La vigencia de este certificado será de tres meses, a partir de su fecha de exp
 				<text><![CDATA[0,9992]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="210" y="544" width="65" height="7" uuid="1ff8c2bf-4f30-48e2-a7dd-170662d7261f">
+				<reportElement x="199" y="544" width="76" height="7" uuid="1ff8c2bf-4f30-48e2-a7dd-170662d7261f">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<box>
@@ -848,8 +848,8 @@ La vigencia de este certificado será de tres meses, a partir de su fecha de exp
 				</textElement>
 				<text><![CDATA[TIPO DE PREDIO]]></text>
 			</staticText>
-			<image>
-				<reportElement x="110" y="606" width="60" height="39" uuid="93922ca0-954f-4a4a-8695-c684cfc2d042">
+			<image hAlign="Center">
+				<reportElement x="15" y="597" width="255" height="57" uuid="93922ca0-954f-4a4a-8695-c684cfc2d042">
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>

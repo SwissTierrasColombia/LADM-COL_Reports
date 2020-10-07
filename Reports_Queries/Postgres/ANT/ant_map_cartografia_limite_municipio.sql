@@ -1,6 +1,6 @@
 WITH
 limite_municipio AS (SELECT geometria AS geom , nombre_municipio FROM reportes_el_guamo.cc_limitemunicipio
-					 WHERE geometria && (SELECT ST_Expand(ST_Envelope(geometria), 15) FROM reportes_el_guamo.lc_terreno WHERE t_id = 956))
+					 WHERE geometria && (SELECT ST_Expand(ST_Envelope(geometria), 200) FROM reportes_el_guamo.lc_terreno WHERE t_id = 956))
 SELECT array_to_json(array_agg(features)) AS features
 FROM (
 	SELECT f AS features

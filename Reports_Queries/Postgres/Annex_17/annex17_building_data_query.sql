@@ -11,5 +11,6 @@ SELECT array_to_json(array_agg(features)) AS features
                     						) AS l
                     					)) AS properties
                             FROM ladm_lev_cat_v1.lc_construccion AS c --Parametrizar schema y nombre de tabla
+                            WHERE geometria && (SELECT ST_Expand(ST_Envelope(lc_terreno.geometria), 200) FROM ladm_lev_cat_v1.lc_terreno WHERE t_id = 1432)
                     		) AS f
                         ) AS ff

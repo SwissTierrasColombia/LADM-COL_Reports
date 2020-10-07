@@ -10,7 +10,7 @@
       "layers": [
         {
           "geoJson": {"type": "FeatureCollection", "features": []},
-          "name": "puntoLindero",
+          "name": "punto_lindero",
           "style": "file:///styles/punto_lindero.sld",
           "type": "geojson"
         },

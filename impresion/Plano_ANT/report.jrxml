@@ -16,137 +16,84 @@
 	<parameter name="northArrowSubReport1" class="java.lang.String"/>
 	<parameter name="scalebarSubReport1" class="java.lang.String"/>
 	<queryString>
-		<![CDATA[WITH terrenos_seleccionados AS
-  (SELECT $P{id} AS ue_terreno
-   WHERE '764' <> 'NULL' --12425  12424 12005
-   UNION SELECT col_uebaunit.ue_lc_terreno
-   FROM $P!{datasetName}.lc_predio
-   LEFT JOIN $P!{datasetName}.col_uebaunit ON lc_predio.t_id = col_uebaunit.baunit
-   WHERE col_uebaunit.ue_lc_terreno IS NOT NULL
-     AND CASE
-             WHEN 'NULL' = 'NULL' THEN 1 = 2
-             ELSE lc_predio.matricula_inmobiliaria = 'NULL'
-         END
-   UNION SELECT col_uebaunit.ue_lc_terreno
-   FROM $P!{datasetName}.lc_predio
-   LEFT JOIN $P!{datasetName}.col_uebaunit ON lc_predio.t_id = col_uebaunit.baunit
-   WHERE col_uebaunit.ue_lc_terreno IS NOT NULL
-     AND CASE
-             WHEN 'NULL' = 'NULL' THEN 1 = 2
-             ELSE lc_predio.numero_predial = 'NULL'
-         END
-   UNION SELECT col_uebaunit.ue_lc_terreno
-   FROM $P!{datasetName}.lc_predio
-   LEFT JOIN $P!{datasetName}.col_uebaunit ON lc_predio.t_id = col_uebaunit.baunit
-   WHERE col_uebaunit.ue_lc_terreno IS NOT NULL
-     AND CASE
-             WHEN 'NULL' = 'NULL' THEN 1 = 2
-             ELSE lc_predio.numero_predial_anterior = 'NULL'
-         END ),
-     predios_seleccionados AS
-  (SELECT col_uebaunit.baunit AS t_id
-   FROM $P!{datasetName}.col_uebaunit
-   WHERE col_uebaunit.ue_lc_terreno = $P{id}
-     AND '764' <> 'NULL'
-   UNION SELECT t_id
-   FROM $P!{datasetName}.lc_predio
-   WHERE CASE
-             WHEN 'NULL' = 'NULL' THEN 1 = 2
-             ELSE lc_predio.matricula_inmobiliaria = 'NULL'
-         END
-   UNION SELECT t_id
-   FROM $P!{datasetName}.lc_predio
-   WHERE CASE
-             WHEN 'NULL' = 'NULL' THEN 1 = 2
-             ELSE lc_predio.numero_predial = 'NULL'
-         END
-   UNION SELECT t_id
-   FROM $P!{datasetName}.lc_predio
-   WHERE CASE
-             WHEN 'NULL' = 'NULL' THEN 1 = 2
-             ELSE lc_predio.numero_predial_anterior = 'NULL'
-         END ),
-     derechos_seleccionados AS
-  (SELECT DISTINCT lc_derecho.t_id
-   FROM $P!{datasetName}.lc_derecho
-   WHERE lc_derecho.unidad IN
-       (SELECT *
-        FROM predios_seleccionados) ),
-     derecho_interesados AS
-  (SELECT DISTINCT lc_derecho.interesado_lc_interesado,
-                   lc_derecho.t_id
-   FROM $P!{datasetName}.lc_derecho
-   WHERE lc_derecho.t_id IN
-       (SELECT *
-        FROM derechos_seleccionados)
-     AND lc_derecho.interesado_lc_interesado IS NOT NULL ),
-     derecho_agrupacion_interesados AS
-  (SELECT DISTINCT lc_derecho.interesado_lc_agrupacioninteresados,
-                   col_miembros.interesado_lc_interesado
-   FROM $P!{datasetName}.lc_derecho
-   LEFT JOIN $P!{datasetName}.col_miembros ON lc_derecho.interesado_lc_agrupacioninteresados = col_miembros.agrupacion
-   WHERE lc_derecho.t_id IN
-       (SELECT *
-        FROM derechos_seleccionados)
-     AND lc_derecho.interesado_lc_agrupacioninteresados IS NOT NULL ),
-     info_terreno AS
-  (SELECT lc_terreno.area_terreno,
-          st_x(st_transform(st_centroid(lc_terreno.geometria), 4326)) AS x ,
-          st_y(st_transform(st_centroid(geometria), 4326)) AS y
-   FROM $P!{datasetName}.lc_terreno
-   WHERE lc_terreno.t_id IN
-       (SELECT *
-        FROM terrenos_seleccionados) ),
-     info_predio AS
-  (SELECT lc_predio.matricula_inmobiliaria AS fmi ,
-          lc_predio.nupre AS nupre ,
-          lc_predio.numero_predial AS numero_predial ,
-          lc_predio.nombre AS nombre ,
-          lc_predio.local_id ,
-          lc_predio.departamento ,
-          lc_predio.municipio ,
-          --lc_predio.zona ,
-          lc_predio.numero_predial_anterior ,
-          lc_predio.espacio_de_nombres || lc_predio.local_id AS codigo
-   FROM $P!{datasetName}.lc_predio
-   WHERE lc_predio.t_id IN
-       (SELECT *
-        FROM predios_seleccionados) ),
-     info_interesado AS
-  (SELECT lc_interesado.local_id AS local_id ,
-          (CASE
-               WHEN lc_interesado.t_id IS NOT NULL THEN 'interesado'
-           END) AS agrupacion_interesado ,
-          (coalesce(lc_interesado.primer_nombre, '') || coalesce(' ' || lc_interesado.segundo_nombre, '') || coalesce(' ' || lc_interesado.primer_apellido, '') || coalesce(' ' || lc_interesado.segundo_apellido, '') || coalesce(lc_interesado.razon_social, '')) AS nombre
-   FROM derecho_interesados
-   LEFT JOIN $P!{datasetName}.lc_interesado ON lc_interesado.t_id = derecho_interesados.interesado_lc_interesado
-   UNION SELECT lc_interesado.local_id AS local_id ,
-                (CASE
-                     WHEN lc_interesado.t_id IS NOT NULL THEN 'agrupacion'
-                 END) AS agrupacion_interesado ,
-                (coalesce(lc_interesado.primer_nombre, '') || coalesce(' ' || lc_interesado.segundo_nombre, '') || coalesce(' ' || lc_interesado.primer_apellido, '') || coalesce(' ' || lc_interesado.segundo_apellido, '') || coalesce(lc_interesado.razon_social, '')) AS nombre
-   FROM derecho_agrupacion_interesados
-   LEFT JOIN $P!{datasetName}.lc_interesado ON lc_interesado.t_id = derecho_agrupacion_interesados.interesado_lc_interesado
-   ORDER BY local_id
-   LIMIT 1)
-SELECT info_predio.fmi ,
-       info_predio.nupre ,
-       info_predio.numero_predial ,
-       info_predio.nombre ,
-       info_predio.local_id ,
-       info_predio.departamento ,
-       info_predio.municipio ,
-       --info_predio.zona ,
-       info_predio.numero_predial_anterior ,
-       info_terreno.area_terreno ,
-       info_terreno.x ,
-       info_terreno.y ,
-       info_predio.codigo ,
-       coalesce(info_interesado.nombre, 'no hay interesado') AS interesado_nombre ,
-       info_interesado.agrupacion_interesado AS diferenciacion
-FROM info_terreno ,
-     info_predio ,
-     info_interesado]]>
+		<![CDATA[WITH
+terrenos_seleccionados AS (
+	SELECT lc_terreno.t_id AS ue_lc_terreno FROM $P!{datasetName}.lc_terreno
+	WHERE lc_terreno.t_id = $P{id}
+),
+predios_seleccionados AS (
+	SELECT col_uebaunit.baunit AS t_id FROM $P!{datasetName}.col_uebaunit JOIN terrenos_seleccionados ON col_uebaunit.ue_lc_terreno = terrenos_seleccionados.ue_lc_terreno
+),
+derechos_seleccionados AS (
+	SELECT DISTINCT lc_derecho.t_id FROM $P!{datasetName}.lc_derecho WHERE lc_derecho.unidad IN (SELECT * FROM predios_seleccionados)
+),
+derecho_interesados AS (
+	SELECT DISTINCT lc_derecho.interesado_lc_interesado, lc_derecho.t_id, lc_derecho.unidad AS predio_t_id FROM $P!{datasetName}.lc_derecho WHERE lc_derecho.t_id IN (SELECT * FROM derechos_seleccionados) AND lc_derecho.interesado_lc_interesado IS NOT NULL 
+),
+derecho_agrupacion_interesados AS (
+	SELECT DISTINCT lc_derecho.interesado_lc_agrupacioninteresados, col_miembros.interesado_lc_interesado, col_miembros.agrupacion, lc_derecho.unidad AS predio_t_id
+	FROM $P!{datasetName}.lc_derecho LEFT JOIN $P!{datasetName}.col_miembros ON lc_derecho.interesado_lc_agrupacioninteresados = col_miembros.agrupacion
+	WHERE lc_derecho.t_id IN (SELECT * FROM derechos_seleccionados) AND lc_derecho.interesado_lc_agrupacioninteresados IS NOT NULL 
+),
+info_predio AS (
+	SELECT
+		lc_predio.numero_predial AS numero_predial
+		,lc_predio.t_id
+		,lc_predio.matricula_inmobiliaria AS fmi
+		,lc_predio.nupre AS nupre
+		,lc_predio.nombre AS nombre
+		,lc_predio.local_id
+		,lc_predio.departamento
+		,lc_predio.municipio
+		,lc_predio.numero_predial_anterior
+		,lc_predio.espacio_de_nombres || lc_predio.local_id AS codigo
+		FROM $P!{datasetName}.lc_predio WHERE lc_predio.t_id IN (SELECT * FROM predios_seleccionados)
+),
+info_agrupacion_filter AS (
+	SELECT distinct on (agrupacion) agrupacion
+	,predio_t_id
+	,(case when lc_interesado.t_id is not null then 'agrupacion' end) AS agrupacion_interesado
+	,(coalesce(lc_interesado.primer_nombre,'') || coalesce(' ' || lc_interesado.segundo_nombre, '') || coalesce(' ' || lc_interesado.primer_apellido, '') || coalesce(' ' || lc_interesado.segundo_apellido, '')
+			|| coalesce(lc_interesado.razon_social, '') ) AS nombre
+	FROM derecho_agrupacion_interesados LEFT JOIN $P!{datasetName}.lc_interesado ON lc_interesado.t_id = derecho_agrupacion_interesados.interesado_lc_interesado order by agrupacion
+),
+info_interesado AS (
+	SELECT DISTINCT
+	predio_t_id
+	,(case when lc_interesado.t_id is not null then 'interesado' end) AS agrupacion_interesado
+	,(coalesce(lc_interesado.primer_nombre,'') || coalesce(' ' || lc_interesado.segundo_nombre, '') || coalesce(' ' || lc_interesado.primer_apellido, '') || coalesce(' ' || lc_interesado.segundo_apellido, '')
+			|| coalesce(lc_interesado.razon_social, '') ) AS nombre
+	FROM derecho_interesados LEFT JOIN $P!{datasetName}.lc_interesado ON lc_interesado.t_id = derecho_interesados.interesado_lc_interesado 
+),
+info_agrupacion AS (
+		SELECT predio_t_id
+		,agrupacion_interesado
+		,nombre
+		FROM info_agrupacion_filter
+),
+info_total_interesados AS (
+	SELECT *  FROM info_interesado
+	UNION ALL
+	SELECT *  FROM info_agrupacion
+)
+SELECT info_predio.fmi
+       ,info_predio.nupre
+       ,info_predio.numero_predial
+       ,info_predio.nombre
+       ,info_predio.local_id
+       ,info_predio.departamento
+       ,info_predio.municipio
+       ,info_predio.numero_predial_anterior
+	   ,terreno.area_terreno
+	   ,st_x(st_transform(st_centroid(terreno.geometria), 4326)) AS x
+	   ,st_y(st_transform(st_centroid(terreno.geometria), 4326)) AS y
+	   ,info_predio.codigo
+       ,coalesce(info_total_interesados.nombre, 'no hay interesado') AS interesado_nombre
+       ,info_total_interesados.agrupacion_interesado AS diferenciacion
+FROM (SELECT * FROM $P!{datasetName}.lc_terreno where t_id in (select ue_lc_terreno from terrenos_seleccionados)) AS terreno
+LEFT JOIN $P!{datasetName}.col_uebaunit ON terreno.t_id = col_uebaunit.ue_lc_terreno
+LEFT JOIN info_predio ON col_uebaunit.baunit = info_predio.t_id
+LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.predio_t_id]]>
 	</queryString>
 	<field name="fmi" class="java.lang.String"/>
 	<field name="nupre" class="java.lang.String"/>
@@ -756,8 +703,9 @@ FROM info_terreno ,
 				<text><![CDATA[Falso Norte:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="47" y="544" width="113" height="7" uuid="e58f5981-461e-4f93-8ebb-2b290d0f5e40">
+				<reportElement x="47" y="544" width="93" height="7" uuid="e58f5981-461e-4f93-8ebb-2b290d0f5e40">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
 					<pen lineWidth="0.0"/>
@@ -769,7 +717,7 @@ FROM info_terreno ,
 				<text><![CDATA[MAGNA - SIRGAS]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="47" y="565" width="113" height="7" uuid="892ff815-55a1-4770-8e7c-b0cef022a4af">
+				<reportElement x="47" y="565" width="93" height="7" uuid="892ff815-55a1-4770-8e7c-b0cef022a4af">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<box>
@@ -782,7 +730,7 @@ FROM info_terreno ,
 				<text><![CDATA[2.000.000]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="47" y="551" width="113" height="7" uuid="c8e3b91c-df29-450a-9a2d-b65502b2faa9">
+				<reportElement x="47" y="551" width="93" height="7" uuid="c8e3b91c-df29-450a-9a2d-b65502b2faa9">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<box>
@@ -795,7 +743,7 @@ FROM info_terreno ,
 				<text><![CDATA[Origen Nacional]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="47" y="558" width="113" height="7" uuid="e5fc4b2a-b989-4c3b-baa8-43e0bec90b3f">
+				<reportElement x="47" y="558" width="93" height="7" uuid="e5fc4b2a-b989-4c3b-baa8-43e0bec90b3f">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<box>
@@ -808,9 +756,9 @@ FROM info_terreno ,
 				<text><![CDATA[5.000.000]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="160" y="544" width="50" height="7" uuid="0b2b0e02-7133-40da-a041-f0aa5d6cb96a">
+				<reportElement x="140" y="544" width="59" height="7" uuid="0b2b0e02-7133-40da-a041-f0aa5d6cb96a">
 					<property name="com.jaspersoft.studio.unit.x" value="pixel"/>
-					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
 					<pen lineWidth="0.0"/>
@@ -822,8 +770,9 @@ FROM info_terreno ,
 				<text><![CDATA[Meridiano Central:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="160" y="565" width="50" height="7" uuid="7aea7858-cf9c-4e67-92e1-7c77030a721e">
+				<reportElement x="140" y="565" width="59" height="7" uuid="7aea7858-cf9c-4e67-92e1-7c77030a721e">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
 					<pen lineWidth="0.0"/>
@@ -835,8 +784,9 @@ FROM info_terreno ,
 				<text><![CDATA[Factor de Escala:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="160" y="551" width="50" height="7" uuid="d97b2ba7-cd8d-4a28-8ecd-17d766917628">
+				<reportElement x="140" y="551" width="59" height="7" uuid="d97b2ba7-cd8d-4a28-8ecd-17d766917628">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
 					<pen lineWidth="0.0"/>
@@ -848,8 +798,9 @@ FROM info_terreno ,
 				<text><![CDATA[Latitud de Origen:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="160" y="558" width="50" height="7" uuid="9a64f2d9-8c5b-4803-8103-5862fdde8eda">
+				<reportElement x="140" y="558" width="59" height="7" uuid="9a64f2d9-8c5b-4803-8103-5862fdde8eda">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
 					<pen lineWidth="0.0"/>
@@ -861,7 +812,7 @@ FROM info_terreno ,
 				<text><![CDATA[Unidad Lineal:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="210" y="551" width="65" height="7" uuid="1a6b4052-533f-4345-b176-b8f0346f3d62">
+				<reportElement x="199" y="551" width="76" height="7" uuid="1a6b4052-533f-4345-b176-b8f0346f3d62">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<box>
@@ -874,7 +825,7 @@ FROM info_terreno ,
 				<text><![CDATA[4,0]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="210" y="558" width="65" height="7" uuid="c782db10-3c0f-4d01-9f1f-7a2fd6bf1d1a">
+				<reportElement x="199" y="558" width="76" height="7" uuid="c782db10-3c0f-4d01-9f1f-7a2fd6bf1d1a">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<box>
@@ -887,7 +838,7 @@ FROM info_terreno ,
 				<text><![CDATA[Metro]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="210" y="565" width="65" height="7" uuid="7f2f2855-940e-4d21-a372-f6a60d7958b1">
+				<reportElement x="199" y="565" width="76" height="7" uuid="7f2f2855-940e-4d21-a372-f6a60d7958b1">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<box>
@@ -900,7 +851,7 @@ FROM info_terreno ,
 				<text><![CDATA[0,9992]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="210" y="544" width="65" height="7" uuid="1ff8c2bf-4f30-48e2-a7dd-170662d7261f">
+				<reportElement x="199" y="544" width="76" height="7" uuid="1ff8c2bf-4f30-48e2-a7dd-170662d7261f">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<box>
@@ -943,8 +894,13 @@ FROM info_terreno ,
 				</textElement>
 				<text><![CDATA[TIPO DE PREDIO]]></text>
 			</staticText>
-			<image>
-				<reportElement x="110" y="606" width="60" height="39" uuid="1e5bca3c-d805-4168-a160-58e47f5e8eb2"/>
+			<image hAlign="Center" vAlign="Middle">
+				<reportElement x="15" y="597" width="255" height="57" uuid="1e5bca3c-d805-4168-a160-58e47f5e8eb2">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
 				<box>
 					<pen lineColor="rgba(0, 0, 0, 0.09803922)"/>
 				</box>
