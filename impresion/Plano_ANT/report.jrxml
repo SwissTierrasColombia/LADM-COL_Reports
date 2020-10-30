@@ -17,28 +17,30 @@
 	<parameter name="scalebarSubReport1" class="java.lang.String"/>
 	<queryString>
 		<![CDATA[WITH
-terrenos_seleccionados AS (
-	SELECT lc_terreno.t_id AS ue_lc_terreno FROM $P!{datasetName}.lc_terreno
+terreno_seleccionado AS (
+	SELECT lc_terreno.t_id AS id_terreno FROM $P!{datasetName}.lc_terreno
 	WHERE lc_terreno.t_id = $P{id}
 ),
-predios_seleccionados AS (
-	SELECT col_uebaunit.baunit AS t_id FROM $P!{datasetName}.col_uebaunit JOIN terrenos_seleccionados ON col_uebaunit.ue_lc_terreno = terrenos_seleccionados.ue_lc_terreno
+predio_seleccionado AS (
+	SELECT col_uebaunit.baunit AS t_id FROM $P!{datasetName}.col_uebaunit JOIN terreno_seleccionado ON col_uebaunit.ue_lc_terreno = terreno_seleccionado.id_terreno LIMIT 1
 ),
 derechos_seleccionados AS (
-	SELECT DISTINCT lc_derecho.t_id FROM $P!{datasetName}.lc_derecho WHERE lc_derecho.unidad IN (SELECT * FROM predios_seleccionados)
+	SELECT DISTINCT lc_derecho.t_id FROM $P!{datasetName}.lc_derecho WHERE lc_derecho.unidad IN (SELECT * FROM predio_seleccionado)
 ),
 derecho_interesados AS (
-	SELECT DISTINCT lc_derecho.interesado_lc_interesado, lc_derecho.t_id, lc_derecho.unidad AS predio_t_id FROM $P!{datasetName}.lc_derecho WHERE lc_derecho.t_id IN (SELECT * FROM derechos_seleccionados) AND lc_derecho.interesado_lc_interesado IS NOT NULL 
+	SELECT DISTINCT lc_derecho.interesado_lc_interesado, lc_derecho.t_id, lc_derecho.unidad AS predio_t_id FROM $P!{datasetName}.lc_derecho WHERE lc_derecho.t_id IN (SELECT * FROM derechos_seleccionados) AND lc_derecho.interesado_lc_interesado IS NOT NULL
 ),
 derecho_agrupacion_interesados AS (
 	SELECT DISTINCT lc_derecho.interesado_lc_agrupacioninteresados, col_miembros.interesado_lc_interesado, col_miembros.agrupacion, lc_derecho.unidad AS predio_t_id
 	FROM $P!{datasetName}.lc_derecho LEFT JOIN $P!{datasetName}.col_miembros ON lc_derecho.interesado_lc_agrupacioninteresados = col_miembros.agrupacion
-	WHERE lc_derecho.t_id IN (SELECT * FROM derechos_seleccionados) AND lc_derecho.interesado_lc_agrupacioninteresados IS NOT NULL 
+	WHERE lc_derecho.t_id IN (SELECT * FROM derechos_seleccionados) AND lc_derecho.interesado_lc_agrupacioninteresados IS NOT NULL
 ),
 info_predio AS (
 	SELECT
 		lc_predio.numero_predial AS numero_predial
 		,lc_predio.t_id
+	    ,lc_predio.id_operacion
+		,lc_predio.codigo_orip as orip
 		,lc_predio.matricula_inmobiliaria AS fmi
 		,lc_predio.nupre AS nupre
 		,lc_predio.nombre AS nombre
@@ -46,29 +48,32 @@ info_predio AS (
 		,lc_predio.departamento
 		,lc_predio.municipio
 		,lc_predio.numero_predial_anterior
-		,lc_predio.espacio_de_nombres || lc_predio.local_id AS codigo
-		FROM $P!{datasetName}.lc_predio WHERE lc_predio.t_id IN (SELECT * FROM predios_seleccionados)
+		FROM $P!{datasetName}.lc_predio WHERE lc_predio.t_id IN (SELECT * FROM predio_seleccionado)
 ),
 info_agrupacion_filter AS (
 	SELECT distinct on (agrupacion) agrupacion
 	,predio_t_id
 	,(case when lc_interesado.t_id is not null then 'agrupacion' end) AS agrupacion_interesado
-	,(coalesce(lc_interesado.primer_nombre,'') || coalesce(' ' || lc_interesado.segundo_nombre, '') || coalesce(' ' || lc_interesado.primer_apellido, '') || coalesce(' ' || lc_interesado.segundo_apellido, '')
-			|| coalesce(lc_interesado.razon_social, '') ) AS nombre
+	,(coalesce(lc_interesado.primer_nombre,'') || coalesce(' ' || lc_interesado.segundo_nombre, '') || coalesce(' ' || lc_interesado.primer_apellido, '') || coalesce(' ' || lc_interesado.segundo_apellido, '') || coalesce(lc_interesado.razon_social, '') ) AS nombre
+	,(select dispname from $P!{datasetName}.lc_interesadodocumentotipo where  t_id = tipo_documento) tipo_documento
+	,documento_identidad
 	FROM derecho_agrupacion_interesados LEFT JOIN $P!{datasetName}.lc_interesado ON lc_interesado.t_id = derecho_agrupacion_interesados.interesado_lc_interesado order by agrupacion
 ),
 info_interesado AS (
 	SELECT DISTINCT
 	predio_t_id
 	,(case when lc_interesado.t_id is not null then 'interesado' end) AS agrupacion_interesado
-	,(coalesce(lc_interesado.primer_nombre,'') || coalesce(' ' || lc_interesado.segundo_nombre, '') || coalesce(' ' || lc_interesado.primer_apellido, '') || coalesce(' ' || lc_interesado.segundo_apellido, '')
-			|| coalesce(lc_interesado.razon_social, '') ) AS nombre
-	FROM derecho_interesados LEFT JOIN $P!{datasetName}.lc_interesado ON lc_interesado.t_id = derecho_interesados.interesado_lc_interesado 
+	,(coalesce(lc_interesado.primer_nombre,'') || coalesce(' ' || lc_interesado.segundo_nombre, '') || coalesce(' ' || lc_interesado.primer_apellido, '') || coalesce(' ' || lc_interesado.segundo_apellido, '') || coalesce(lc_interesado.razon_social, '') ) AS nombre
+	, (select dispname from $P!{datasetName}.lc_interesadodocumentotipo where  t_id = tipo_documento) tipo_documento
+	, documento_identidad
+	FROM derecho_interesados LEFT JOIN $P!{datasetName}.lc_interesado ON lc_interesado.t_id = derecho_interesados.interesado_lc_interesado
 ),
 info_agrupacion AS (
 		SELECT predio_t_id
 		,agrupacion_interesado
 		,nombre
+	    ,tipo_documento
+	    ,documento_identidad
 		FROM info_agrupacion_filter
 ),
 info_total_interesados AS (
@@ -76,39 +81,80 @@ info_total_interesados AS (
 	UNION ALL
 	SELECT *  FROM info_agrupacion
 )
-SELECT info_predio.fmi
+SELECT case when info_predio.orip is null then info_predio.fmi else concat(COALESCE(info_predio.orip, ''), ' - ', COALESCE(info_predio.fmi, '')) end fmi
        ,info_predio.nupre
+	   ,info_predio.id_operacion
        ,info_predio.numero_predial
        ,info_predio.nombre
-       ,info_predio.local_id
        ,info_predio.departamento
        ,info_predio.municipio
-       ,info_predio.numero_predial_anterior
-	   ,terreno.area_terreno
-	   ,st_x(st_transform(st_centroid(terreno.geometria), 4326)) AS x
-	   ,st_y(st_transform(st_centroid(terreno.geometria), 4326)) AS y
-	   ,info_predio.codigo
+	   ,(
+		   select round(sum(st_area(geometria) * total_pisos)::numeric, 2)
+		   from $P!{datasetName}.lc_unidadconstruccion
+		   where lc_construccion in (select col_uebaunit.ue_lc_construccion from $P!{datasetName}.col_uebaunit where baunit = info_predio.t_id and col_uebaunit.ue_lc_construccion IS NOT NULL)
+	   ) area_construida
+	   ,(
+		   SELECT
+		   case when (SELECT dispname FROM $P!{datasetName}.extdireccion_tipo_direccion WHERE t_id = extdireccion.tipo_direccion) = 'Estructurada' then
+		   		trim(concat(COALESCE((SELECT dispname FROM $P!{datasetName}.extdireccion_clase_via_principal WHERE t_id = extdireccion.clase_via_principal) || ' ', ''),
+					 COALESCE(extdireccion.valor_via_principal || ' ', ''),
+					 COALESCE(extdireccion.letra_via_principal || ' ', ''),
+					 COALESCE((SELECT dispname FROM $P!{datasetName}.extdireccion_sector_ciudad WHERE t_id = extdireccion.sector_ciudad) || ' ', ''),
+					 COALESCE(extdireccion.valor_via_generadora || ' ', ''),
+					 COALESCE(extdireccion.letra_via_generadora || ' ', ''),
+					 COALESCE(extdireccion.numero_predio || ' ', ''),
+					 COALESCE((SELECT dispname FROM $P!{datasetName}.extdireccion_sector_predio WHERE t_id = extdireccion.sector_predio) || ' ', ''),
+					 COALESCE(extdireccion.complemento || ' ', '')))
+			else
+				extdireccion.nombre_predio
+			end
+			from $P!{datasetName}.extdireccion where extdireccion.lc_predio_direccion = info_predio.t_id
+			limit 1) direccion
+	   ,(
+		   SELECT nombre
+		   FROM $P!{datasetName}.cc_vereda
+		   WHERE st_intersects(geometria, terreno.geometria)
+		   ORDER BY st_area(st_intersection(geometria, terreno.geometria)) desc
+		   LIMIT 1) vereda
+	   ,(
+		   SELECT nombre
+		   FROM $P!{datasetName}.cc_corregimiento
+		   WHERE st_intersects(geometria, terreno.geometria)
+		   ORDER BY st_area(st_intersection(geometria, terreno.geometria)) desc
+		   LIMIT 1) corregimiento
+	   ,round(terreno.area_terreno, 2) area_terreno
+	   ,(select round(Area_Registral_M2,2) from $P!{datasetName}.lc_datosadicionaleslevantamientocatastral where lc_predio = info_predio.t_id) area_registral
+	   ,info_total_interesados.tipo_documento
+	   ,info_total_interesados.documento_identidad
        ,coalesce(info_total_interesados.nombre, 'no hay interesado') AS interesado_nombre
        ,info_total_interesados.agrupacion_interesado AS diferenciacion
-FROM (SELECT * FROM $P!{datasetName}.lc_terreno where t_id in (select ue_lc_terreno from terrenos_seleccionados)) AS terreno
+	   ,CASE WHEN ST_NumGeometries(terreno.geometria) > 1 THEN true ELSE false END AS multiparte
+	   ,ST_NumGeometries(terreno.geometria) AS num_partes
+FROM (SELECT * FROM $P!{datasetName}.lc_terreno where t_id in (select id_terreno from terreno_seleccionado)) AS terreno
 LEFT JOIN $P!{datasetName}.col_uebaunit ON terreno.t_id = col_uebaunit.ue_lc_terreno
 LEFT JOIN info_predio ON col_uebaunit.baunit = info_predio.t_id
-LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.predio_t_id]]>
+LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.predio_t_id
+LIMIT 1]]>
 	</queryString>
 	<field name="fmi" class="java.lang.String"/>
 	<field name="nupre" class="java.lang.String"/>
+	<field name="id_operacion" class="java.lang.String"/>
 	<field name="numero_predial" class="java.lang.String"/>
 	<field name="nombre" class="java.lang.String"/>
 	<field name="departamento" class="java.lang.String"/>
 	<field name="municipio" class="java.lang.String"/>
-	<field name="numero_predial_anterior" class="java.lang.String"/>
+	<field name="area_construida" class="java.lang.Double"/>
+	<field name="direccion" class="java.lang.String"/>
+	<field name="vereda" class="java.lang.String"/>
+	<field name="corregimiento" class="java.lang.String"/>
 	<field name="area_terreno" class="java.lang.Double"/>
-	<field name="x" class="java.lang.Double"/>
-	<field name="y" class="java.lang.Double"/>
-	<field name="codigo" class="java.lang.String"/>
-	<field name="local_id" class="java.lang.String"/>
+	<field name="area_registral" class="java.lang.Double"/>
+	<field name="tipo_documento" class="java.lang.String"/>
+	<field name="documento_identidad" class="java.lang.String"/>
 	<field name="interesado_nombre" class="java.lang.String"/>
 	<field name="diferenciacion" class="java.lang.String"/>
+	<field name="multiparte" class="java.lang.Boolean"/>
+	<field name="num_partes" class="java.lang.Integer"/>
 	<background>
 		<band height="800">
 			<rectangle>
@@ -120,12 +166,9 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 		<band height="73">
 			<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 			<rectangle>
-				<reportElement x="125" y="11" width="370" height="50" uuid="2425737f-57a9-4ae9-bc61-eab79c6ad084">
+				<reportElement x="125" y="11" width="424" height="50" uuid="2425737f-57a9-4ae9-bc61-eab79c6ad084">
 					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
 				</reportElement>
-			</rectangle>
-			<rectangle>
-				<reportElement x="495" y="11" width="55" height="50" uuid="376275db-2d50-481f-9002-849ba2268137"/>
 			</rectangle>
 			<rectangle>
 				<reportElement x="10" y="11" width="115" height="50" uuid="5d0afdcb-b0b9-427f-9ceb-fa5c9b4a6bd1"/>
@@ -133,6 +176,7 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 			<staticText>
 				<reportElement x="125" y="11" width="70" height="10" uuid="06080ad3-295c-47e5-b6a9-211e304ea155">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
 					<pen lineWidth="0.2"/>
@@ -144,8 +188,8 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 				<text><![CDATA[DEPARTAMENTO]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="315" y="11" width="60" height="10" uuid="d9724179-c69c-4302-b05f-0dd63854c7f8">
-					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+				<reportElement x="245" y="11" width="70" height="10" uuid="d9724179-c69c-4302-b05f-0dd63854c7f8">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
 					<pen lineWidth="0.2"/>
@@ -181,7 +225,7 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 				<text><![CDATA[COMUNA]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="375" y="31" width="60" height="10" uuid="0ecc82e2-e32e-456c-a90a-16dbfbdb84ff"/>
+				<reportElement x="365" y="31" width="70" height="10" uuid="0ecc82e2-e32e-456c-a90a-16dbfbdb84ff"/>
 				<box>
 					<pen lineWidth="0.2"/>
 				</box>
@@ -192,8 +236,8 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 				<text><![CDATA[MANZANA]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
-				<reportElement x="195" y="11" width="120" height="10" uuid="1ae94e4d-597a-40e7-8934-1bf99178c16f">
-					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+				<reportElement x="195" y="11" width="50" height="10" uuid="1ae94e4d-597a-40e7-8934-1bf99178c16f">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
 					<pen lineWidth="0.2"/>
@@ -205,7 +249,9 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 				<textFieldExpression><![CDATA[$F{departamento}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="375" y="11" width="120" height="10" uuid="aae50dcf-fb49-453f-9c8c-f6bd8e12ba3d"/>
+				<reportElement x="315" y="11" width="50" height="10" uuid="aae50dcf-fb49-453f-9c8c-f6bd8e12ba3d">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
 				<box>
 					<pen lineWidth="0.2"/>
 				</box>
@@ -216,7 +262,7 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 				<textFieldExpression><![CDATA[$F{municipio}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="195" y="21" width="55" height="10" uuid="a3c9e9fc-522a-460b-8711-f67b11c506e4"/>
+				<reportElement x="195" y="21" width="50" height="10" uuid="a3c9e9fc-522a-460b-8711-f67b11c506e4"/>
 				<box>
 					<pen lineWidth="0.2"/>
 				</box>
@@ -224,10 +270,10 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 					<font size="7"/>
 					<paragraph leftIndent="5"/>
 				</textElement>
-				<textFieldExpression><![CDATA[RIGHT(LEFT($F{numero_predial},7),2)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[LEN($F{numero_predial})>7? RIGHT(LEFT($F{numero_predial},7),2):""]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="195" y="31" width="55" height="10" uuid="8b4df3d7-652d-40da-ae5c-8dc26ade01b7"/>
+				<reportElement x="195" y="31" width="50" height="10" uuid="8b4df3d7-652d-40da-ae5c-8dc26ade01b7"/>
 				<box>
 					<pen lineWidth="0.2"/>
 				</box>
@@ -235,10 +281,10 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 					<font size="7"/>
 					<paragraph leftIndent="5"/>
 				</textElement>
-				<textFieldExpression><![CDATA[RIGHT(LEFT($F{numero_predial},11),2)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[LEN($F{numero_predial})>11?RIGHT(LEFT($F{numero_predial},11),2):""]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="435" y="31" width="60" height="10" uuid="438da534-cc55-4324-85cf-0bd8c0eba30b">
+				<reportElement x="435" y="31" width="114" height="10" uuid="438da534-cc55-4324-85cf-0bd8c0eba30b">
 					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
 				</reportElement>
 				<box>
@@ -248,10 +294,10 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 					<font size="7"/>
 					<paragraph leftIndent="5"/>
 				</textElement>
-				<textFieldExpression><![CDATA[RIGHT(LEFT($F{numero_predial},17),4)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[LEN($F{numero_predial})>17?RIGHT(LEFT($F{numero_predial},17),4):""]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="250" y="21" width="65" height="10" uuid="b54f859a-906c-4be2-99f3-42119217b424"/>
+				<reportElement x="245" y="21" width="70" height="10" uuid="b54f859a-906c-4be2-99f3-42119217b424"/>
 				<box>
 					<pen lineWidth="0.2"/>
 				</box>
@@ -262,7 +308,7 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 				<text><![CDATA[SECTOR]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="250" y="31" width="65" height="10" uuid="7e3947d6-a20e-4bb5-ae27-651934de9782">
+				<reportElement x="245" y="31" width="70" height="10" uuid="7e3947d6-a20e-4bb5-ae27-651934de9782">
 					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
 				</reportElement>
 				<box>
@@ -275,7 +321,7 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 				<text><![CDATA[BARRIO]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
-				<reportElement x="315" y="21" width="180" height="10" uuid="dc1e0f06-5724-4fac-8cf0-dd8e49c1f8bc"/>
+				<reportElement x="315" y="21" width="50" height="10" uuid="dc1e0f06-5724-4fac-8cf0-dd8e49c1f8bc"/>
 				<box>
 					<pen lineWidth="0.2"/>
 				</box>
@@ -283,10 +329,10 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 					<font size="7"/>
 					<paragraph leftIndent="5"/>
 				</textElement>
-				<textFieldExpression><![CDATA[RIGHT(LEFT($F{numero_predial},9),2)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[LEN($F{numero_predial})>9?RIGHT(LEFT($F{numero_predial},9),2):""]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="315" y="31" width="60" height="10" uuid="e7e71bf8-b1e9-48cc-bcfd-808f0272eeeb"/>
+				<reportElement x="315" y="31" width="50" height="10" uuid="e7e71bf8-b1e9-48cc-bcfd-808f0272eeeb"/>
 				<box>
 					<pen lineWidth="0.2"/>
 				</box>
@@ -294,7 +340,7 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 					<font size="7"/>
 					<paragraph leftIndent="5"/>
 				</textElement>
-				<textFieldExpression><![CDATA[RIGHT(LEFT($F{numero_predial},13),2)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[LEN($F{numero_predial})>13?RIGHT(LEFT($F{numero_predial},13),2):""]]></textFieldExpression>
 			</textField>
 			<image vAlign="Middle">
 				<reportElement x="25" y="12" width="90" height="48" uuid="91b62581-b5d0-4f02-b066-1d4b3160b8fa">
@@ -302,17 +348,8 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 				</reportElement>
 				<imageExpression><![CDATA["images/logo_ant.jpg"]]></imageExpression>
 			</image>
-			<componentElement>
-				<reportElement x="500" y="14" width="43" height="43" uuid="4fc3ba75-754a-4d31-9160-bd511dc63ac0">
-					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
-					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
-				</reportElement>
-				<jr:QRCode xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
-					<jr:codeExpression><![CDATA["http://ide.proadmintierra.info:8084/repositorio_documental/ppc.html?id=" + $F{codigo}]]></jr:codeExpression>
-				</jr:QRCode>
-			</componentElement>
 			<staticText>
-				<reportElement x="125" y="41" width="125" height="10" uuid="ca3ddde1-b9d4-448d-9c73-d25e5ad4c01e"/>
+				<reportElement x="125" y="41" width="120" height="10" uuid="ca3ddde1-b9d4-448d-9c73-d25e5ad4c01e"/>
 				<box>
 					<pen lineWidth="0.2"/>
 				</box>
@@ -323,7 +360,7 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 				<text><![CDATA[PROPIETARIO Y/O SOLICITANTE]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
-				<reportElement x="250" y="41" width="245" height="10" uuid="af8088c6-eed6-46e0-bb0d-dd761bbc7fc4"/>
+				<reportElement x="245" y="41" width="304" height="10" uuid="af8088c6-eed6-46e0-bb0d-dd761bbc7fc4"/>
 				<box>
 					<pen lineWidth="0.2"/>
 				</box>
@@ -342,10 +379,10 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 					<font size="7"/>
 					<paragraph leftIndent="5"/>
 				</textElement>
-				<text><![CDATA[CORREO]]></text>
+				<text><![CDATA[TIPO DOCUMENTO]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="315" y="51" width="60" height="10" uuid="46f8659d-aaf9-4355-afdc-8cbd1e48dbb9"/>
+				<reportElement x="315" y="51" width="54" height="10" uuid="46f8659d-aaf9-4355-afdc-8cbd1e48dbb9"/>
 				<box>
 					<pen lineWidth="0.2"/>
 				</box>
@@ -353,7 +390,7 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 					<font size="7"/>
 					<paragraph leftIndent="5"/>
 				</textElement>
-				<text><![CDATA[TELÉFONO]]></text>
+				<text><![CDATA[DOCUMENTO]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
 				<reportElement x="199" y="51" width="116" height="10" uuid="e4041f72-e21a-4100-ae80-a36a94c5295f"/>
@@ -364,10 +401,23 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 					<font size="7"/>
 					<paragraph leftIndent="5"/>
 				</textElement>
-				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{tipo_documento}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="375" y="51" width="120" height="10" uuid="54eb3be7-9b9b-4a18-a748-bf6924f1d91f"/>
+				<reportElement x="369" y="51" width="180" height="10" uuid="54eb3be7-9b9b-4a18-a748-bf6924f1d91f"/>
+				<box>
+					<pen lineWidth="0.2"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="7"/>
+					<paragraph leftIndent="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{documento_identidad}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="365" y="11" width="70" height="10" uuid="4153c6cf-8e0f-408b-85a4-d8dec37bbad8">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
 				<box>
 					<pen lineWidth="0.2"/>
 				</box>
@@ -375,7 +425,44 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 					<font size="7"/>
 					<paragraph leftIndent="5"/>
 				</textElement>
-				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+				<text><![CDATA[CORREGIMIENTO]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="435" y="11" width="114" height="10" uuid="02572a01-57a8-4d55-b8ae-1c6c441209bd">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.2"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+					<paragraph leftIndent="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{corregimiento}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="365" y="21" width="70" height="10" uuid="ec767df5-eb37-43a4-a95f-a1f39bca2446"/>
+				<box>
+					<pen lineWidth="0.2"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+					<paragraph leftIndent="5"/>
+				</textElement>
+				<text><![CDATA[VEREDA]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="435" y="21" width="114" height="10" uuid="c4881f71-deed-47e0-ae9c-60f4819ac54e">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.2"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+					<paragraph leftIndent="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{vereda}]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageHeader>
@@ -402,7 +489,7 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 				<text><![CDATA[FIRMA AUTORIZADA]]></text>
 			</staticText>
 			<rectangle>
-				<reportElement mode="Transparent" x="10" y="443" width="265" height="80" uuid="b33eadc0-022a-488e-ae7a-88e350284a9e"/>
+				<reportElement mode="Transparent" x="10" y="443" width="265" height="70" uuid="b33eadc0-022a-488e-ae7a-88e350284a9e"/>
 			</rectangle>
 			<subreport>
 				<reportElement x="10" y="26" width="540" height="399" uuid="fa145068-76a5-4834-98ed-ce65b1976b3d">
@@ -464,7 +551,7 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 					<font size="6"/>
 					<paragraph leftIndent="5"/>
 				</textElement>
-				<text><![CDATA[NÚMERO PREDIAL VIGENTE]]></text>
+				<text><![CDATA[NÚMERO PREDIAL NACIONAL]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
 				<reportElement x="115" y="443" width="160" height="10" uuid="df01966f-eedc-4019-8db5-2fe82db3dd70"/>
@@ -486,7 +573,7 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 					<font size="6"/>
 					<paragraph leftIndent="5"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{local_id}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{id_operacion}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="10" y="453" width="105" height="10" uuid="dcbe5130-bcd0-4069-962c-f856fc052d71">
@@ -499,7 +586,7 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 					<font size="6"/>
 					<paragraph leftIndent="5"/>
 				</textElement>
-				<text><![CDATA[ID PROYECTO]]></text>
+				<text><![CDATA[ID OPERACIÓN]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
 				<reportElement x="115" y="463" width="160" height="10" uuid="3f0392c0-4e72-46c5-91c6-e74ad0ce0a64"/>
@@ -523,7 +610,7 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 					<font size="6"/>
 					<paragraph leftIndent="5"/>
 				</textElement>
-				<text><![CDATA[IDENTIFICADOR ÚNICO PREDIAL]]></text>
+				<text><![CDATA[CÓDIGO HOMOLOGADO]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
 				<reportElement x="115" y="473" width="160" height="10" uuid="5a15c0dd-3fbf-46fe-a2dd-d8e5bbfd1bac"/>
@@ -558,7 +645,7 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 					<font size="6"/>
 					<paragraph leftIndent="5"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{nombre}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{direccion}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="10" y="483" width="105" height="10" uuid="13835e2a-179a-483f-a1a4-924bc78f4c00">
@@ -571,7 +658,7 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 					<font size="6"/>
 					<paragraph leftIndent="5"/>
 				</textElement>
-				<text><![CDATA[DIRECCIÓN]]></text>
+				<text><![CDATA[NOMENCLATURA]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
 				<reportElement x="115" y="493" width="160" height="10" uuid="c7312348-5550-4aac-88b8-91d571f960d9"/>
@@ -582,7 +669,8 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 					<font size="6"/>
 					<paragraph leftIndent="5"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{area_terreno} + " m2"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[(FLOOR($F{area_terreno}/10000)==0?$F{area_terreno}+" m2": FLOOR($F{area_terreno}/10000).intValue() +" ha "+ String.format("%.1f", (double) ((($F{area_terreno}/10000)-FLOOR($F{area_terreno}/10000))*10000))+" m2")
+]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="10" y="493" width="105" height="10" uuid="c6a159dc-0247-4705-a5d2-6772b06783dc">
@@ -606,7 +694,7 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 					<font size="6"/>
 					<paragraph leftIndent="5"/>
 				</textElement>
-				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{area_construida}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="10" y="503" width="105" height="10" uuid="d21799a5-de6d-4133-a1c6-02df43517693">
@@ -622,36 +710,36 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 				<text><![CDATA[ÁREA CONSTRUIDA]]></text>
 			</staticText>
 			<rectangle>
-				<reportElement mode="Transparent" x="10" y="528" width="265" height="10" uuid="7b968588-dbcf-40ce-9311-b1614d11f723"/>
+				<reportElement mode="Transparent" x="10" y="522" width="265" height="10" uuid="7b968588-dbcf-40ce-9311-b1614d11f723"/>
 			</rectangle>
 			<staticText>
-				<reportElement x="10" y="528" width="265" height="10" uuid="3b7efb13-8bcc-4683-bc38-46d92a28f103"/>
+				<reportElement x="10" y="522" width="265" height="10" uuid="3b7efb13-8bcc-4683-bc38-46d92a28f103"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="7" isBold="true"/>
 				</textElement>
 				<text><![CDATA[SISTEMA DE REFERENCIA]]></text>
 			</staticText>
 			<rectangle>
-				<reportElement mode="Transparent" x="10" y="538" width="265" height="40" uuid="e32d56e0-0ee9-47da-8dd3-cee93aa9d871"/>
+				<reportElement mode="Transparent" x="10" y="532" width="265" height="40" uuid="e32d56e0-0ee9-47da-8dd3-cee93aa9d871"/>
 			</rectangle>
 			<rectangle>
-				<reportElement mode="Transparent" x="10" y="583" width="265" height="10" uuid="9148033c-2cfc-4c45-8e56-1d4028b72801"/>
+				<reportElement mode="Transparent" x="10" y="580" width="265" height="10" uuid="9148033c-2cfc-4c45-8e56-1d4028b72801"/>
 			</rectangle>
 			<staticText>
-				<reportElement x="10" y="583" width="265" height="10" uuid="dbba5577-eca7-447f-8e74-7b6a2ccb8d73"/>
+				<reportElement x="10" y="580" width="265" height="10" uuid="dbba5577-eca7-447f-8e74-7b6a2ccb8d73"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="7" isBold="true"/>
 				</textElement>
 				<text><![CDATA[CONVENCIONES]]></text>
 			</staticText>
 			<rectangle>
-				<reportElement mode="Transparent" x="10" y="593" width="265" height="65" uuid="0927a29b-d74e-4769-81ec-87eaefa0c00c"/>
+				<reportElement mode="Transparent" x="10" y="590" width="265" height="68" uuid="0927a29b-d74e-4769-81ec-87eaefa0c00c"/>
 			</rectangle>
 			<rectangle>
 				<reportElement mode="Transparent" x="10" y="670" width="540" height="10" uuid="a8b240ef-e428-4118-b1cb-123af4415402"/>
 			</rectangle>
 			<staticText>
-				<reportElement x="10" y="544" width="37" height="7" uuid="cf6109cc-c353-464e-bd12-1ce4ba4e1b4f">
+				<reportElement x="10" y="538" width="37" height="7" uuid="cf6109cc-c353-464e-bd12-1ce4ba4e1b4f">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<box>
@@ -664,7 +752,7 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 				<text><![CDATA[Datum:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="10" y="551" width="37" height="7" uuid="63d3dc9c-be5a-4821-8c55-0e29b43b5df3">
+				<reportElement x="10" y="545" width="37" height="7" uuid="63d3dc9c-be5a-4821-8c55-0e29b43b5df3">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<box>
@@ -677,7 +765,7 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 				<text><![CDATA[Proyección:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="10" y="558" width="37" height="7" uuid="bae5bbcc-bad1-4bc7-89db-76a13865c6a3">
+				<reportElement x="10" y="552" width="37" height="7" uuid="bae5bbcc-bad1-4bc7-89db-76a13865c6a3">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<box>
@@ -690,7 +778,7 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 				<text><![CDATA[Falso Este:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="10" y="565" width="37" height="7" uuid="0c1f4fa4-2103-4386-8153-889b377783c8">
+				<reportElement x="10" y="559" width="37" height="7" uuid="0c1f4fa4-2103-4386-8153-889b377783c8">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<box>
@@ -703,7 +791,7 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 				<text><![CDATA[Falso Norte:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="47" y="544" width="93" height="7" uuid="e58f5981-461e-4f93-8ebb-2b290d0f5e40">
+				<reportElement x="47" y="538" width="93" height="7" uuid="e58f5981-461e-4f93-8ebb-2b290d0f5e40">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -717,7 +805,7 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 				<text><![CDATA[MAGNA - SIRGAS]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="47" y="565" width="93" height="7" uuid="892ff815-55a1-4770-8e7c-b0cef022a4af">
+				<reportElement x="47" y="559" width="93" height="7" uuid="892ff815-55a1-4770-8e7c-b0cef022a4af">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<box>
@@ -730,7 +818,7 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 				<text><![CDATA[2.000.000]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="47" y="551" width="93" height="7" uuid="c8e3b91c-df29-450a-9a2d-b65502b2faa9">
+				<reportElement x="47" y="545" width="93" height="7" uuid="c8e3b91c-df29-450a-9a2d-b65502b2faa9">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<box>
@@ -743,7 +831,7 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 				<text><![CDATA[Origen Nacional]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="47" y="558" width="93" height="7" uuid="e5fc4b2a-b989-4c3b-baa8-43e0bec90b3f">
+				<reportElement x="47" y="552" width="93" height="7" uuid="e5fc4b2a-b989-4c3b-baa8-43e0bec90b3f">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<box>
@@ -756,7 +844,7 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 				<text><![CDATA[5.000.000]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="140" y="544" width="59" height="7" uuid="0b2b0e02-7133-40da-a041-f0aa5d6cb96a">
+				<reportElement x="140" y="538" width="59" height="7" uuid="0b2b0e02-7133-40da-a041-f0aa5d6cb96a">
 					<property name="com.jaspersoft.studio.unit.x" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -770,7 +858,7 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 				<text><![CDATA[Meridiano Central:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="140" y="565" width="59" height="7" uuid="7aea7858-cf9c-4e67-92e1-7c77030a721e">
+				<reportElement x="140" y="559" width="59" height="7" uuid="7aea7858-cf9c-4e67-92e1-7c77030a721e">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -784,7 +872,7 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 				<text><![CDATA[Factor de Escala:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="140" y="551" width="59" height="7" uuid="d97b2ba7-cd8d-4a28-8ecd-17d766917628">
+				<reportElement x="140" y="545" width="59" height="7" uuid="d97b2ba7-cd8d-4a28-8ecd-17d766917628">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -798,7 +886,7 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 				<text><![CDATA[Latitud de Origen:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="140" y="558" width="59" height="7" uuid="9a64f2d9-8c5b-4803-8103-5862fdde8eda">
+				<reportElement x="140" y="552" width="59" height="7" uuid="9a64f2d9-8c5b-4803-8103-5862fdde8eda">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -812,7 +900,7 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 				<text><![CDATA[Unidad Lineal:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="199" y="551" width="76" height="7" uuid="1a6b4052-533f-4345-b176-b8f0346f3d62">
+				<reportElement x="199" y="545" width="76" height="7" uuid="1a6b4052-533f-4345-b176-b8f0346f3d62">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<box>
@@ -825,7 +913,7 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 				<text><![CDATA[4,0]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="199" y="558" width="76" height="7" uuid="c782db10-3c0f-4d01-9f1f-7a2fd6bf1d1a">
+				<reportElement x="199" y="552" width="76" height="7" uuid="c782db10-3c0f-4d01-9f1f-7a2fd6bf1d1a">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<box>
@@ -838,7 +926,7 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 				<text><![CDATA[Metro]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="199" y="565" width="76" height="7" uuid="7f2f2855-940e-4d21-a372-f6a60d7958b1">
+				<reportElement x="199" y="559" width="76" height="7" uuid="7f2f2855-940e-4d21-a372-f6a60d7958b1">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<box>
@@ -851,7 +939,7 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 				<text><![CDATA[0,9992]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="199" y="544" width="76" height="7" uuid="1ff8c2bf-4f30-48e2-a7dd-170662d7261f">
+				<reportElement x="199" y="538" width="76" height="7" uuid="1ff8c2bf-4f30-48e2-a7dd-170662d7261f">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<box>
@@ -870,32 +958,8 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 				</textElement>
 				<text><![CDATA[PLANO PREDIAL]]></text>
 			</staticText>
-			<textField isBlankWhenNull="true">
-				<reportElement x="115" y="513" width="160" height="10" uuid="c7bbcc2a-5a44-40d2-924d-19dcc13e30a9"/>
-				<box>
-					<pen lineWidth="0.2"/>
-				</box>
-				<textElement verticalAlignment="Middle">
-					<font size="6"/>
-					<paragraph leftIndent="5"/>
-				</textElement>
-				<textFieldExpression><![CDATA[""]]></textFieldExpression>
-			</textField>
-			<staticText>
-				<reportElement x="10" y="513" width="105" height="10" uuid="ad80dc7e-2f74-42e5-8e05-2d03e567d4c2">
-					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
-				</reportElement>
-				<box>
-					<pen lineWidth="0.2"/>
-				</box>
-				<textElement verticalAlignment="Middle">
-					<font size="6"/>
-					<paragraph leftIndent="5"/>
-				</textElement>
-				<text><![CDATA[TIPO DE PREDIO]]></text>
-			</staticText>
 			<image hAlign="Center" vAlign="Middle">
-				<reportElement x="15" y="597" width="255" height="57" uuid="1e5bca3c-d805-4168-a160-58e47f5e8eb2">
+				<reportElement x="15" y="594" width="255" height="57" uuid="1e5bca3c-d805-4168-a160-58e47f5e8eb2">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
@@ -925,7 +989,7 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 				<subreportExpression><![CDATA[$P{scalebarSubReport1}]]></subreportExpression>
 			</subreport>
 		</band>
-		<band height="47">
+		<band height="50">
 			<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 			<staticText>
 				<reportElement x="0" y="2" width="560" height="19" forecolor="#000000" uuid="96502e3c-db78-4f77-83be-d271a631da0f"/>
@@ -935,11 +999,11 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 				<text><![CDATA[CUADRO DE COLINDANCIAS]]></text>
 			</staticText>
 			<subreport>
-				<reportElement x="14" y="27" width="536" height="20" uuid="314fd602-70a2-492d-b63c-b48bc0f97f70">
+				<reportElement x="14" y="30" width="536" height="20" uuid="314fd602-70a2-492d-b63c-b48bc0f97f70">
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 				</reportElement>
 				<subreportParameter name="srp_id">
 					<subreportParameterExpression><![CDATA[$P{id}]]></subreportParameterExpression>
@@ -954,7 +1018,7 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 				<subreportExpression><![CDATA["sub_report_neighbors_parts.jasper"]]></subreportExpression>
 			</subreport>
 		</band>
-		<band height="50">
+		<band height="80">
 			<staticText>
 				<reportElement x="0" y="0" width="560" height="19" forecolor="#000000" uuid="6ab642e3-12c1-4bbc-a44a-f51ec9c04477"/>
 				<textElement textAlignment="Center">
@@ -963,11 +1027,11 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 				<text><![CDATA[DESCRIPCIÓN TÉCNICA DE LINDEROS]]></text>
 			</staticText>
 			<subreport>
-				<reportElement x="14" y="30" width="536" height="20" uuid="3871b19b-dbbb-441b-a670-c4fb0ff110b5">
+				<reportElement x="14" y="60" width="536" height="20" uuid="3871b19b-dbbb-441b-a670-c4fb0ff110b5">
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
-					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 				</reportElement>
 				<subreportParameter name="srp_id">
 					<subreportParameterExpression><![CDATA[$P{id}]]></subreportParameterExpression>
@@ -981,6 +1045,16 @@ LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.pr
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["sub_report_technical_boundaries_parts.jasper"]]></subreportExpression>
 			</subreport>
+			<textField textAdjust="StretchHeight">
+				<reportElement x="14" y="27" width="536" height="20" uuid="32deeec7-f412-48db-bd51-89c4181d368e">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Justified"/>
+				<textFieldExpression><![CDATA["El inmueble "+($F{direccion} != null? "denominado "+$F{direccion} +", " : "sin dirección asociada, ") +" identificado "+($F{numero_predial} != null?"con número predial "+$F{numero_predial}:"sin número predial, ")+($F{fmi} != null? " cuyo folio de matrícula "+$F{fmi}: "sin folio de matrícula")+($F{area_registral} !=null? " con área registra de "+(FLOOR($F{area_registral}/10000)==0?$F{area_registral}+" m2": FLOOR($F{area_registral}/10000).intValue() +" ha "+ String.format("%.1f", (double) ((($F{area_registral}/10000)-FLOOR($F{area_registral}/10000))*10000))+" m2"):" sin área registral")+", y que una vez validada y actualizada su cabida por el método indirecto, "+($F{num_partes} == 1? "genera un globo de terreno con área de": "genera ("+$F{num_partes}+")  globos de terreno con área total de ")+(FLOOR($F{area_terreno}/10000)==0?$F{area_terreno}+" m2": FLOOR($F{area_terreno}/10000).intValue() +" ha "+ String.format("%.1f", (double) ((($F{area_terreno}/10000)-FLOOR($F{area_terreno}/10000))*10000))+" m2")+" , presenta los siguientes linderos, referidos al sistema de referencia oficial Magna Sirgas Origen Nacional:"]]></textFieldExpression>
+			</textField>
 		</band>
 		<band height="50">
 			<staticText>

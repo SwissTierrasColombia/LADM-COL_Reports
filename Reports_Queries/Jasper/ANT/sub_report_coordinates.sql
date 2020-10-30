@@ -166,7 +166,7 @@ puntos_terreno_ordenados AS (
 ),
 puntos_lindero_ordenados AS (
     SELECT * FROM (
-        SELECT DISTINCT ON (t_id) t_id, id, st_distance(puntos_lindero.geom, puntos_terreno_ordenados.geom) AS distance, puntos_lindero.geom, round(st_x(puntos_lindero.geom)::numeric,3) x, round(st_y(puntos_lindero.geom)::numeric, 3) y, parte, punto_inicial, punto_final
+        SELECT DISTINCT ON (t_id) t_id, id, st_distance(puntos_lindero.geom, puntos_terreno_ordenados.geom) AS distance, puntos_lindero.geom, round(st_x(puntos_lindero.geom)::numeric,2) x, round(st_y(puntos_lindero.geom)::numeric, 3) y, parte, punto_inicial, punto_final
         FROM puntos_lindero, puntos_terreno_ordenados ORDER BY t_id, distance
         LIMIT (SELECT count(t_id) FROM puntos_lindero)
     ) tmp_puntos_lindero_ordenados ORDER BY id

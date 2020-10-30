@@ -34,16 +34,13 @@ templates:
       northArrowDef: !northArrow
         size: 40
         default:
-          graphic: "file://images/NorthArrow.svg"
+          graphic: "file://images/NorthArrow.png"
       overviewMap: !overviewMap
         width: 265
         height: 215
         maxDpi: 400
         style: "file:///styles/bbox.sld"
-        zoomSnapTolerance: 0.025
-        zoomLevelSnapStrategy: CLOSEST_LOWER_SCALE_ON_TIE
-        zoomLevels: !zoomLevels
-          scales: [ 100, 200, 300, 500, 1000, 2000, 2500, 3000, 5000, 7500, 10000, 15000, 20000, 25000, 50000, 100000, 500000, 1000000 ]
+        zoomFactor: 18
       overlayLayers: !staticLayers
         default:
           layers:

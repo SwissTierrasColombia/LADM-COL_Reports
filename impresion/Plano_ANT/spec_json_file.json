@@ -16,18 +16,6 @@
         },
         {
           "geoJson": {"type": "FeatureCollection", "features": []},
-          "name": "terreno",
-          "style": "file:///styles/terreno.sld",
-          "type": "geojson"
-        },
-        {
-          "geoJson": {"type": "FeatureCollection", "features": []},
-          "name": "terrenos",
-          "style": "file:///styles/terrenos.sld",
-          "type": "geojson"
-        },
-        {
-          "geoJson": {"type": "FeatureCollection", "features": []},
           "name": "construcciones",
           "style": "file:///styles/construccion.sld",
           "type": "geojson"
@@ -48,6 +36,18 @@
           "geoJson": {"type": "FeatureCollection", "features": []},
           "name": "limite_municipio",
           "style": "file:///styles/limite_municipio.sld",
+          "type": "geojson"
+        },
+        {
+          "geoJson": {"type": "FeatureCollection", "features": []},
+          "name": "terreno",
+          "style": "file:///styles/terreno.sld",
+          "type": "geojson"
+        },
+        {
+          "geoJson": {"type": "FeatureCollection", "features": []},
+          "name": "terrenos",
+          "style": "file:///styles/terrenos.sld",
           "type": "geojson"
         }
       ],

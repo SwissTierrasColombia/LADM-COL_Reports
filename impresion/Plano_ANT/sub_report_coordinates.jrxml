@@ -189,17 +189,17 @@ puntos_terreno_ordenados AS (
 ),
 puntos_lindero_ordenados AS (
     SELECT * FROM (
-        SELECT DISTINCT ON (t_id) t_id, id, st_distance(puntos_lindero.geom, puntos_terreno_ordenados.geom) AS distance, puntos_lindero.geom, round(st_x(puntos_lindero.geom)::numeric,3) x, round(st_y(puntos_lindero.geom)::numeric, 3) y, parte, punto_inicial, punto_final
+        SELECT DISTINCT ON (t_id) t_id, id, st_distance(puntos_lindero.geom, puntos_terreno_ordenados.geom) AS distance, puntos_lindero.geom, round(st_x(puntos_lindero.geom)::numeric, 2) x, round(st_y(puntos_lindero.geom)::numeric, 2) y, parte, punto_inicial, punto_final
         FROM puntos_lindero, puntos_terreno_ordenados ORDER BY t_id, distance
         LIMIT (SELECT count(t_id) FROM puntos_lindero)
     ) tmp_puntos_lindero_ordenados ORDER BY id
 )
 SELECT "from", "to", x,y, dist FROM
 (
-	SELECT c1.parte, c1.id AS "from", CASE WHEN c1.id + 1 <= c1.punto_final THEN c1.id + 1 ELSE c1.punto_final - c1.id + c1.punto_inicial  END AS "to", c1.x, c1.y, round(st_distance(c1.geom, c2.geom)::numeric, 3) AS dist, c1.geom
+	SELECT c1.parte, c1.id AS "from", CASE WHEN c1.id + 1 <= c1.punto_final THEN c1.id + 1 ELSE c1.punto_final - c1.id + c1.punto_inicial  END AS "to", c1.x, c1.y, round(st_distance(c1.geom, c2.geom)::numeric, 2) AS dist, c1.geom
 	FROM puntos_lindero_ordenados c1 JOIN puntos_lindero_ordenados c2 ON c1.id + 1 = c2.id AND c1.id < c1.punto_final
 	UNION
-	SELECT c1.parte, c1.id AS "from", CASE WHEN c1.id + 1 <= c1.punto_final THEN c1.id + 1 ELSE c1.punto_final - c1.id + c1.punto_inicial  END AS "to", c1.x, c1.y, round(st_distance(c1.geom, c2.geom)::numeric, 3) AS dist, c1.geom
+	SELECT c1.parte, c1.id AS "from", CASE WHEN c1.id + 1 <= c1.punto_final THEN c1.id + 1 ELSE c1.punto_final - c1.id + c1.punto_inicial  END AS "to", c1.x, c1.y, round(st_distance(c1.geom, c2.geom)::numeric, 2) AS dist, c1.geom
 	FROM puntos_lindero_ordenados c1 JOIN puntos_lindero_ordenados c2 ON c1.id - c1.punto_final = 0 AND c2.id = c1.punto_inicial
 ) puntos_resultado WHERE parte = $P{parte} ORDER BY "from"]]>
 	</queryString>

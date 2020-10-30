@@ -51,6 +51,7 @@ templates:
               unitFormat: " %s"
               formatGroupingSeparator: "."
               valueFormat: "###,###"
+              renderAsSvg: true
               rotateLabels: false
               numberOfLines: [3, 3]
               labelColor: "#000000"

@@ -15,6 +15,6 @@ SELECT array_to_json(array_agg(features)) AS features
                             LEFT JOIN ladm_lev_cat_v1.lc_predio ON lc_predio.t_id = baunit --parametrizar schema, tabla y atributo
                             -- The selection of the filter depends on: If you want a selected plot or all associated plots
 							WHERE l.t_id = 1432 --parametrizar WHERE
-							--WHERE l.geometria && (SELECT ST_Expand(ST_Envelope(lc_terreno.geometria), 200) FROM ladm_lev_cat_v1.lc_terreno WHERE t_id = 1432) AND l.t_id != 1432
+							--WHERE l.geometria && (SELECT ST_Expand(ST_Envelope(lc_terreno.geometria), 1000) FROM ladm_lev_cat_v1.lc_terreno WHERE t_id = 1432) AND l.t_id != 1432
                             ) AS f
                         ) AS ff;

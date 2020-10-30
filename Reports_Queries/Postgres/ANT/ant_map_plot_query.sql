@@ -3,7 +3,7 @@ terrenos_seleccionados AS (
     -- The selection of the filter depends on: If you want a selected plot or all associated plots
 	SELECT lc_terreno.t_id AS ue_lc_terreno FROM ladm_lev_cat_v1.lc_terreno
 	 WHERE lc_terreno.t_id = 1432
-	 --WHERE lc_terreno.geometria && (SELECT ST_Expand(ST_Envelope(lc_terreno.geometria), 200) FROM ladm_lev_cat_v1.lc_terreno WHERE t_id = 1432) AND lc_terreno.t_id != 1432
+	 --WHERE lc_terreno.geometria && (SELECT ST_Expand(ST_Envelope(lc_terreno.geometria), 1000) FROM ladm_lev_cat_v1.lc_terreno WHERE t_id = 1432) AND lc_terreno.t_id != 1432
 ),
 predios_seleccionados AS (
     SELECT col_uebaunit.baunit AS t_id FROM ladm_lev_cat_v1.col_uebaunit JOIN terrenos_seleccionados ON col_uebaunit.ue_lc_terreno = terrenos_seleccionados.ue_lc_terreno
