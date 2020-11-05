@@ -1,3 +1,9 @@
+pdfConfig: !pdfConfig
+  compressed: false
+  author: "ANT - Swisstierras Colombia"
+  subject: "ANT - Swisstierras Colombia"
+  creator: "ANT - Swisstierras Colombia"
+
 throwErrorOnExtraParameters: true
 transparentTileErrorColor: "rgba(78, 78, 255, 125)"
 opaqueTileErrorColor: "rgba(255, 155, 155, 0)"
@@ -5,6 +11,8 @@ jdbcDrivers:
     - org.postgresql.Driver
 templates:
   A4 portrait: !template
+    pdfConfig: !pdfConfig
+      title: "Plano predial ANT"
     reportTemplate: report.jrxml
     jdbcUser: "{DB_USER}"
     jdbcPassword: "{DB_PASSWORD}"

@@ -75,11 +75,11 @@
                         </sld:Font>
                         <sld:LabelPlacement>
                             <sld:LinePlacement>
-                                <sld:PerpendicularOffset>6.0</sld:PerpendicularOffset>
+                                <sld:PerpendicularOffset>-5.0</sld:PerpendicularOffset>
                             </sld:LinePlacement>
                         </sld:LabelPlacement>
                         <sld:Halo>
-                            <sld:Radius>0.4</sld:Radius>
+                            <sld:Radius>0.8</sld:Radius>
                             <sld:Fill>
                                 <sld:CssParameter name="fill">#FFFFFF</sld:CssParameter>
                             </sld:Fill>

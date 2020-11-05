@@ -682,7 +682,7 @@ LIMIT 1]]>
 					<font size="6"/>
 					<paragraph leftIndent="5"/>
 				</textElement>
-				<text><![CDATA[NOMENCLATURA]]></text>
+				<text><![CDATA[DIRECCIÓN]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
 				<reportElement x="115" y="493" width="160" height="10" uuid="c7312348-5550-4aac-88b8-91d571f960d9"/>
