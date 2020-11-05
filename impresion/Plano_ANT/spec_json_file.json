@@ -11,7 +11,13 @@
         {
           "geoJson": {"type": "FeatureCollection", "features": []},
           "name": "punto_lindero",
-          "style": "file:///styles/punto_lindero.sld",
+          "style": "file:///styles/ai_punto_lindero.sld",
+          "type": "geojson"
+        },
+        {
+          "geoJson": {"type": "FeatureCollection", "features": []},
+          "name": "linderos",
+          "style": "file:///styles/linderos.sld",
           "type": "geojson"
         },
         {

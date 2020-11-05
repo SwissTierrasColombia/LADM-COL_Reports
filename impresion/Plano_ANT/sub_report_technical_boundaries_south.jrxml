@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.12.2.final using JasperReports Library version 6.12.2-75c5e90a222ab406e416cbf590a5397028a52de3  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="sub_report_boundaries" pageWidth="595" pageHeight="842" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="20" uuid="8044c259-bf6b-4072-8923-78bca3eb0308">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="sub_report_boundaries" pageWidth="595" pageHeight="842" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="2" uuid="8044c259-bf6b-4072-8923-78bca3eb0308">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="New Data Adapter "/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="779"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="212"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="220"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="774"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
@@ -12,10 +16,6 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="779"/>
-	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="212"/>
-	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="220"/>
-	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="774"/>
 	<parameter name="id" class="java.lang.Integer">
 		<defaultValueExpression><![CDATA[66040]]></defaultValueExpression>
 	</parameter>
@@ -238,7 +238,7 @@ nodos_lindero_ubicacion AS (
 	ORDER BY code, st_distance(nl.geom, plo.geom)
 ),
 secuencia_nodos AS (
-	SELECT t_id, array_to_string(array_agg(nlu.id || ': N=' || round(y::numeric,2) || ', E=' || round(x::numeric,2) ), '; ') AS nodos
+	SELECT t_id, array_to_string(array_agg(nlu.id || ': N=' || round(y::numeric,2) || 'm' || ', E=' || round(x::numeric,2) || 'm'), '; ') AS nodos
 	FROM nodos_lindero_ubicacion AS nlu
 	GROUP BY t_id
 ),
@@ -342,7 +342,7 @@ SELECT
 	, (SELECT y FROM puntos_lindero_ordenados WHERE id = hasta LIMIT 1) AS yf
 	, COALESCE(info_total_interesados.nombre, 'INDETERMINADO') AS interesado
 	, COALESCE(info_total_interesados.agrupacion_interesado, 'INDETERMINADO') AS tipo_interesado
-	, round(st_length(colindantes.geom)::numeric,2) distancia
+	, round(st_length(colindantes.geom)::numeric,1) distancia
 	, (SELECT nodos FROM secuencia_nodos WHERE t_id = colindantes.t_id_linderos LIMIT 1) AS nodos
 	, round(degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2)))::numeric, 2) AS degrees
 	,CASE WHEN degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2))) BETWEEN 360-(SELECT tolerancia_sentidos FROM parametros) AND 360 or degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2))) BETWEEN 0 AND (SELECT tolerancia_sentidos FROM parametros) THEN 'norte'
@@ -394,7 +394,7 @@ ORDER BY id]]>
 					<font size="9"/>
 					<paragraph lineSpacing="Single" lineSpacingSize="2.0" firstLineIndent="20" leftIndent="5" rightIndent="5"/>
 				</textElement>
-				<textFieldExpression><![CDATA["<b>LINDERO " + $F{id}+ ":</b> Partiendo del punto " + $F{desde} + " con coordenadas N=" + $F{yi} + " metros (m.), E=" + $F{xi} + " metros (m.)" + ($F{nodos} != null ? " en línea quebrada" :" en línea recta") + " y en sentido " + $F{sentido} +  ($F{nodos} != null ? " pasando por los puntos y coordenadas " + $F{nodos} + ", con una distancia acumulada de " :" en distancia de ") + $F{distancia} + " metros (m.) hasta el punto " + $F{hasta} + " con coordenadas N=" + $F{yf} + " metros (m.), E="  + $F{xf} + " metros (m.)" +($V{REPORT_COUNT}.equals($F{total_linderos}.intValue()) ? ", con el cual cierra el polígono," : ",")  + " colindando con "  + ($F{tipo_interesado}.equals("agrupacion")? "la agrupación conformada por "+ $F{interesado} +" y otros": $F{interesado})  +"."]]></textFieldExpression>
+				<textFieldExpression><![CDATA["<b>LINDERO " + $F{id}+ ":</b> Inicia en el punto " + $F{desde} + " con coordenadas N=" + $F{yi} + "m, E=" + $F{xi} + "m" + ($F{nodos} != null ? " en línea quebrada" :" en línea recta") + " y en sentido " + $F{sentido} +  ($F{nodos} != null ? " pasando por los puntos y coordenadas " + $F{nodos} + ", con una distancia acumulada de " :" en distancia de ") + $F{distancia} + "m hasta el punto " + $F{hasta} + " con coordenadas N=" + $F{yf} + "m, E="  + $F{xf} + "m " +($V{REPORT_COUNT}.equals($F{total_linderos}.intValue()) ? ", con el cual cierra el polígono," : ",")  + " colindando con "  + ($F{tipo_interesado}.equals("agrupacion")? "la agrupación conformada por "+ $F{interesado} +" y otros": $F{interesado})  +"."]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>

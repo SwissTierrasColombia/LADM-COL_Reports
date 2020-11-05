@@ -371,7 +371,7 @@ LIMIT 1]]>
 				<textFieldExpression><![CDATA[($F{diferenciacion}.equals("interesado")? $F{interesado_nombre} : "AGRUPACIÓN DE " + $F{interesado_nombre} + " Y OTROS")]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="125" y="51" width="74" height="10" uuid="c24cc91a-7bf2-4e52-bdf6-ceded62114ec"/>
+				<reportElement x="125" y="51" width="95" height="10" uuid="c24cc91a-7bf2-4e52-bdf6-ceded62114ec"/>
 				<box>
 					<pen lineWidth="0.2"/>
 				</box>
@@ -379,7 +379,7 @@ LIMIT 1]]>
 					<font size="7"/>
 					<paragraph leftIndent="5"/>
 				</textElement>
-				<text><![CDATA[TIPO DOCUMENTO]]></text>
+				<text><![CDATA[TIPO DE DOCUMENTO]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="315" y="51" width="54" height="10" uuid="46f8659d-aaf9-4355-afdc-8cbd1e48dbb9"/>
@@ -393,7 +393,9 @@ LIMIT 1]]>
 				<text><![CDATA[DOCUMENTO]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
-				<reportElement x="199" y="51" width="116" height="10" uuid="e4041f72-e21a-4100-ae80-a36a94c5295f"/>
+				<reportElement x="220" y="51" width="95" height="10" uuid="e4041f72-e21a-4100-ae80-a36a94c5295f">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
 				<box>
 					<pen lineWidth="0.2"/>
 				</box>
@@ -404,7 +406,7 @@ LIMIT 1]]>
 				<textFieldExpression><![CDATA[$F{tipo_documento}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="369" y="51" width="180" height="10" uuid="54eb3be7-9b9b-4a18-a748-bf6924f1d91f"/>
+				<reportElement x="369" y="51" width="66" height="10" uuid="54eb3be7-9b9b-4a18-a748-bf6924f1d91f"/>
 				<box>
 					<pen lineWidth="0.2"/>
 				</box>
@@ -464,25 +466,43 @@ LIMIT 1]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{vereda}]]></textFieldExpression>
 			</textField>
+			<staticText>
+				<reportElement x="435" y="51" width="55" height="10" uuid="3d503e08-e468-4e66-a9ea-a384bb3415ff"/>
+				<box>
+					<pen lineWidth="0.2"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+					<paragraph leftIndent="5"/>
+				</textElement>
+				<text><![CDATA[FISO]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="490" y="51" width="59" height="10" uuid="2cac4f7f-a111-4cb9-b93c-ba8fa168a253">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.2"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+					<paragraph leftIndent="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+			</textField>
 		</band>
 	</pageHeader>
 	<detail>
-		<band height="715">
+		<band height="718">
 			<rectangle>
-				<reportElement mode="Transparent" x="10" y="680" width="540" height="29" uuid="21e55b7c-158b-4cfc-aea6-5e1f8a8166c8"/>
+				<reportElement mode="Transparent" x="10" y="680" width="135" height="29" uuid="21e55b7c-158b-4cfc-aea6-5e1f8a8166c8">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
 			</rectangle>
 			<staticText>
-				<reportElement x="10" y="680" width="540" height="29" uuid="d9797641-71de-4a23-b4d1-abfac801ba60">
-					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				<reportElement x="10" y="670" width="270" height="10" uuid="10b8610f-b594-45db-8af1-57ccd167eee2">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
-				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font size="5"/>
-					<paragraph leftIndent="5"/>
-				</textElement>
-				<text><![CDATA[Plano generado a partir de la información validada por el IGAC en el marco del proyecto de catastro multipropósito]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="10" y="670" width="540" height="10" uuid="10b8610f-b594-45db-8af1-57ccd167eee2"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="7" isBold="true"/>
 				</textElement>
@@ -669,8 +689,7 @@ LIMIT 1]]>
 					<font size="6"/>
 					<paragraph leftIndent="5"/>
 				</textElement>
-				<textFieldExpression><![CDATA[(FLOOR($F{area_terreno}/10000)==0?$F{area_terreno}+" m2": FLOOR($F{area_terreno}/10000).intValue() +" ha "+ String.format("%.1f", (double) ((($F{area_terreno}/10000)-FLOOR($F{area_terreno}/10000))*10000))+" m2")
-]]></textFieldExpression>
+				<textFieldExpression><![CDATA[(FLOOR($F{area_terreno}/10000)==0?$F{area_terreno}+" m2": FLOOR($F{area_terreno}/10000).intValue() +" ha "+ String.format("%.1f", (double) ((($F{area_terreno}/10000)-FLOOR($F{area_terreno}/10000))*10000))+" m2")]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="10" y="493" width="105" height="10" uuid="c6a159dc-0247-4705-a5d2-6772b06783dc">
@@ -694,7 +713,7 @@ LIMIT 1]]>
 					<font size="6"/>
 					<paragraph leftIndent="5"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{area_construida}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{area_construida}+" m2"]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="10" y="503" width="105" height="10" uuid="d21799a5-de6d-4133-a1c6-02df43517693">
@@ -736,7 +755,9 @@ LIMIT 1]]>
 				<reportElement mode="Transparent" x="10" y="590" width="265" height="68" uuid="0927a29b-d74e-4769-81ec-87eaefa0c00c"/>
 			</rectangle>
 			<rectangle>
-				<reportElement mode="Transparent" x="10" y="670" width="540" height="10" uuid="a8b240ef-e428-4118-b1cb-123af4415402"/>
+				<reportElement mode="Transparent" x="10" y="670" width="270" height="10" uuid="a8b240ef-e428-4118-b1cb-123af4415402">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
 			</rectangle>
 			<staticText>
 				<reportElement x="10" y="538" width="37" height="7" uuid="cf6109cc-c353-464e-bd12-1ce4ba4e1b4f">
@@ -988,8 +1009,72 @@ LIMIT 1]]>
 				</reportElement>
 				<subreportExpression><![CDATA[$P{scalebarSubReport1}]]></subreportExpression>
 			</subreport>
+			<rectangle>
+				<reportElement mode="Transparent" x="280" y="670" width="270" height="10" uuid="837c9ef6-f93b-4e79-a142-ab648d117f86">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+			</rectangle>
+			<rectangle>
+				<reportElement mode="Transparent" x="280" y="680" width="270" height="29" uuid="15620cd0-b3a2-4657-b981-aa9b0e17491a">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+			</rectangle>
+			<staticText>
+				<reportElement x="280" y="670" width="270" height="10" uuid="10c15425-e54e-4dc1-832a-4367d6ca9965">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[OBSERVACIONES]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="280" y="680" width="270" height="29" uuid="a5a387cc-1249-41af-a3ba-ae1031a98a5b">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="5"/>
+					<paragraph leftIndent="5"/>
+				</textElement>
+				<text><![CDATA[Plano elaborado por el equipo técnico de SSJ de la ANT, con base en la información recolectada en el barrido predial masivo y el resultado de las verificaciones realizadas en campo.]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement mode="Transparent" x="145" y="680" width="135" height="29" uuid="9a7ccedf-5372-4328-8f27-26a19ae69b35">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+			</rectangle>
+			<textField>
+				<reportElement x="10" y="680" width="135" height="29" uuid="63ac4661-ce5e-413c-a894-2a38513f392d">
+					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle" markup="html">
+					<font size="5"/>
+					<paragraph leftIndent="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA["<b>Elaboró</b>: <br><br><br><b>Matrícula</b>:"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="145" y="680" width="135" height="29" uuid="33dd2310-2c0c-4438-85f8-f4b022d61e81">
+					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle" markup="html">
+					<font size="5"/>
+					<paragraph leftIndent="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA["<b>Revisó</b>: <br><br><br><b>Matrícula</b>:"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="450" y="712" width="100" height="6" uuid="2914e8ac-a28d-458e-8f0a-4c682f91504b">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font size="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Generado: "+ new SimpleDateFormat("dd/MM/YYYY HH:mm").format(new Date())]]></textFieldExpression>
+			</textField>
 		</band>
-		<band height="50">
+		<band height="53">
 			<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 			<staticText>
 				<reportElement x="0" y="2" width="560" height="19" forecolor="#000000" uuid="96502e3c-db78-4f77-83be-d271a631da0f"/>
@@ -999,7 +1084,7 @@ LIMIT 1]]>
 				<text><![CDATA[CUADRO DE COLINDANCIAS]]></text>
 			</staticText>
 			<subreport>
-				<reportElement x="14" y="30" width="536" height="20" uuid="314fd602-70a2-492d-b63c-b48bc0f97f70">
+				<reportElement x="14" y="27" width="536" height="20" uuid="314fd602-70a2-492d-b63c-b48bc0f97f70">
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -1018,7 +1103,7 @@ LIMIT 1]]>
 				<subreportExpression><![CDATA["sub_report_neighbors_parts.jasper"]]></subreportExpression>
 			</subreport>
 		</band>
-		<band height="80">
+		<band height="78">
 			<staticText>
 				<reportElement x="0" y="0" width="560" height="19" forecolor="#000000" uuid="6ab642e3-12c1-4bbc-a44a-f51ec9c04477"/>
 				<textElement textAlignment="Center">
@@ -1027,7 +1112,7 @@ LIMIT 1]]>
 				<text><![CDATA[DESCRIPCIÓN TÉCNICA DE LINDEROS]]></text>
 			</staticText>
 			<subreport>
-				<reportElement x="14" y="60" width="536" height="20" uuid="3871b19b-dbbb-441b-a670-c4fb0ff110b5">
+				<reportElement x="14" y="58" width="536" height="20" uuid="3871b19b-dbbb-441b-a670-c4fb0ff110b5">
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -1056,7 +1141,7 @@ LIMIT 1]]>
 				<textFieldExpression><![CDATA["El inmueble "+($F{direccion} != null? "denominado "+$F{direccion} +", " : "sin dirección asociada, ") +" identificado "+($F{numero_predial} != null?"con número predial "+$F{numero_predial}:"sin número predial, ")+($F{fmi} != null? " cuyo folio de matrícula "+$F{fmi}: "sin folio de matrícula")+($F{area_registral} !=null? " con área registra de "+(FLOOR($F{area_registral}/10000)==0?$F{area_registral}+" m2": FLOOR($F{area_registral}/10000).intValue() +" ha "+ String.format("%.1f", (double) ((($F{area_registral}/10000)-FLOOR($F{area_registral}/10000))*10000))+" m2"):" sin área registral")+", y que una vez validada y actualizada su cabida por el método indirecto, "+($F{num_partes} == 1? "genera un globo de terreno con área de": "genera ("+$F{num_partes}+")  globos de terreno con área total de ")+(FLOOR($F{area_terreno}/10000)==0?$F{area_terreno}+" m2": FLOOR($F{area_terreno}/10000).intValue() +" ha "+ String.format("%.1f", (double) ((($F{area_terreno}/10000)-FLOOR($F{area_terreno}/10000))*10000))+" m2")+" , presenta los siguientes linderos, referidos al sistema de referencia oficial Magna Sirgas Origen Nacional:"]]></textFieldExpression>
 			</textField>
 		</band>
-		<band height="50">
+		<band height="46">
 			<staticText>
 				<reportElement x="0" y="0" width="560" height="19" forecolor="#000000" uuid="38d9105f-0565-40c7-abc5-765c05da81f7"/>
 				<textElement textAlignment="Center">
@@ -1065,7 +1150,7 @@ LIMIT 1]]>
 				<text><![CDATA[CUADRO DE COORDENADAS]]></text>
 			</staticText>
 			<subreport>
-				<reportElement x="14" y="30" width="536" height="20" uuid="ea3f2b24-a78e-4473-ad37-0b242db9cfff">
+				<reportElement x="14" y="26" width="536" height="20" uuid="ea3f2b24-a78e-4473-ad37-0b242db9cfff">
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>

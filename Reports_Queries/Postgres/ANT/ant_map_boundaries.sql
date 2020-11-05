@@ -2,11 +2,10 @@ WITH
 -- Se definen los parametos de la consulta
 parametros AS (
   SELECT
-    1458 	AS terreno_t_id, --$P{id}
+    1494 	AS terreno_t_id, --$P{id}
      1 		AS criterio_punto_inicial, --tipo de criterio para seleccionar el punto inicial de la enumeración del terreno, valores posibles: 1 (punto mas cercano al noroeste), 2 (punto mas cercano al noreste) parametrizar $P{criterio_punto_inicial}
      4		AS criterio_observador, --1: Centroide, 2: Centro del extent, 3: punto en la superficie, 4: Punto mas cercano al centroide dentro del poligono
-	true	AS incluir_tipo_derecho, --Mostrar el tipo de derecho de cada interesado (booleano)
-	15		AS tolerancia_sentidos --tolerancia en grados para la definicion del sentido de una linea
+	true	AS incluir_tipo_derecho --Mostrar el tipo de derecho de cada interesado (booleano)
 ),
 -- Se orienta en terreno en el sentido de las manecillas del reloj
 t AS (
@@ -55,13 +54,13 @@ cuadrante_oeste_g AS (
 	SELECT ST_SetSRID(ST_MakePolygon(ST_MakeLine(ARRAY [punto_nw_g.p, punto_medio_g.p, punto_sw_g.p, punto_nw_g.p])), ST_SRID(t.geometria)) geom FROM t, punto_nw_g, punto_medio_g, punto_sw_g
 ),
 cuadrantes_g AS (
-	SELECT '1_Norte' ubicacion, geom AS cuadrante FROM cuadrante_norte_g
+	SELECT 'Norte' ubicacion, geom AS cuadrante FROM cuadrante_norte_g
 	UNION
-	SELECT '2_Este' ubicacion, geom AS cuadrante FROM cuadrante_este_g
+	SELECT 'Este' ubicacion, geom AS cuadrante FROM cuadrante_este_g
 	UNION
-	SELECT '3_Sur' ubicacion, geom AS cuadrante FROM cuadrante_sur_g
+	SELECT 'Sur' ubicacion, geom AS cuadrante FROM cuadrante_sur_g
 	UNION
-	SELECT '4_Oeste' ubicacion, geom AS cuadrante FROM cuadrante_oeste_g
+	SELECT 'Oeste' ubicacion, geom AS cuadrante FROM cuadrante_oeste_g
 ),
 -- Se convierte la geometria multipoligono del terreno a partes simples
 t_simple AS (
@@ -96,13 +95,13 @@ vertices_bbox_partes AS (
 ),
 -- Cuadrantes para cada una de las partes
 cuadrantes_partes AS (
-	SELECT parte, '1_Norte' AS ubicacion, ST_SetSRID(ST_MakePolygon(ST_MakeLine(ARRAY [p_nw, p_ne, p_medio, p_nw])), ST_SRID(geom)) AS cuadrante FROM vertices_bbox_partes
+	SELECT parte, 'Norte' AS ubicacion, ST_SetSRID(ST_MakePolygon(ST_MakeLine(ARRAY [p_nw, p_ne, p_medio, p_nw])), ST_SRID(geom)) AS cuadrante FROM vertices_bbox_partes
 	union
-	SELECT parte, '2_Este' AS ubicacion, ST_SetSRID(ST_MakePolygon(ST_MakeLine(ARRAY [p_medio, p_ne, p_se, p_medio])), ST_SRID(geom)) AS cuadrante FROM vertices_bbox_partes
+	SELECT parte, 'Este' AS ubicacion, ST_SetSRID(ST_MakePolygon(ST_MakeLine(ARRAY [p_medio, p_ne, p_se, p_medio])), ST_SRID(geom)) AS cuadrante FROM vertices_bbox_partes
 	union
-	SELECT parte, '3_Sur' AS ubicacion, ST_SetSRID(ST_MakePolygon(ST_MakeLine(ARRAY [p_medio, p_se, p_sw, p_medio])), ST_SRID(geom)) AS cuadrante FROM vertices_bbox_partes
+	SELECT parte, 'Sur' AS ubicacion, ST_SetSRID(ST_MakePolygon(ST_MakeLine(ARRAY [p_medio, p_se, p_sw, p_medio])), ST_SRID(geom)) AS cuadrante FROM vertices_bbox_partes
 	union
-	SELECT parte, '4_Oeste' AS ubicacion, ST_SetSRID(ST_MakePolygon(ST_MakeLine(ARRAY [p_nw, p_medio, p_sw, p_nw])), ST_SRID(geom)) AS cuadrante FROM vertices_bbox_partes
+	SELECT parte, 'Oeste' AS ubicacion, ST_SetSRID(ST_MakePolygon(ST_MakeLine(ARRAY [p_nw, p_medio, p_sw, p_nw])), ST_SRID(geom)) AS cuadrante FROM vertices_bbox_partes
 ),
 -- Se obtienen linderos asociados a los linderos se utilizan las tablas topologicas
 linderos AS (
@@ -213,7 +212,7 @@ nodos_lindero_ubicacion AS (
 	ORDER BY code, st_distance(nl.geom, plo.geom)
 ),
 secuencia_nodos AS (
-	SELECT t_id, array_to_string(array_agg(nlu.id || ': N=' || round(y::numeric,2) || 'm' || ', E=' || round(x::numeric,2) || 'm'), '; ') AS nodos
+	SELECT t_id, array_to_string(array_agg(nlu.id || ': N=' || round(y::numeric,2) || ', E=' || round(x::numeric,2) ), '; ') AS nodos
 	FROM nodos_lindero_ubicacion AS nlu
 	GROUP BY t_id
 ),
@@ -254,82 +253,15 @@ linderos_colindantes AS (
 ),
 colindantes AS (
 	SELECT linderos_colindantes.*, terrenos_asociados_linderos.t_id_terreno  FROM linderos_colindantes LEFT JOIN terrenos_asociados_linderos ON linderos_colindantes.t_id_linderos = terrenos_asociados_linderos.t_id_lindero
-),
-predios_seleccionados AS (
-	SELECT DISTINCT baunit AS t_id_predio, colindantes.t_id_terreno AS t_id_colindante FROM colindantes
-	LEFT JOIN ladm_lev_cat_v1.col_uebaunit ON colindantes.t_id_terreno = ue_lc_terreno
-	WHERE baunit is not null AND colindantes.t_id_terreno is not null
-),
-derechos_seleccionados AS (
-	 SELECT DISTINCT lc_derecho.t_id AS t_id_derecho, predios_seleccionados.t_id_colindante
-	 FROM predios_seleccionados LEFT JOIN ladm_lev_cat_v1.lc_derecho
-	 ON lc_derecho.unidad = predios_seleccionados.t_id_predio
- ),
-derecho_interesados AS (
-	 SELECT DISTINCT lc_derecho.interesado_lc_interesado, lc_derecho.t_id AS t_id_derecho, derechos_seleccionados.t_id_colindante
-	 FROM derechos_seleccionados LEFT JOIN ladm_lev_cat_v1.lc_derecho
-	 ON lc_derecho.t_id = derechos_seleccionados.t_id_derecho WHERE lc_derecho.interesado_lc_interesado IS NOT NULL
-),
-derecho_agrupacion_interesados AS (
-	 SELECT DISTINCT lc_derecho.interesado_lc_agrupacioninteresados, col_miembros.interesado_lc_interesado, derechos_seleccionados.t_id_colindante, col_miembros.agrupacion
-	 FROM derechos_seleccionados LEFT JOIN ladm_lev_cat_v1.lc_derecho
-	 ON lc_derecho.t_id = derechos_seleccionados.t_id_derecho
-	 LEFT JOIN ladm_lev_cat_v1.col_miembros
-	 ON lc_derecho.interesado_lc_agrupacioninteresados = col_miembros.agrupacion
-	 WHERE lc_derecho.interesado_lc_agrupacioninteresados IS NOT NULL
-),
-info_agrupacion_filter AS (
-		SELECT DISTINCT ON (agrupacion) agrupacion
-		,lc_interesado.local_id AS local_id
-		,(CASE WHEN lc_interesado.t_id IS NOT null THEN 'agrupacion' END) AS agrupacion_interesado
-	 	,(coalesce(lc_interesado.primer_nombre,'') || coalesce(' ' || lc_interesado.segundo_nombre, '') || coalesce(' ' || lc_interesado.primer_apellido, '') || coalesce(' ' || lc_interesado.segundo_apellido, '')
-				|| coalesce(lc_interesado.razon_social, '') ) AS nombre
-		,t_id_colindante
-		FROM derecho_agrupacion_interesados LEFT JOIN ladm_lev_cat_v1.lc_interesado ON lc_interesado.t_id = derecho_agrupacion_interesados.interesado_lc_interesado ORDER BY agrupacion
-),
-info_interesado AS (
-		SELECT
-	 	lc_interesado.local_id AS local_id
-	 	,(CASE WHEN lc_interesado.t_id IS NOT null THEN 'interesado' END) AS agrupacion_interesado
-	 	,(coalesce(lc_interesado.primer_nombre,'') || coalesce(' ' || lc_interesado.segundo_nombre, '') || coalesce(' ' || lc_interesado.primer_apellido, '') || coalesce(' ' || lc_interesado.segundo_apellido, '')
-				|| coalesce(lc_interesado.razon_social, '') ) AS nombre
-		,t_id_colindante
- 		FROM derecho_interesados LEFT JOIN ladm_lev_cat_v1.lc_interesado ON lc_interesado.t_id = derecho_interesados.interesado_lc_interesado
-),
-info_agrupacion AS (
-		SELECT local_id
-		,agrupacion_interesado
-		,nombre
-		,t_id_colindante
-		FROM info_agrupacion_filter
-),
-info_total_interesados AS (
-	SELECT * FROM info_interesado UNION all SELECT * FROM info_agrupacion
 )
-SELECT
-	id
-	,desde
-	,hasta
-	,ubicacion
-	, (SELECT x FROM puntos_lindero_ordenados WHERE id = desde LIMIT 1) AS xi
-	, (SELECT y FROM puntos_lindero_ordenados WHERE id = desde LIMIT 1) AS yi
-	, (SELECT x FROM puntos_lindero_ordenados WHERE id = hasta LIMIT 1) AS xf
-	, (SELECT y FROM puntos_lindero_ordenados WHERE id = hasta LIMIT 1) AS yf
-	, COALESCE(info_total_interesados.nombre, 'INDETERMINADO') AS interesado
-	, COALESCE(info_total_interesados.agrupacion_interesado, 'INDETERMINADO') AS tipo_interesado
-	, round(st_length(colindantes.geom)::numeric,1) distancia
-	, (SELECT nodos FROM secuencia_nodos WHERE t_id = colindantes.t_id_linderos LIMIT 1) AS nodos
-	, round(degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2)))::numeric, 3) AS degrees
-	,CASE WHEN degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2))) BETWEEN 360-(SELECT tolerancia_sentidos FROM parametros) AND 360 or degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2))) BETWEEN 0 AND (SELECT tolerancia_sentidos FROM parametros) THEN 'norte'
-	  WHEN degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2))) BETWEEN (SELECT tolerancia_sentidos FROM parametros) AND 90-(SELECT tolerancia_sentidos FROM parametros) THEN 'noreste'
-	  WHEN degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2))) BETWEEN 90-(SELECT tolerancia_sentidos FROM parametros) AND 90+(SELECT tolerancia_sentidos FROM parametros) THEN 'este'
-	  WHEN degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2))) BETWEEN 90+(SELECT tolerancia_sentidos FROM parametros) AND 180-(SELECT tolerancia_sentidos FROM parametros) THEN 'sureste'
-	  WHEN degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2))) BETWEEN 180-(SELECT tolerancia_sentidos FROM parametros) AND 180+(SELECT tolerancia_sentidos FROM parametros) THEN 'sur'
-	  WHEN degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2))) BETWEEN 180+(SELECT tolerancia_sentidos FROM parametros) AND 270-(SELECT tolerancia_sentidos FROM parametros) THEN 'suroeste'
-	  WHEN degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2))) BETWEEN 270-(SELECT tolerancia_sentidos FROM parametros) AND 270+(SELECT tolerancia_sentidos FROM parametros) THEN 'oeste'
-	  WHEN degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2))) BETWEEN 270+(SELECT tolerancia_sentidos FROM parametros) AND 360-(SELECT tolerancia_sentidos FROM parametros) THEN 'noroeste'
-	END AS sentido
-	,(SELECT count(*) FROM colindantes) AS total_linderos
-FROM colindantes LEFT JOIN info_total_interesados ON colindantes.t_id_terreno = info_total_interesados.t_id_colindante
-WHERE ubicacion = '3_Sur' and parte = 1
-ORDER BY id
+SELECT array_to_json(array_agg(features)) AS features
+FROM (
+	SELECT f AS features
+	FROM (
+		SELECT 'Feature' AS type,
+		row_to_json((SELECT l FROM (SELECT id) AS l)) AS properties,
+		ST_AsGeoJSON(geom, 4, 0)::json AS geometry
+		FROM colindantes ORDER BY parte, id
+	) AS f)
+AS ff;
+

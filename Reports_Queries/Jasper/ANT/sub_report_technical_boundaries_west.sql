@@ -213,7 +213,7 @@ nodos_lindero_ubicacion AS (
 	ORDER BY code, st_distance(nl.geom, plo.geom)
 ),
 secuencia_nodos AS (
-	SELECT t_id, array_to_string(array_agg(nlu.id || ': N=' || round(y::numeric,2) || ', E=' || round(x::numeric,2) ), '; ') AS nodos
+	SELECT t_id, array_to_string(array_agg(nlu.id || ': N=' || round(y::numeric,2) || 'm' || ', E=' || round(x::numeric,2) || 'm'), '; ') AS nodos
 	FROM nodos_lindero_ubicacion AS nlu
 	GROUP BY t_id
 ),
@@ -317,7 +317,7 @@ SELECT
 	, (SELECT y FROM puntos_lindero_ordenados WHERE id = hasta LIMIT 1) AS yf
 	, COALESCE(info_total_interesados.nombre, 'INDETERMINADO') AS interesado
 	, COALESCE(info_total_interesados.agrupacion_interesado, 'INDETERMINADO') AS tipo_interesado
-	, round(st_length(colindantes.geom)::numeric,2) distancia
+	, round(st_length(colindantes.geom)::numeric,1) distancia
 	, (SELECT nodos FROM secuencia_nodos WHERE t_id = colindantes.t_id_linderos LIMIT 1) AS nodos
 	, round(degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2)))::numeric, 3) AS degrees
 	,CASE WHEN degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2))) BETWEEN 360-(SELECT tolerancia_sentidos FROM parametros) AND 360 or degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2))) BETWEEN 0 AND (SELECT tolerancia_sentidos FROM parametros) THEN 'norte'

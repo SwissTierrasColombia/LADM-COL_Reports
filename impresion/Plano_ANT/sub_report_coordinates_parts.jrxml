@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.12.2.final using JasperReports Library version 6.12.2-75c5e90a222ab406e416cbf590a5397028a52de3  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="sub_report_coordinates_parts" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="cc7ca7b2-c8a8-42ae-95ae-288f8fa5e3bc">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="sub_report_coordinates_parts" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="5" bottomMargin="5" uuid="cc7ca7b2-c8a8-42ae-95ae-288f8fa5e3bc">
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="PG Local"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<parameter name="srp_id" class="java.lang.Integer"/>
@@ -18,9 +18,9 @@ FROM $P!{srp_datasetName}.lc_terreno WHERE t_id = $P{srp_id}]]>
 		<property name="com.jaspersoft.studio.field.label" value="multi"/>
 	</field>
 	<detail>
-		<band height="63" splitType="Stretch">
+		<band height="70" splitType="Stretch">
 			<textField>
-				<reportElement x="-20" y="-14" width="100" height="20" uuid="2a2c1157-7738-426e-82fc-3f75b28682bb">
+				<reportElement x="-20" y="0" width="100" height="20" uuid="2a2c1157-7738-426e-82fc-3f75b28682bb">
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -32,7 +32,7 @@ FROM $P!{srp_datasetName}.lc_terreno WHERE t_id = $P{srp_id}]]>
 				<textFieldExpression><![CDATA[$F{multi}.booleanValue()? "PARTE "+$F{parte}:""]]></textFieldExpression>
 			</textField>
 			<subreport>
-				<reportElement x="-20" y="13" width="536" height="50" uuid="09108a6b-68d7-466a-9ae9-7941e7f81fe3">
+				<reportElement x="-20" y="24" width="536" height="46" uuid="09108a6b-68d7-466a-9ae9-7941e7f81fe3">
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>

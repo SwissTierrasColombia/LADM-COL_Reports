@@ -265,7 +265,7 @@ SELECT
     END AS predio
   , lc_predio.t_id
   , COALESCE(interesado, 'INDETERMINADO') AS interesado
-  , round(st_length(colindantes.geom)::numeric, 3) distancia
+  , round(st_length(colindantes.geom)::numeric, 1) distancia
 FROM
 colindantes
 LEFT JOIN ladm_lev_cat_v1.lc_terreno ON lc_terreno.t_id = colindantes.t_id_terreno

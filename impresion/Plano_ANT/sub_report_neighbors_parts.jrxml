@@ -1,8 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.12.2.final using JasperReports Library version 6.12.2-75c5e90a222ab406e416cbf590a5397028a52de3  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="sub_report_neighbors_parts" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="a5bee20e-853e-4fea-a084-5fc1c5536c68">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="sub_report_neighbors_parts" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="5" bottomMargin="5" uuid="a5bee20e-853e-4fea-a084-5fc1c5536c68">
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="PG Local"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<parameter name="srp_id" class="java.lang.Integer"/>
 	<parameter name="srp_criterio_punto_inicial" class="java.lang.Integer"/>
 	<parameter name="srp_datasetName" class="java.lang.String"/>
@@ -18,9 +27,9 @@ FROM $P!{srp_datasetName}.lc_terreno WHERE t_id = $P{srp_id}]]>
 		<property name="com.jaspersoft.studio.field.label" value="multi"/>
 	</field>
 	<detail>
-		<band height="63" splitType="Stretch">
+		<band height="74" splitType="Stretch">
 			<textField>
-				<reportElement x="-20" y="-14" width="100" height="20" uuid="ce10bd0b-da2e-44de-b563-8bc13f25f410">
+				<reportElement x="-20" y="0" width="100" height="20" uuid="ce10bd0b-da2e-44de-b563-8bc13f25f410">
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -31,7 +40,7 @@ FROM $P!{srp_datasetName}.lc_terreno WHERE t_id = $P{srp_id}]]>
 				<textFieldExpression><![CDATA[$F{multi}.booleanValue()? "PARTE "+$F{parte}:""]]></textFieldExpression>
 			</textField>
 			<subreport>
-				<reportElement x="-20" y="13" width="536" height="50" uuid="37c1fd7a-2029-4679-9b1c-2a10ec8c1427">
+				<reportElement x="-20" y="24" width="536" height="50" uuid="37c1fd7a-2029-4679-9b1c-2a10ec8c1427">
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
