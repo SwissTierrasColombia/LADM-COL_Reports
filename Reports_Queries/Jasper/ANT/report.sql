@@ -71,7 +71,7 @@ SELECT case when info_predio.orip is null then info_predio.fmi else concat(COALE
        ,info_predio.departamento
        ,info_predio.municipio
 	   ,(
-		   select round(sum(st_area(geometria) * total_pisos)::numeric, 2)
+		   select COALESCE(round(sum(st_area(geometria))::numeric, 2), 0)
 		   from ladm_lev_cat_v1.lc_unidadconstruccion
 		   where lc_construccion in (select col_uebaunit.ue_lc_construccion from ladm_lev_cat_v1.col_uebaunit where baunit = info_predio.t_id and col_uebaunit.ue_lc_construccion IS NOT NULL)
 	   ) area_construida
