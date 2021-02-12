@@ -1,0 +1,7 @@
+#JasperReports
+.settings
+.classpath
+.project
+
+/target
+/.idea
