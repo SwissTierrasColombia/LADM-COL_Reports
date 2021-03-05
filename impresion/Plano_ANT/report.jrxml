@@ -1055,7 +1055,7 @@ LIMIT 1]]>
 				<textFieldExpression><![CDATA["<b>Revisó</b>: <br><br><br><b>Matrícula</b>:"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="450" y="712" width="100" height="6" uuid="2914e8ac-a28d-458e-8f0a-4c682f91504b">
+				<reportElement x="300" y="709" width="250" height="9" uuid="2914e8ac-a28d-458e-8f0a-4c682f91504b">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Right">
