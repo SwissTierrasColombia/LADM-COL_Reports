@@ -94,12 +94,6 @@ SELECT case when info_predio.orip is null then info_predio.fmi else concat(COALE
 			limit 1) direccion
 	   ,(
 		   SELECT nombre
-		   FROM ladm_lev_cat_v1.cc_vereda
-		   WHERE st_intersects(geometria, terreno.geometria)
-		   ORDER BY st_area(st_intersection(geometria, terreno.geometria)) desc
-		   LIMIT 1) vereda
-	   ,(
-		   SELECT nombre
 		   FROM ladm_lev_cat_v1.cc_corregimiento
 		   WHERE st_intersects(geometria, terreno.geometria)
 		   ORDER BY st_area(st_intersection(geometria, terreno.geometria)) desc

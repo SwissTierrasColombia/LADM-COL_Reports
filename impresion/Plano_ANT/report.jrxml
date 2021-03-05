@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.12.2.final using JasperReports Library version 6.12.2-75c5e90a222ab406e416cbf590a5397028a52de3  -->
+<!-- Created with Jaspersoft Studio version 6.16.0.final using JasperReports Library version 6.16.0-48579d909b7943b64690c65c71e07e0b80981928  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="9a3e59f5-6675-48cf-ad74-9c42b5a5b290">
 	<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.HorizontalRowLayout"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
@@ -112,12 +112,6 @@ SELECT case when info_predio.orip is null then info_predio.fmi else concat(COALE
 			limit 1) direccion
 	   ,(
 		   SELECT nombre
-		   FROM $P!{datasetName}.cc_vereda
-		   WHERE st_intersects(geometria, terreno.geometria)
-		   ORDER BY st_area(st_intersection(geometria, terreno.geometria)) desc
-		   LIMIT 1) vereda
-	   ,(
-		   SELECT nombre
 		   FROM $P!{datasetName}.cc_corregimiento
 		   WHERE st_intersects(geometria, terreno.geometria)
 		   ORDER BY st_area(st_intersection(geometria, terreno.geometria)) desc
@@ -145,7 +139,6 @@ LIMIT 1]]>
 	<field name="municipio" class="java.lang.String"/>
 	<field name="area_construida" class="java.lang.Double"/>
 	<field name="direccion" class="java.lang.String"/>
-	<field name="vereda" class="java.lang.String"/>
 	<field name="corregimiento" class="java.lang.String"/>
 	<field name="area_terreno" class="java.lang.Double"/>
 	<field name="area_registral" class="java.lang.Double"/>
@@ -174,69 +167,76 @@ LIMIT 1]]>
 				<reportElement x="10" y="11" width="115" height="50" uuid="5d0afdcb-b0b9-427f-9ceb-fa5c9b4a6bd1"/>
 			</rectangle>
 			<staticText>
-				<reportElement x="125" y="11" width="70" height="10" uuid="06080ad3-295c-47e5-b6a9-211e304ea155">
+				<reportElement x="125" y="11" width="84" height="10" uuid="06080ad3-295c-47e5-b6a9-211e304ea155">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
 				</reportElement>
 				<box>
 					<pen lineWidth="0.2"/>
 				</box>
 				<textElement verticalAlignment="Middle">
 					<font size="7"/>
-					<paragraph leftIndent="5"/>
+					<paragraph leftIndent="2"/>
 				</textElement>
 				<text><![CDATA[DEPARTAMENTO]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="245" y="11" width="70" height="10" uuid="d9724179-c69c-4302-b05f-0dd63854c7f8">
+				<reportElement x="260" y="11" width="55" height="10" uuid="d9724179-c69c-4302-b05f-0dd63854c7f8">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
 				</reportElement>
 				<box>
 					<pen lineWidth="0.2"/>
 				</box>
 				<textElement verticalAlignment="Middle">
 					<font size="7"/>
-					<paragraph leftIndent="5"/>
+					<paragraph leftIndent="2"/>
 				</textElement>
 				<text><![CDATA[MUNICIPIO]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="125" y="21" width="70" height="10" uuid="f51f3b86-4559-4dac-ae11-35ff81759045"/>
-				<box>
-					<pen lineWidth="0.2"/>
-				</box>
-				<textElement verticalAlignment="Middle">
-					<font size="7"/>
-					<paragraph leftIndent="5"/>
-				</textElement>
-				<text><![CDATA[ZONA]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="125" y="31" width="70" height="10" uuid="e259d65e-dd16-447c-a2d7-6a1b895e1d6e">
-					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+				<reportElement x="125" y="21" width="84" height="10" uuid="f51f3b86-4559-4dac-ae11-35ff81759045">
+					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
 				</reportElement>
 				<box>
 					<pen lineWidth="0.2"/>
 				</box>
 				<textElement verticalAlignment="Middle">
 					<font size="7"/>
-					<paragraph leftIndent="5"/>
+					<paragraph leftIndent="2"/>
 				</textElement>
-				<text><![CDATA[COMUNA]]></text>
+				<text><![CDATA[ZONA]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="365" y="31" width="70" height="10" uuid="0ecc82e2-e32e-456c-a90a-16dbfbdb84ff"/>
+				<reportElement x="125" y="31" width="84" height="10" uuid="e259d65e-dd16-447c-a2d7-6a1b895e1d6e">
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+				</reportElement>
 				<box>
 					<pen lineWidth="0.2"/>
 				</box>
 				<textElement verticalAlignment="Middle">
 					<font size="7"/>
-					<paragraph leftIndent="5"/>
+					<paragraph leftIndent="2"/>
 				</textElement>
-				<text><![CDATA[MANZANA]]></text>
+				<text><![CDATA[COMUNA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="380" y="31" width="70" height="10" uuid="0ecc82e2-e32e-456c-a90a-16dbfbdb84ff">
+					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.2"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[VEREDA/MANZANA]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
-				<reportElement x="195" y="11" width="50" height="10" uuid="1ae94e4d-597a-40e7-8934-1bf99178c16f">
+				<reportElement x="209" y="11" width="51" height="10" uuid="1ae94e4d-597a-40e7-8934-1bf99178c16f">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
@@ -249,7 +249,7 @@ LIMIT 1]]>
 				<textFieldExpression><![CDATA[$F{departamento}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="315" y="11" width="50" height="10" uuid="aae50dcf-fb49-453f-9c8c-f6bd8e12ba3d">
+				<reportElement x="315" y="11" width="65" height="10" uuid="aae50dcf-fb49-453f-9c8c-f6bd8e12ba3d">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
@@ -262,7 +262,7 @@ LIMIT 1]]>
 				<textFieldExpression><![CDATA[$F{municipio}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="195" y="21" width="50" height="10" uuid="a3c9e9fc-522a-460b-8711-f67b11c506e4"/>
+				<reportElement x="209" y="21" width="51" height="10" uuid="a3c9e9fc-522a-460b-8711-f67b11c506e4"/>
 				<box>
 					<pen lineWidth="0.2"/>
 				</box>
@@ -273,7 +273,7 @@ LIMIT 1]]>
 				<textFieldExpression><![CDATA[LEN($F{numero_predial})>7? RIGHT(LEFT($F{numero_predial},7),2):""]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="195" y="31" width="50" height="10" uuid="8b4df3d7-652d-40da-ae5c-8dc26ade01b7"/>
+				<reportElement x="209" y="31" width="51" height="10" uuid="8b4df3d7-652d-40da-ae5c-8dc26ade01b7"/>
 				<box>
 					<pen lineWidth="0.2"/>
 				</box>
@@ -284,7 +284,7 @@ LIMIT 1]]>
 				<textFieldExpression><![CDATA[LEN($F{numero_predial})>11?RIGHT(LEFT($F{numero_predial},11),2):""]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="435" y="31" width="114" height="10" uuid="438da534-cc55-4324-85cf-0bd8c0eba30b">
+				<reportElement x="450" y="31" width="99" height="10" uuid="438da534-cc55-4324-85cf-0bd8c0eba30b">
 					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
 				</reportElement>
 				<box>
@@ -297,31 +297,34 @@ LIMIT 1]]>
 				<textFieldExpression><![CDATA[LEN($F{numero_predial})>17?RIGHT(LEFT($F{numero_predial},17),4):""]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="245" y="21" width="70" height="10" uuid="b54f859a-906c-4be2-99f3-42119217b424"/>
-				<box>
-					<pen lineWidth="0.2"/>
-				</box>
-				<textElement verticalAlignment="Middle">
-					<font size="7"/>
-					<paragraph leftIndent="5"/>
-				</textElement>
-				<text><![CDATA[SECTOR]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="245" y="31" width="70" height="10" uuid="7e3947d6-a20e-4bb5-ae27-651934de9782">
-					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+				<reportElement x="260" y="21" width="55" height="10" uuid="b54f859a-906c-4be2-99f3-42119217b424">
+					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
 				</reportElement>
 				<box>
 					<pen lineWidth="0.2"/>
 				</box>
 				<textElement verticalAlignment="Middle">
 					<font size="7"/>
-					<paragraph leftIndent="5"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[SECTOR]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="260" y="31" width="55" height="10" uuid="7e3947d6-a20e-4bb5-ae27-651934de9782">
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.2"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+					<paragraph leftIndent="2"/>
 				</textElement>
 				<text><![CDATA[BARRIO]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
-				<reportElement x="315" y="21" width="50" height="10" uuid="dc1e0f06-5724-4fac-8cf0-dd8e49c1f8bc"/>
+				<reportElement x="315" y="21" width="65" height="10" uuid="dc1e0f06-5724-4fac-8cf0-dd8e49c1f8bc"/>
 				<box>
 					<pen lineWidth="0.2"/>
 				</box>
@@ -332,7 +335,7 @@ LIMIT 1]]>
 				<textFieldExpression><![CDATA[LEN($F{numero_predial})>9?RIGHT(LEFT($F{numero_predial},9),2):""]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="315" y="31" width="50" height="10" uuid="e7e71bf8-b1e9-48cc-bcfd-808f0272eeeb"/>
+				<reportElement x="315" y="31" width="65" height="10" uuid="e7e71bf8-b1e9-48cc-bcfd-808f0272eeeb"/>
 				<box>
 					<pen lineWidth="0.2"/>
 				</box>
@@ -349,18 +352,20 @@ LIMIT 1]]>
 				<imageExpression><![CDATA["images/logo_ant.jpg"]]></imageExpression>
 			</image>
 			<staticText>
-				<reportElement x="125" y="41" width="70" height="10" uuid="ca3ddde1-b9d4-448d-9c73-d25e5ad4c01e"/>
+				<reportElement x="125" y="41" width="84" height="10" uuid="ca3ddde1-b9d4-448d-9c73-d25e5ad4c01e">
+					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+				</reportElement>
 				<box>
 					<pen lineWidth="0.2"/>
 				</box>
 				<textElement verticalAlignment="Middle">
 					<font size="7"/>
-					<paragraph leftIndent="5"/>
+					<paragraph leftIndent="2"/>
 				</textElement>
 				<text><![CDATA[SOLICITANTE]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
-				<reportElement x="195" y="41" width="354" height="10" uuid="af8088c6-eed6-46e0-bb0d-dd761bbc7fc4"/>
+				<reportElement x="209" y="41" width="340" height="10" uuid="af8088c6-eed6-46e0-bb0d-dd761bbc7fc4"/>
 				<box>
 					<pen lineWidth="0.2"/>
 				</box>
@@ -368,21 +373,23 @@ LIMIT 1]]>
 					<font size="7"/>
 					<paragraph leftIndent="5"/>
 				</textElement>
-				<textFieldExpression><![CDATA[($F{diferenciacion}.equals("interesado")? $F{interesado_nombre} : "AGRUPACIÓN DE " + $F{interesado_nombre} + " Y OTROS")]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($F{diferenciacion}.equals("interesado")? $F{interesado_nombre} : $F{interesado_nombre} + " Y OTROS")]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="125" y="51" width="95" height="10" uuid="c24cc91a-7bf2-4e52-bdf6-ceded62114ec"/>
+				<reportElement x="125" y="51" width="84" height="10" uuid="c24cc91a-7bf2-4e52-bdf6-ceded62114ec">
+					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+				</reportElement>
 				<box>
 					<pen lineWidth="0.2"/>
 				</box>
 				<textElement verticalAlignment="Middle">
 					<font size="7"/>
-					<paragraph leftIndent="5"/>
+					<paragraph leftIndent="2"/>
 				</textElement>
 				<text><![CDATA[TIPO DE DOCUMENTO]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="315" y="51" width="50" height="10" uuid="46f8659d-aaf9-4355-afdc-8cbd1e48dbb9">
+				<reportElement x="315" y="51" width="65" height="10" uuid="46f8659d-aaf9-4355-afdc-8cbd1e48dbb9">
 					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
 				</reportElement>
 				<box>
@@ -395,7 +402,7 @@ LIMIT 1]]>
 				<text><![CDATA[DOCUMENTO]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
-				<reportElement x="220" y="51" width="95" height="10" uuid="e4041f72-e21a-4100-ae80-a36a94c5295f">
+				<reportElement x="209" y="51" width="106" height="10" uuid="e4041f72-e21a-4100-ae80-a36a94c5295f">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
@@ -408,7 +415,7 @@ LIMIT 1]]>
 				<textFieldExpression><![CDATA[$F{tipo_documento}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="365" y="51" width="70" height="10" uuid="54eb3be7-9b9b-4a18-a748-bf6924f1d91f"/>
+				<reportElement x="380" y="51" width="169" height="10" uuid="54eb3be7-9b9b-4a18-a748-bf6924f1d91f"/>
 				<box>
 					<pen lineWidth="0.2"/>
 				</box>
@@ -416,23 +423,24 @@ LIMIT 1]]>
 					<font size="7"/>
 					<paragraph leftIndent="5"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{documento_identidad}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($F{diferenciacion}.equals("interesado")? $F{documento_identidad} : $F{documento_identidad} + " Y OTROS")]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="365" y="11" width="70" height="10" uuid="4153c6cf-8e0f-408b-85a4-d8dec37bbad8">
+				<reportElement x="380" y="11" width="70" height="10" uuid="4153c6cf-8e0f-408b-85a4-d8dec37bbad8">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
 				</reportElement>
 				<box>
 					<pen lineWidth="0.2"/>
 				</box>
 				<textElement verticalAlignment="Middle">
 					<font size="7"/>
-					<paragraph leftIndent="5"/>
+					<paragraph leftIndent="2"/>
 				</textElement>
 				<text><![CDATA[CORREGIMIENTO]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
-				<reportElement x="435" y="11" width="114" height="10" uuid="02572a01-57a8-4d55-b8ae-1c6c441209bd">
+				<reportElement x="450" y="11" width="99" height="10" uuid="02572a01-57a8-4d55-b8ae-1c6c441209bd">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
@@ -445,42 +453,20 @@ LIMIT 1]]>
 				<textFieldExpression><![CDATA[$F{corregimiento}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="365" y="21" width="70" height="10" uuid="ec767df5-eb37-43a4-a95f-a1f39bca2446"/>
-				<box>
-					<pen lineWidth="0.2"/>
-				</box>
-				<textElement verticalAlignment="Middle">
-					<font size="7"/>
-					<paragraph leftIndent="5"/>
-				</textElement>
-				<text><![CDATA[VEREDA]]></text>
-			</staticText>
-			<textField isBlankWhenNull="true">
-				<reportElement x="435" y="21" width="114" height="10" uuid="c4881f71-deed-47e0-ae9c-60f4819ac54e">
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				<reportElement x="380" y="21" width="70" height="10" uuid="3d503e08-e468-4e66-a9ea-a384bb3415ff">
+					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
 				</reportElement>
 				<box>
 					<pen lineWidth="0.2"/>
 				</box>
 				<textElement verticalAlignment="Middle">
 					<font size="7"/>
-					<paragraph leftIndent="5"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{vereda}]]></textFieldExpression>
-			</textField>
-			<staticText>
-				<reportElement x="435" y="51" width="55" height="10" uuid="3d503e08-e468-4e66-a9ea-a384bb3415ff"/>
-				<box>
-					<pen lineWidth="0.2"/>
-				</box>
-				<textElement verticalAlignment="Middle">
-					<font size="7"/>
-					<paragraph leftIndent="5"/>
+					<paragraph leftIndent="2"/>
 				</textElement>
 				<text><![CDATA[FISO]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
-				<reportElement x="490" y="51" width="59" height="10" uuid="2cac4f7f-a111-4cb9-b93c-ba8fa168a253">
+				<reportElement x="450" y="21" width="99" height="10" uuid="2cac4f7f-a111-4cb9-b93c-ba8fa168a253">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
@@ -977,7 +963,7 @@ LIMIT 1]]>
 				<text><![CDATA[-73,0]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="-3" y="0" width="560" height="19" forecolor="#000000" uuid="15684f3e-a901-41a1-8bd0-59266694541a"/>
+				<reportElement x="10" y="0" width="538" height="19" forecolor="#000000" uuid="15684f3e-a901-41a1-8bd0-59266694541a"/>
 				<textElement textAlignment="Center">
 					<font size="14"/>
 				</textElement>
