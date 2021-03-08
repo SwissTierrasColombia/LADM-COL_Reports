@@ -3,7 +3,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="9a3e59f5-6675-48cf-ad74-9c42b5a5b290">
 	<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.HorizontalRowLayout"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="ladmcolV221"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="LADM"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="net.sf.jasperreports.print.create.bookmarks" value="true"/>
 	<parameter name="title" class="java.lang.String"/>
@@ -47,6 +47,7 @@ info_predio AS (
 		,lc_predio.local_id
 		,lc_predio.departamento
 		,lc_predio.municipio
+		,(select ilicode='Publico.Baldio' from $P!{datasetName}.lc_prediotipo where t_id = lc_predio.tipo) as es_baldio
 		,lc_predio.numero_predial_anterior
 		FROM $P!{datasetName}.lc_predio WHERE lc_predio.t_id IN (SELECT * FROM predio_seleccionado)
 ),
@@ -89,10 +90,12 @@ SELECT case when info_predio.orip is null then info_predio.fmi else concat(COALE
        ,info_predio.departamento
        ,info_predio.municipio
 	   ,(
-		   select COALESCE(round(sum(st_area(geometria))::numeric, 2))
-		   from $P!{datasetName}.lc_unidadconstruccion
-		   where lc_construccion in (select col_uebaunit.ue_lc_construccion from $P!{datasetName}.col_uebaunit where baunit = info_predio.t_id and col_uebaunit.ue_lc_construccion IS NOT NULL)
-	   ) area_construida
+		   select CASE WHEN FLOOR(area_geom/10000) = 0 THEN CONCAT(TRUNC(area_geom, 2), ' m2') ELSE CONCAT(FLOOR(area_geom/10000), ' ha ', TRUNC(((area_geom/10000) - FLOOR(area_geom/10000))*10000, 2), ' m2') END
+		   from (
+			   select COALESCE(round(sum(st_area(geometria))::numeric, 2), 0) as area_geom
+		   	   from $P!{datasetName}.lc_unidadconstruccion
+		       where lc_construccion in (select col_uebaunit.ue_lc_construccion from $P!{datasetName}.col_uebaunit where baunit = info_predio.t_id and col_uebaunit.ue_lc_construccion IS NOT NULL)
+		   ) as calculo_area_construida) area_construida
 	   ,(
 		   SELECT
 		   case when (SELECT dispname FROM $P!{datasetName}.extdireccion_tipo_direccion WHERE t_id = extdireccion.tipo_direccion) = 'Estructurada' then
@@ -116,15 +119,19 @@ SELECT case when info_predio.orip is null then info_predio.fmi else concat(COALE
 		   WHERE st_intersects(geometria, terreno.geometria)
 		   ORDER BY st_area(st_intersection(geometria, terreno.geometria)) desc
 		   LIMIT 1) corregimiento
-	   ,round(terreno.area_terreno, 2) area_terreno
-	   ,(select round(Area_Registral_M2,2) from $P!{datasetName}.lc_datosadicionaleslevantamientocatastral where lc_predio = info_predio.t_id) area_registral
+	   , CASE WHEN FLOOR(terreno.area_geom/10000) = 0 THEN CONCAT(TRUNC(terreno.area_geom, 1), ' m2') ELSE CONCAT(FLOOR(terreno.area_geom/10000), ' ha ', TRUNC(((terreno.area_geom/10000) - FLOOR(terreno.area_geom/10000))*10000, 1), ' m2') END as area_terreno
+	   ,(
+		   SELECT CASE WHEN FLOOR(COALESCE(Area_Registral_M2, 0)/10000) = 0 THEN CONCAT(TRUNC(COALESCE(Area_Registral_M2, 0), 1), ' m2') ELSE CONCAT(FLOOR(COALESCE(Area_Registral_M2, 0)/10000), ' ha ', TRUNC(((COALESCE(Area_Registral_M2,0)/10000) - FLOOR(COALESCE(Area_Registral_M2,0)/10000))*10000, 1), ' m2') END
+		   FROM $P!{datasetName}.lc_datosadicionaleslevantamientocatastral
+		   WHERE lc_predio = info_predio.t_id) area_registral
+	   , es_baldio
 	   ,info_total_interesados.tipo_documento
 	   ,info_total_interesados.documento_identidad
        ,coalesce(info_total_interesados.nombre, 'no hay interesado') AS interesado_nombre
        ,info_total_interesados.agrupacion_interesado AS diferenciacion
 	   ,CASE WHEN ST_NumGeometries(terreno.geometria) > 1 THEN true ELSE false END AS multiparte
 	   ,ST_NumGeometries(terreno.geometria) AS num_partes
-FROM (SELECT * FROM $P!{datasetName}.lc_terreno where t_id in (select id_terreno from terreno_seleccionado)) AS terreno
+FROM (SELECT *, COALESCE(st_area(geometria), 0)::NUMERIC as area_geom FROM $P!{datasetName}.lc_terreno where t_id in (select id_terreno from terreno_seleccionado)) AS terreno
 LEFT JOIN $P!{datasetName}.col_uebaunit ON terreno.t_id = col_uebaunit.ue_lc_terreno
 LEFT JOIN info_predio ON col_uebaunit.baunit = info_predio.t_id
 LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.predio_t_id
@@ -137,11 +144,12 @@ LIMIT 1]]>
 	<field name="nombre" class="java.lang.String"/>
 	<field name="departamento" class="java.lang.String"/>
 	<field name="municipio" class="java.lang.String"/>
-	<field name="area_construida" class="java.lang.Double"/>
+	<field name="area_construida" class="java.lang.String"/>
 	<field name="direccion" class="java.lang.String"/>
 	<field name="corregimiento" class="java.lang.String"/>
-	<field name="area_terreno" class="java.lang.Double"/>
-	<field name="area_registral" class="java.lang.Double"/>
+	<field name="area_terreno" class="java.lang.String"/>
+	<field name="es_baldio" class="java.lang.Boolean"/>
+	<field name="area_registral" class="java.lang.String"/>
 	<field name="tipo_documento" class="java.lang.String"/>
 	<field name="documento_identidad" class="java.lang.String"/>
 	<field name="interesado_nombre" class="java.lang.String"/>
@@ -679,7 +687,7 @@ LIMIT 1]]>
 					<font size="6"/>
 					<paragraph leftIndent="5"/>
 				</textElement>
-				<textFieldExpression><![CDATA[(FLOOR($F{area_terreno}/10000)==0?$F{area_terreno}+" m2": FLOOR($F{area_terreno}/10000).intValue() +" ha "+ String.format("%.1f", (double) ((($F{area_terreno}/10000)-FLOOR($F{area_terreno}/10000))*10000))+" m2")]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{area_terreno}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="10" y="493" width="105" height="10" uuid="c6a159dc-0247-4705-a5d2-6772b06783dc">
@@ -703,7 +711,7 @@ LIMIT 1]]>
 					<font size="6"/>
 					<paragraph leftIndent="5"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{area_construida}+" m2"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{area_construida}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="10" y="503" width="105" height="10" uuid="d21799a5-de6d-4133-a1c6-02df43517693">
@@ -1085,7 +1093,7 @@ LIMIT 1]]>
 					<font size="6"/>
 					<paragraph leftIndent="5"/>
 				</textElement>
-				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{es_baldio} ? $F{area_terreno} : ""]]></textFieldExpression>
 			</textField>
 		</band>
 		<band height="53">
@@ -1152,7 +1160,7 @@ LIMIT 1]]>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Justified"/>
-				<textFieldExpression><![CDATA["El inmueble "+($F{direccion} != null? "denominado "+$F{direccion} +", " : "sin dirección asociada, ") +" identificado "+($F{numero_predial} != null?"con número predial "+$F{numero_predial}:"sin número predial, ")+($F{fmi} != null? " cuyo folio de matrícula "+$F{fmi}: "sin folio de matrícula")+($F{area_registral} !=null? " con área registra de "+(FLOOR($F{area_registral}/10000)==0?$F{area_registral}+" m2": FLOOR($F{area_registral}/10000).intValue() +" ha "+ String.format("%.1f", (double) ((($F{area_registral}/10000)-FLOOR($F{area_registral}/10000))*10000))+" m2"):" sin área registral")+", y que una vez validada y actualizada su cabida por el método indirecto, "+($F{num_partes} == 1? "genera un globo de terreno con área de": "genera ("+$F{num_partes}+")  globos de terreno con área total de ")+(FLOOR($F{area_terreno}/10000)==0?$F{area_terreno}+" m2": FLOOR($F{area_terreno}/10000).intValue() +" ha "+ String.format("%.1f", (double) ((($F{area_terreno}/10000)-FLOOR($F{area_terreno}/10000))*10000))+" m2")+" , presenta los siguientes linderos, referidos al sistema de referencia oficial Magna Sirgas Origen Nacional:"]]></textFieldExpression>
+				<textFieldExpression><![CDATA["El inmueble "+($F{direccion} != null? "denominado "+$F{direccion} +", " : "sin dirección asociada, ") +" identificado "+($F{numero_predial} != null?"con número predial "+$F{numero_predial}:"sin número predial, ")+($F{fmi} != null? " cuyo folio de matrícula "+$F{fmi}: "sin folio de matrícula")+($F{area_registral} !=null? " con área registra de "+$F{area_registral}:" sin área registral")+", y que una vez validada y actualizada su cabida por el método indirecto, "+($F{num_partes} == 1? "genera un globo de terreno con área de": "genera ("+$F{num_partes}+")  globos de terreno con área total de ")+$F{area_terreno}+" , presenta los siguientes linderos, referidos al sistema de referencia oficial Magna Sirgas Origen Nacional:"]]></textFieldExpression>
 			</textField>
 		</band>
 		<band height="46">

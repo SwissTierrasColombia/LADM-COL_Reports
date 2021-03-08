@@ -29,6 +29,7 @@ info_predio AS (
 		,lc_predio.local_id
 		,lc_predio.departamento
 		,lc_predio.municipio
+		,(select ilicode='Publico.Baldio' from ladm_lev_cat_v1.lc_prediotipo where t_id = lc_predio.tipo) as es_baldio
 		,lc_predio.numero_predial_anterior
 		FROM ladm_lev_cat_v1.lc_predio WHERE lc_predio.t_id IN (SELECT * FROM predio_seleccionado)
 ),
@@ -71,10 +72,12 @@ SELECT case when info_predio.orip is null then info_predio.fmi else concat(COALE
        ,info_predio.departamento
        ,info_predio.municipio
 	   ,(
-		   select COALESCE(round(sum(st_area(geometria))::numeric, 2), 0)
-		   from ladm_lev_cat_v1.lc_unidadconstruccion
-		   where lc_construccion in (select col_uebaunit.ue_lc_construccion from ladm_lev_cat_v1.col_uebaunit where baunit = info_predio.t_id and col_uebaunit.ue_lc_construccion IS NOT NULL)
-	   ) area_construida
+		   select CASE WHEN FLOOR(area_geom/10000) = 0 THEN CONCAT(TRUNC(area_geom, 2), ' m2') ELSE CONCAT(FLOOR(area_geom/10000), ' ha ', TRUNC(((area_geom/10000) - FLOOR(area_geom/10000))*10000, 2), ' m2') END
+		   from (
+			   select COALESCE(round(sum(st_area(geometria))::numeric, 2), 0) as area_geom
+		   	   from ladm_lev_cat_v1.lc_unidadconstruccion
+		       where lc_construccion in (select col_uebaunit.ue_lc_construccion from ladm_lev_cat_v1.col_uebaunit where baunit = info_predio.t_id and col_uebaunit.ue_lc_construccion IS NOT NULL)
+		   ) as calculo_area_construida ) area_construida
 	   ,(
 		   SELECT
 		   case when (SELECT dispname FROM ladm_lev_cat_v1.extdireccion_tipo_direccion WHERE t_id = extdireccion.tipo_direccion) = 'Estructurada' then
@@ -98,15 +101,19 @@ SELECT case when info_predio.orip is null then info_predio.fmi else concat(COALE
 		   WHERE st_intersects(geometria, terreno.geometria)
 		   ORDER BY st_area(st_intersection(geometria, terreno.geometria)) desc
 		   LIMIT 1) corregimiento
-	   ,round(terreno.area_terreno, 2) area_terreno
-	   ,(select round(Area_Registral_M2,2) from ladm_lev_cat_v1.lc_datosadicionaleslevantamientocatastral where lc_predio = info_predio.t_id) area_registral
+	   , CASE WHEN FLOOR(terreno.area_geom/10000) = 0 THEN CONCAT(TRUNC(terreno.area_geom, 1), ' m2') ELSE CONCAT(FLOOR(terreno.area_geom/10000), ' ha ', TRUNC(((terreno.area_geom/10000) - FLOOR(terreno.area_geom/10000))*10000, 1), ' m2') END as area_terreno
+	   ,(
+		   SELECT CASE WHEN FLOOR(COALESCE(Area_Registral_M2, 0)/10000) = 0 THEN CONCAT(TRUNC(COALESCE(Area_Registral_M2, 0), 1), ' m2') ELSE CONCAT(FLOOR(COALESCE(Area_Registral_M2, 0)/10000), ' ha ', TRUNC(((COALESCE(Area_Registral_M2,0)/10000) - FLOOR(COALESCE(Area_Registral_M2,0)/10000))*10000, 1), ' m2') END
+		   FROM ladm_lev_cat_v1.lc_datosadicionaleslevantamientocatastral
+		   WHERE lc_predio = info_predio.t_id) area_registral
+	   , es_baldio
 	   ,info_total_interesados.tipo_documento
 	   ,info_total_interesados.documento_identidad
        ,coalesce(info_total_interesados.nombre, 'no hay interesado') AS interesado_nombre
        ,info_total_interesados.agrupacion_interesado AS diferenciacion
 	   ,CASE WHEN ST_NumGeometries(terreno.geometria) > 1 THEN true ELSE false END AS multiparte
 	   ,ST_NumGeometries(terreno.geometria) AS num_partes
-FROM (SELECT * FROM ladm_lev_cat_v1.lc_terreno where t_id in (select id_terreno from terreno_seleccionado)) AS terreno
+FROM (SELECT *, COALESCE(st_area(geometria), 0)::NUMERIC as area_geom FROM ladm_lev_cat_v1.lc_terreno where t_id in (select id_terreno from terreno_seleccionado)) AS terreno
 LEFT JOIN ladm_lev_cat_v1.col_uebaunit ON terreno.t_id = col_uebaunit.ue_lc_terreno
 LEFT JOIN info_predio ON col_uebaunit.baunit = info_predio.t_id
 LEFT JOIN info_total_interesados ON info_predio.t_id = info_total_interesados.predio_t_id

@@ -307,6 +307,7 @@ info_total_interesados AS (
 	SELECT * FROM info_interesado UNION all SELECT * FROM info_agrupacion
 )
 SELECT
+    distinct
 	id
 	,desde
 	,hasta
