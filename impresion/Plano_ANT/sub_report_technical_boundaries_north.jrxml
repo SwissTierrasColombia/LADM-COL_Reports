@@ -229,7 +229,7 @@ nodos_lindero_ubicacion AS (
 	ORDER BY code, st_distance(nl.geom, plo.geom)
 ),
 secuencia_nodos AS (
-	SELECT t_id, array_to_string(array_agg(nlu.id || ': N=' || round(y::numeric,2) || 'm' || ', E=' || round(x::numeric,2) || 'm'), '; ') AS nodos
+	SELECT t_id, array_to_string(array_agg(nlu.id || ': N=' || trunc(y,2) || 'm' || ', E=' || trunc(x,2) || 'm'), '; ') AS nodos
 	FROM nodos_lindero_ubicacion AS nlu
 	GROUP BY t_id
 ),
@@ -328,10 +328,10 @@ SELECT
 	,desde
 	,hasta
 	,ubicacion
-	, (SELECT x FROM puntos_lindero_ordenados WHERE id = desde LIMIT 1) AS xi
-	, (SELECT y FROM puntos_lindero_ordenados WHERE id = desde LIMIT 1) AS yi
-	, (SELECT x FROM puntos_lindero_ordenados WHERE id = hasta LIMIT 1) AS xf
-	, (SELECT y FROM puntos_lindero_ordenados WHERE id = hasta LIMIT 1) AS yf
+	, (SELECT trunc(x,2) FROM puntos_lindero_ordenados WHERE id = desde LIMIT 1) AS xi
+	, (SELECT trunc(y,2) FROM puntos_lindero_ordenados WHERE id = desde LIMIT 1) AS yi
+	, (SELECT trunc(x,2) FROM puntos_lindero_ordenados WHERE id = hasta LIMIT 1) AS xf
+	, (SELECT trunc(y,2) FROM puntos_lindero_ordenados WHERE id = hasta LIMIT 1) AS yf
 	, COALESCE(info_total_interesados.nombre, 'INDETERMINADO') AS interesado
 	, COALESCE(info_total_interesados.agrupacion_interesado, 'INDETERMINADO') AS tipo_interesado
 	, round(st_length(colindantes.geom)::numeric,1) distancia
@@ -384,7 +384,7 @@ ORDER BY id]]>
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Justified" verticalAlignment="Middle" markup="html">
-					<font size="9"/>
+					<font size="10"/>
 					<paragraph lineSpacing="Single" lineSpacingSize="1.0" firstLineIndent="10" leftIndent="5" rightIndent="5" tabStopWidth="20"/>
 				</textElement>
 				<textFieldExpression><![CDATA["<b>LINDERO " + $F{id}+ ":</b> Inicia en el punto " + $F{desde} + " con coordenadas N=" + $F{yi} + "m, E=" + $F{xi} + "m" + ($F{nodos} != null ? " en línea quebrada" :" en línea recta") + " y en sentido " + $F{sentido} +  ($F{nodos} != null ? " pasando por los puntos y coordenadas " + $F{nodos} + ", con una distancia acumulada de " :" en distancia de ") + $F{distancia} + "m hasta el punto " + $F{hasta} + " con coordenadas N=" + $F{yf} + "m, E="  + $F{xf} + "m" +($V{REPORT_COUNT}.equals($F{total_linderos}.intValue()) ? ", con el cual cierra el polígono," : ",")  + " colindando con "  + ($F{tipo_interesado}.equals("agrupacion")? "la agrupación conformada por "+ $F{interesado} +" y otros": $F{interesado})  +"."]]></textFieldExpression>

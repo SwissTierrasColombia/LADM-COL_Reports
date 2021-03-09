@@ -213,7 +213,7 @@ nodos_lindero_ubicacion AS (
 	ORDER BY code, st_distance(nl.geom, plo.geom)
 ),
 secuencia_nodos AS (
-	SELECT t_id, array_to_string(array_agg(nlu.id || ': N=' || round(y::numeric,2) || 'm' || ', E=' || round(x::numeric,2) || 'm'), '; ') AS nodos
+	SELECT t_id, array_to_string(array_agg(nlu.id || ': N=' || trunc(y,2) || 'm' || ', E=' || trunc(x,2) || 'm'), '; ') AS nodos
 	FROM nodos_lindero_ubicacion AS nlu
 	GROUP BY t_id
 ),
@@ -312,10 +312,10 @@ SELECT
 	,desde
 	,hasta
 	,ubicacion
-	, (SELECT x FROM puntos_lindero_ordenados WHERE id = desde LIMIT 1) AS xi
-	, (SELECT y FROM puntos_lindero_ordenados WHERE id = desde LIMIT 1) AS yi
-	, (SELECT x FROM puntos_lindero_ordenados WHERE id = hasta LIMIT 1) AS xf
-	, (SELECT y FROM puntos_lindero_ordenados WHERE id = hasta LIMIT 1) AS yf
+	, (SELECT trunc(x,2) FROM puntos_lindero_ordenados WHERE id = desde LIMIT 1) AS xi
+	, (SELECT trunc(y,2) FROM puntos_lindero_ordenados WHERE id = desde LIMIT 1) AS yi
+	, (SELECT trunc(x,2) FROM puntos_lindero_ordenados WHERE id = hasta LIMIT 1) AS xf
+	, (SELECT trunc(y,2) FROM puntos_lindero_ordenados WHERE id = hasta LIMIT 1) AS yf
 	, COALESCE(info_total_interesados.nombre, 'INDETERMINADO') AS interesado
 	, COALESCE(info_total_interesados.agrupacion_interesado, 'INDETERMINADO') AS tipo_interesado
 	, round(st_length(colindantes.geom)::numeric,1) distancia
