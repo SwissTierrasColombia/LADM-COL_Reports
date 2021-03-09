@@ -62,7 +62,7 @@ FROM (
             FROM (
                 SELECT (left(right(info_predio.numero_predial,15),6) ||
                 (CASE WHEN info_total_interesados.agrupacion_interesado = 'agrupacion'
-                THEN COALESCE(' ' || 'AGRUPACIÓN DE ' || info_total_interesados.nombre || ' Y OTROS', ' INDETERMINADO')
+                THEN COALESCE(' ' || info_total_interesados.nombre || ' Y OTROS', ' INDETERMINADO')
                 ELSE COALESCE(' ' || info_total_interesados.nombre, ' INDETERMINADO') END)) AS predio
             ) AS l)) AS properties
             ,ST_AsGeoJSON(terrenos.geometria, 4, 0)::json AS geometry

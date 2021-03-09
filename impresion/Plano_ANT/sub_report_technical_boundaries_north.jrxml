@@ -371,7 +371,7 @@ ORDER BY id]]>
 			<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 			<textField textAdjust="StretchHeight" pattern="" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="536" height="10" isPrintWhenDetailOverflows="true" uuid="e9c4fcf3-43da-4f4c-b8f9-7ef03c16a6d9">
+				<reportElement x="0" y="0" width="536" height="10" isPrintWhenDetailOverflows="true" uuid="e9c4fcf3-43da-4f4c-b8f9-7ef03c16a6d9">
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>

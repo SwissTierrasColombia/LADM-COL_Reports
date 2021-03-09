@@ -379,7 +379,7 @@ ORDER BY id]]>
 		<band height="19" splitType="Stretch">
 			<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
 			<textField textAdjust="StretchHeight" pattern="" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="536" height="10" isPrintWhenDetailOverflows="true" uuid="e9c4fcf3-43da-4f4c-b8f9-7ef03c16a6d9">
+				<reportElement x="0" y="0" width="536" height="10" isPrintWhenDetailOverflows="true" uuid="e9c4fcf3-43da-4f4c-b8f9-7ef03c16a6d9">
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -395,7 +395,7 @@ ORDER BY id]]>
 					<font size="9"/>
 					<paragraph lineSpacing="Single" lineSpacingSize="2.0" firstLineIndent="20" leftIndent="5" rightIndent="5"/>
 				</textElement>
-				<textFieldExpression><![CDATA["<b>LINDERO " + $F{id}+ ":</b> Inicia en el punto " + $F{desde} + " con coordenadas N=" + $F{yi} + "m, E=" + $F{xi} + "m" + ($F{nodos} != null ? " en línea quebrada" :" en línea recta") + " y en sentido " + $F{sentido} +  ($F{nodos} != null ? " pasando por los puntos y coordenadas " + $F{nodos} + ", con una distancia acumulada de " :" en distancia de ") + $F{distancia} + "m hasta el punto " + $F{hasta} + " con coordenadas N=" + $F{yf} + "m, E="  + $F{xf} + "m" +($V{REPORT_COUNT}.equals($F{total_linderos}.intValue()) ? ", con el cual cierra el polígono," : ",")  + " colindando con "  + ($F{tipo_interesado}.equals("agrupacion")? "la agrupación conformada por "+ $F{interesado} +" y otros": $F{interesado})  +"."]]></textFieldExpression>
+				<textFieldExpression><![CDATA["<b>LINDERO " + $F{id}+ ":</b> Inicia en el punto " + $F{desde} + " con coordenadas N=" + $F{yi} + "m, E=" + $F{xi} + "m" + ($F{nodos} != null ? " en línea quebrada" :" en línea recta") + " y en sentido " + $F{sentido} +  ($F{nodos} != null ? " pasando por los puntos y coordenadas " + $F{nodos} + ", con una distancia acumulada de " :" en distancia de ") + $F{distancia} + "m hasta el punto " + $F{hasta} + " con coordenadas N=" + $F{yf} + "m, E="  + $F{xf} + "m" +($V{REPORT_COUNT}.equals($F{total_linderos}.intValue()) ? ", con el cual cierra el polígono," : ",")  + " colindando con "  + ($F{tipo_interesado}.equals("agrupacion")? "la agrupación conformada por "+ $F{interesado} +" y otros": $F{interesado}) + "."]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
