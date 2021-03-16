@@ -343,7 +343,8 @@ SELECT
 	, (SELECT trunc(y,2) FROM puntos_lindero_ordenados WHERE id = hasta LIMIT 1) AS yf
 	, COALESCE(info_total_interesados.nombre, 'INDETERMINADO') AS interesado
 	, COALESCE(info_total_interesados.agrupacion_interesado, 'INDETERMINADO') AS tipo_interesado
-	, round(st_length(colindantes.geom)::numeric,1) distancia
+	, COALESCE((select numero_predial from $P!{datasetName}.lc_predio where t_id = (select baunit from $P!{datasetName}.col_uebaunit where col_uebaunit.ue_lc_terreno = t_id_terreno limit 1)), 'INDETERMINADO') AS numero_predial_colindante
+	, trunc(st_length(colindantes.geom)::numeric,1) distancia
 	, (SELECT nodos FROM secuencia_nodos WHERE t_id = colindantes.t_id_linderos LIMIT 1) AS nodos
 	, round(degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2)))::numeric, 2) AS degrees
 	,CASE WHEN degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2))) BETWEEN 360-(SELECT tolerancia_sentidos FROM parametros) AND 360 or degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2))) BETWEEN 0 AND (SELECT tolerancia_sentidos FROM parametros) THEN 'norte'
@@ -370,6 +371,7 @@ ORDER BY id]]>
 	<field name="yf" class="java.math.BigDecimal"/>
 	<field name="interesado" class="java.lang.String"/>
 	<field name="tipo_interesado" class="java.lang.String"/>
+	<field name="numero_predial_colindante" class="java.lang.String"/>
 	<field name="distancia" class="java.math.BigDecimal"/>
 	<field name="nodos" class="java.lang.String"/>
 	<field name="degrees" class="java.math.BigDecimal"/>
@@ -395,7 +397,7 @@ ORDER BY id]]>
 					<font size="10"/>
 					<paragraph lineSpacing="Single" lineSpacingSize="2.0" firstLineIndent="20" leftIndent="5" rightIndent="5"/>
 				</textElement>
-				<textFieldExpression><![CDATA["<b>LINDERO " + $F{id}+ ":</b> Inicia en el punto " + $F{desde} + " con coordenadas N=" + $F{yi} + "m, E=" + $F{xi} + "m" + ($F{nodos} != null ? " en línea quebrada" :" en línea recta") + " y en sentido " + $F{sentido} +  ($F{nodos} != null ? " pasando por los puntos y coordenadas " + $F{nodos} + ", con una distancia acumulada de " :" en distancia de ") + $F{distancia} + "m hasta el punto " + $F{hasta} + " con coordenadas N=" + $F{yf} + "m, E="  + $F{xf} + "m " +($V{REPORT_COUNT}.equals($F{total_linderos}.intValue()) ? ", con el cual cierra el polígono," : ",")  + " colindando con "  + ($F{tipo_interesado}.equals("agrupacion")? "la agrupación conformada por "+ $F{interesado} +" y otros": $F{interesado})  +"."]]></textFieldExpression>
+				<textFieldExpression><![CDATA["<b>LINDERO " + $F{id}+ ":</b> Inicia en el punto " + $F{desde} + " con coordenadas N=" + $F{yi} + "m, E=" + $F{xi} + "m" + ($F{nodos} != null ? " en línea quebrada" :" en línea recta") + " y en sentido " + $F{sentido} +  ($F{nodos} != null ? " pasando por los puntos y coordenadas " + $F{nodos} + ", con una distancia acumulada de " :" en distancia de ") + $F{distancia} + "m hasta el punto " + $F{hasta} + " con coordenadas N=" + $F{yf} + "m, E="  + $F{xf} + "m " +($V{REPORT_COUNT}.equals($F{total_linderos}.intValue()) ? ", con el cual cierra el polígono," : ",")  + " colindando con "  + ($F{tipo_interesado}.equals("agrupacion")? "la agrupación conformada por "+ $F{interesado} +" Y OTROS": $F{interesado}) + ($F{numero_predial_colindante}.equals("INDETERMINADO")? " sin número predial":" con número predial "+$F{numero_predial_colindante}) + "."]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>

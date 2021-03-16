@@ -2,8 +2,8 @@ WITH
 -- Se definen los parametos de la consulta
 parametros AS (
   SELECT
-    1458 	AS terreno_t_id, --$P{id}
-     1 		AS criterio_punto_inicial, --tipo de criterio para seleccionar el punto inicial de la enumeración del terreno, valores posibles: 1 (punto mas cercano al noroeste), 2 (punto mas cercano al noreste) parametrizar $P{criterio_punto_inicial}
+    2675 	AS terreno_t_id,
+     1 		AS criterio_punto_inicial, --tipo de criterio para seleccionar el punto inicial de la enumeración del terreno, valores posibles: 1 (punto mas cercano al noroeste), 2 (punto mas cercano al noreste)
      4		AS criterio_observador, --1: Centroide, 2: Centro del extent, 3: punto en la superficie, 4: Punto mas cercano al centroide dentro del poligono
 	true	AS incluir_tipo_derecho --Mostrar el tipo de derecho de cada interesado (booleano)
 ),
@@ -168,7 +168,7 @@ puntos_terreno_ordenados AS (
 ),
 puntos_lindero_ordenados AS (
     SELECT * FROM (
-        SELECT DISTINCT ON (t_id) t_id, id, st_distance(puntos_lindero.geom, puntos_terreno_ordenados.geom) AS distance, puntos_lindero.geom, round(st_x(puntos_lindero.geom)::numeric,2) x, round(st_y(puntos_lindero.geom)::numeric, 3) y, parte, punto_inicial, punto_final
+        SELECT DISTINCT ON (t_id) t_id, id, st_distance(puntos_lindero.geom, puntos_terreno_ordenados.geom) AS distance, puntos_lindero.geom, trunc(st_x(puntos_lindero.geom)::numeric,2) x, trunc(st_y(puntos_lindero.geom)::numeric, 2) y, parte, punto_inicial, punto_final
         FROM puntos_lindero, puntos_terreno_ordenados ORDER BY t_id, distance
         LIMIT (SELECT count(t_id) FROM puntos_lindero)
     ) tmp_puntos_lindero_ordenados ORDER BY id
@@ -212,7 +212,7 @@ nodos_lindero_ubicacion AS (
 	ORDER BY code, st_distance(nl.geom, plo.geom)
 ),
 secuencia_nodos AS (
-	SELECT t_id, array_to_string(array_agg(nlu.id || ': N=' || round(y::numeric,2) || ', E=' || round(x::numeric,2) ), '; ') AS nodos
+	SELECT t_id, array_to_string(array_agg(nlu.id || ': N=' || trunc(y,2) || ', E=' || trunc(x,2) ), '; ') AS nodos
 	FROM nodos_lindero_ubicacion AS nlu
 	GROUP BY t_id
 ),
@@ -261,73 +261,23 @@ SELECT
   , ubicacion
   , nupre
   , CASE WHEN numero_predial is null AND matricula_inmobiliaria IS NULL AND nombre IS NULL THEN 'ÁREA INDETERMINADA'
-     ELSE COALESCE(numero_predial || ';','') || COALESCE('FMI: ' || matricula_inmobiliaria || ';','') || COALESCE('Nombre: ' || nombre ,'')
+     ELSE COALESCE(numero_predial || ';','') || COALESCE('FMI: ' || matricula_inmobiliaria || ';','') || COALESCE('NOMBRE: ' || UPPER(nombre), '')
     END AS predio
   , lc_predio.t_id
-  , COALESCE(interesado, 'INDETERMINADO') AS interesado
-  , round(st_length(colindantes.geom)::numeric, 1) distancia
+  , trunc(st_length(colindantes.geom)::numeric, 2) distancia,
+  COALESCE((SELECT
+	CASE WHEN lc_derecho.interesado_lc_interesado is not NULL THEN
+		(SELECT UPPER(( coalesce(primer_nombre,'') || coalesce(' ' || segundo_nombre, '') || coalesce(' ' || primer_apellido, '') || coalesce(' ' || segundo_apellido, '') ) || ( coalesce(razon_social, '') )) FROM ladm_lev_cat_v1.lc_interesado WHERE t_id = lc_derecho.interesado_lc_interesado)
+	ELSE
+		(SELECT UPPER(( coalesce(primer_nombre,'') || coalesce(' ' || segundo_nombre, '') || coalesce(' ' || primer_apellido, '') || coalesce(' ' || segundo_apellido, '') ) || ( coalesce(razon_social, '') )) || ' Y OTROS' FROM (SELECT * FROM ladm_lev_cat_v1.lc_agrupacioninteresados WHERE t_id = lc_derecho.interesado_lc_agrupacioninteresados) as agrupacion_filtrada
+		 JOIN ladm_lev_cat_v1.col_miembros ON agrupacion = agrupacion_filtrada.t_id
+		 JOIN ladm_lev_cat_v1.lc_interesado ON lc_interesado.t_id = col_miembros.interesado_lc_interesado LIMIT 1)
+	END as interesado
+	from ladm_lev_cat_v1.lc_derecho where lc_derecho.unidad = lc_predio.t_id limit 1), 'INDETERMINADO') as interesado
 FROM
 colindantes
 LEFT JOIN ladm_lev_cat_v1.lc_terreno ON lc_terreno.t_id = colindantes.t_id_terreno
 LEFT JOIN ladm_lev_cat_v1.col_uebaunit ON colindantes.t_id_terreno = ue_lc_terreno
 LEFT JOIN ladm_lev_cat_v1.lc_predio ON lc_predio.t_id = baunit
-LEFT JOIN
-(
-  SELECT t_id,
-	array_to_string(array_agg(( coalesce(primer_nombre,'') || coalesce(' ' || segundo_nombre, '') || coalesce(' ' || primer_apellido, '') || coalesce(' ' || segundo_apellido, '') )
-				|| ( coalesce(razon_social, '') )
-				|| ', ' || (SELECT dispname FROM ladm_lev_cat_v1.lc_interesadodocumentotipo WHERE t_id = tipo_documento) || ': '
-				|| documento_identidad
-				|| CASE WHEN (SELECT incluir_tipo_derecho FROM parametros) THEN
-					' (' || (SELECT dispname FROM ladm_lev_cat_v1.lc_derechotipo WHERE t_id = tipo_derecho) || ')' --opcional: ver tipo de derecho de cada interesado $P!{datasetName}
-				  ELSE '' END
-				) , '; ')
-			  AS interesado
-  FROM
-  (
-	--navegar agrupación de interesados
-	SELECT * FROM
-		ladm_lev_cat_v1.lc_predio
-		LEFT JOIN
-		(
-			SELECT
-			  primer_nombre
-			  ,segundo_nombre
-			  ,primer_apellido
-			  ,segundo_apellido
-			  ,razon_social
-			  ,tipo_documento
-			  ,documento_identidad
-			  ,unidad
-			  ,lc_derecho.tipo AS tipo_derecho
-			FROM
-			  ladm_lev_cat_v1.lc_derecho
-			  JOIN ladm_lev_cat_v1.lc_agrupacioninteresados ON lc_agrupacioninteresados.t_id = interesado_lc_agrupacioninteresados
-			  JOIN ladm_lev_cat_v1.col_miembros ON agrupacion = lc_agrupacioninteresados.t_id
-			  JOIN ladm_lev_cat_v1.lc_interesado ON lc_interesado.t_id = col_miembros.interesado_lc_interesado
-		 ) agrupacion  ON lc_predio.t_id = agrupacion.unidad
-	UNION
-	--navegar agrupación de interesados
-	SELECT * FROM
-		ladm_lev_cat_v1.lc_predio
-		LEFT JOIN
-		(
-			SELECT
-			  primer_nombre
-			  ,segundo_nombre
-			  ,primer_apellido
-			  ,segundo_apellido
-			  ,razon_social
-			  ,tipo_documento
-			  ,documento_identidad
-			  ,unidad
-			  ,lc_derecho.tipo AS tipo_derecho
-			FROM
-			  ladm_lev_cat_v1.lc_derecho
-			  JOIN ladm_lev_cat_v1.lc_interesado ON lc_interesado.t_id =interesado_lc_interesado
-		) interesado ON lc_predio.t_id = interesado.unidad
-  ) interesados
-  GROUP BY t_id
-) interesados ON interesados.t_id = lc_predio.t_id
 WHERE parte = 1
 ORDER BY id

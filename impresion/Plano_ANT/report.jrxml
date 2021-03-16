@@ -1125,7 +1125,7 @@ LIMIT 1]]>
 				<subreportExpression><![CDATA["sub_report_neighbors_parts.jasper"]]></subreportExpression>
 			</subreport>
 		</band>
-		<band height="78">
+		<band height="88">
 			<staticText>
 				<reportElement x="0" y="0" width="560" height="19" forecolor="#000000" uuid="6ab642e3-12c1-4bbc-a44a-f51ec9c04477"/>
 				<textElement textAlignment="Center">
@@ -1134,7 +1134,7 @@ LIMIT 1]]>
 				<text><![CDATA[DESCRIPCIÓN TÉCNICA DE LINDEROS]]></text>
 			</staticText>
 			<subreport>
-				<reportElement x="14" y="58" width="536" height="20" uuid="3871b19b-dbbb-441b-a670-c4fb0ff110b5">
+				<reportElement x="14" y="65" width="536" height="20" uuid="3871b19b-dbbb-441b-a670-c4fb0ff110b5">
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -1160,7 +1160,7 @@ LIMIT 1]]>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Justified"/>
-				<textFieldExpression><![CDATA["El inmueble "+($F{direccion} != null? "denominado "+$F{direccion} +", " : "sin dirección asociada, ") +" identificado "+($F{numero_predial} != null?"con número predial "+$F{numero_predial}:"sin número predial, ")+($F{fmi} != null? " cuyo folio de matrícula "+$F{fmi}: "sin folio de matrícula")+($F{area_registral} !=null? " con área registra de  "+$F{area_registral}:" sin área registral")+", y que una vez validada y actualizada su cabida por el método indirecto, "+($F{num_partes} == 1? "genera un globo de terreno con área de": "genera ("+$F{num_partes}+")  globos de terreno con área total de ")+$F{area_terreno}+" , presenta los siguientes linderos, referidos al sistema de referencia oficial Magna Sirgas Origen Nacional:"]]></textFieldExpression>
+				<textFieldExpression><![CDATA["El inmueble "+($F{direccion} != null? "denominado "+$F{direccion} +", " : "sin dirección asociada, ") +" identificado "+($F{numero_predial} != null?"con número predial "+$F{numero_predial}:"sin número predial, ")+($F{fmi} != null? " cuyo folio de matrícula "+$F{fmi}: "sin folio de matrícula")+($F{area_registral} !=null? " con área registra de  "+$F{area_registral}:" sin área registral")+", y que una vez validada y actualizada su cabida por el método indirecto, "+($F{num_partes} == 1? "genera un globo de terreno con área de ": "genera ("+$F{num_partes}+") globos de terreno con área total de ")+$F{area_terreno}+", presenta los siguientes linderos, referidos al sistema de referencia oficial Magna Sirgas Origen Nacional:"]]></textFieldExpression>
 			</textField>
 		</band>
 		<band height="46">

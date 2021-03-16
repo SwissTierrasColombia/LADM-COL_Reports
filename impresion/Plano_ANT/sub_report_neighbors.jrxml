@@ -3,8 +3,8 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="sub_report_coordinates" pageWidth="595" pageHeight="842" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="5" uuid="8044c259-bf6b-4072-8923-78bca3eb0308">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="New Data Adapter "/>
-	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="539"/>
-	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="447"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="689"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="301"/>
 	<parameter name="id" class="java.lang.Integer">
 		<defaultValueExpression><![CDATA[66040]]></defaultValueExpression>
 	</parameter>
@@ -17,7 +17,7 @@
 parametros AS (
   SELECT
     $P{id} 	AS terreno_t_id,
-    $P{criterio_punto_inicial} AS criterio_punto_inicial, --tipo de criterio para seleccionar el punto inicial de la enumeración del terreno, valores posibles: 1 (punto mas cercano al noroeste), 2 (punto mas cercano al noreste)
+    $P{criterio_punto_inicial} 		AS criterio_punto_inicial, --tipo de criterio para seleccionar el punto inicial de la enumeración del terreno, valores posibles: 1 (punto mas cercano al noroeste), 2 (punto mas cercano al noreste)
      4		AS criterio_observador, --1: Centroide, 2: Centro del extent, 3: punto en la superficie, 4: Punto mas cercano al centroide dentro del poligono
 	true	AS incluir_tipo_derecho --Mostrar el tipo de derecho de cada interesado (booleano)
 ),
@@ -275,53 +275,24 @@ SELECT
   , ubicacion
   , nupre
   , CASE WHEN numero_predial is null AND matricula_inmobiliaria IS NULL AND nombre IS NULL THEN 'ÁREA INDETERMINADA'
-     ELSE COALESCE(numero_predial || ';','') || COALESCE('FMI: ' || matricula_inmobiliaria || ';','') || COALESCE('Nombre: ' || nombre ,'')
+     ELSE COALESCE(numero_predial || ';','') || COALESCE('FMI: ' || matricula_inmobiliaria || ';','') || COALESCE('NOMBRE: ' || UPPER(nombre), '')
     END AS predio
   , lc_predio.t_id
-  , COALESCE(interesado, 'INDETERMINADO') AS interesado
-  , trunc(st_length(colindantes.geom)::numeric, 2) distancia
+  , trunc(st_length(colindantes.geom)::numeric, 2) distancia,
+  COALESCE((SELECT
+	CASE WHEN lc_derecho.interesado_lc_interesado is not NULL THEN
+		(SELECT UPPER(( coalesce(primer_nombre,'') || coalesce(' ' || segundo_nombre, '') || coalesce(' ' || primer_apellido, '') || coalesce(' ' || segundo_apellido, '') ) || ( coalesce(razon_social, '') )) FROM $P!{datasetName}.lc_interesado WHERE t_id = lc_derecho.interesado_lc_interesado)
+	ELSE
+		(SELECT UPPER(( coalesce(primer_nombre,'') || coalesce(' ' || segundo_nombre, '') || coalesce(' ' || primer_apellido, '') || coalesce(' ' || segundo_apellido, '') ) || ( coalesce(razon_social, '') )) || ' Y OTROS' FROM (SELECT * FROM $P!{datasetName}.lc_agrupacioninteresados WHERE t_id = lc_derecho.interesado_lc_agrupacioninteresados) as agrupacion_filtrada
+		 JOIN $P!{datasetName}.col_miembros ON agrupacion = agrupacion_filtrada.t_id
+		 JOIN $P!{datasetName}.lc_interesado ON lc_interesado.t_id = col_miembros.interesado_lc_interesado LIMIT 1)
+	END as interesado
+	from $P!{datasetName}.lc_derecho where lc_derecho.unidad = lc_predio.t_id limit 1), 'INDETERMINADO') as interesado
 FROM
 colindantes
 LEFT JOIN $P!{datasetName}.lc_terreno ON lc_terreno.t_id = colindantes.t_id_terreno
 LEFT JOIN $P!{datasetName}.col_uebaunit ON colindantes.t_id_terreno = ue_lc_terreno
 LEFT JOIN $P!{datasetName}.lc_predio ON lc_predio.t_id = baunit
-LEFT JOIN
-(
-  SELECT t_id,
-	array_to_string(array_agg(coalesce(nombre_completo,NULL) ) , '; ')
-			  AS interesado
-  FROM
-  (
-	-- navegar agrupación de interesados
-	SELECT * FROM
-		 $P!{datasetName}.lc_predio
-		LEFT JOIN
-		(
-			SELECT
-			  lc_interesado.nombre as nombre_completo
-			  ,unidad
-			FROM
-			  $P!{datasetName}.lc_derecho
-			  JOIN $P!{datasetName}.lc_agrupacioninteresados ON lc_agrupacioninteresados.t_id = interesado_lc_agrupacioninteresados
-			  JOIN $P!{datasetName}.col_miembros ON agrupacion = lc_agrupacioninteresados.t_id
-			  JOIN $P!{datasetName}.lc_interesado ON lc_interesado.t_id = col_miembros.interesado_lc_interesado
-		 ) agrupacion  ON lc_predio.t_id = agrupacion.unidad
-	UNION
-	-- navegar interesados
-	SELECT * FROM
-		 $P!{datasetName}.lc_predio
-		LEFT JOIN
-		(
-			SELECT
-			  lc_interesado.nombre as nombre_completo
-			  ,unidad
-			FROM
-			  $P!{datasetName}.lc_derecho
-			  JOIN $P!{datasetName}.lc_interesado ON lc_interesado.t_id =interesado_lc_interesado
-		) interesado ON lc_predio.t_id = interesado.unidad
-  ) interesados
-  GROUP BY t_id
-) interesados ON interesados.t_id = lc_predio.t_id
 WHERE parte = $P{parte}
 ORDER BY id]]>
 	</queryString>
