@@ -22,6 +22,18 @@ templates:
         default: null
       criterio_punto_inicial: !integer
         default: 1
+      zone: !string
+        default: ''
+      nameWhoElaborated: !string
+        default: ''
+      licenseWhoElaborated: !string
+        default: ''
+      nameWhoRevised: !string
+        default: ''
+      licenseWhoRevised: !string
+        default: ''
+      observationsReport: !string
+        default: ''
       title: !string
         default: "CERTIFICADO PLANO PREDIAL CATASTRAL"
       datasetName: !string

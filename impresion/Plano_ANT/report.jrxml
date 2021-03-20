@@ -15,6 +15,12 @@
 	<parameter name="datasetName" class="java.lang.String"/>
 	<parameter name="northArrowSubReport1" class="java.lang.String"/>
 	<parameter name="scalebarSubReport1" class="java.lang.String"/>
+	<parameter name="zone" class="java.lang.String"/>
+	<parameter name="nameWhoElaborated" class="java.lang.String"/>
+	<parameter name="licenseWhoElaborated" class="java.lang.String"/>
+	<parameter name="nameWhoRevised" class="java.lang.String"/>
+	<parameter name="licenseWhoRevised" class="java.lang.String"/>
+	<parameter name="observationsReport" class="java.lang.String"/>
 	<queryString>
 		<![CDATA[WITH
 terreno_seleccionado AS (
@@ -1026,17 +1032,6 @@ LIMIT 1]]>
 				</textElement>
 				<text><![CDATA[OBSERVACIONES]]></text>
 			</staticText>
-			<staticText>
-				<reportElement x="280" y="680" width="270" height="29" uuid="a5a387cc-1249-41af-a3ba-ae1031a98a5b">
-					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-				</reportElement>
-				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font size="5"/>
-					<paragraph leftIndent="5"/>
-				</textElement>
-				<text><![CDATA[Plano elaborado por el equipo técnico de SSJ de la ANT, con base en la información recolectada en el barrido predial masivo y el resultado de las verificaciones realizadas en campo.]]></text>
-			</staticText>
 			<rectangle>
 				<reportElement mode="Transparent" x="145" y="680" width="135" height="29" uuid="9a7ccedf-5372-4328-8f27-26a19ae69b35">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -1050,7 +1045,7 @@ LIMIT 1]]>
 					<font size="5"/>
 					<paragraph leftIndent="5"/>
 				</textElement>
-				<textFieldExpression><![CDATA["<b>Elaboró</b>: <br><br><br><b>Matrícula</b>:"]]></textFieldExpression>
+				<textFieldExpression><![CDATA["<b>Elaboró</b>: "+$P{nameWhoElaborated}+"<br><br><br><b>Matrícula</b>:"+$P{licenseWhoElaborated}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="145" y="680" width="135" height="29" uuid="33dd2310-2c0c-4438-85f8-f4b022d61e81">
@@ -1060,7 +1055,7 @@ LIMIT 1]]>
 					<font size="5"/>
 					<paragraph leftIndent="5"/>
 				</textElement>
-				<textFieldExpression><![CDATA["<b>Revisó</b>: <br><br><br><b>Matrícula</b>:"]]></textFieldExpression>
+				<textFieldExpression><![CDATA["<b>Revisó</b>:"+$P{nameWhoRevised}+" <br><br><br><b>Matrícula</b>:"+$P{licenseWhoRevised}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="300" y="709" width="250" height="9" uuid="2914e8ac-a28d-458e-8f0a-4c682f91504b">
@@ -1094,6 +1089,16 @@ LIMIT 1]]>
 					<paragraph leftIndent="5"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{es_baldio} ? $F{area_terreno} : ""]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="280" y="680" width="270" height="29" uuid="d94aac44-58a9-4e9a-a85a-a2d8fad628c8">
+					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle" markup="html">
+					<font size="5"/>
+					<paragraph leftIndent="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA["<b>Observación</b>:"+$P{observationsReport}]]></textFieldExpression>
 			</textField>
 		</band>
 		<band height="53">

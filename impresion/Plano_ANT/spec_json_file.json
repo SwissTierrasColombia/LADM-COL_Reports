@@ -3,6 +3,12 @@
   "outputFormat": "pdf",
   "attributes": {
     "id": "",
+    "zone": "",
+    "nameWhoElaborated": "",
+    "licenseWhoElaborated": "",
+    "nameWhoRevised": "",
+    "licenseWhoRevised": "",
+    "observationsReport": "",
     "datasetName": "",
     "map": {
       "rotation": 0,
