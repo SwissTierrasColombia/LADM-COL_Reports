@@ -10,6 +10,7 @@
 	</parameter>
 	<parameter name="criterio_punto_inicial" class="java.lang.Integer"/>
 	<parameter name="datasetName" class="java.lang.String"/>
+	<parameter name="zone" class="java.lang.String"/>
 	<parameter name="parte" class="java.lang.Integer"/>
 	<queryString language="SQL">
 		<![CDATA[WITH
@@ -187,7 +188,7 @@ puntos_lindero_ordenados AS (
 )
 SELECT "from", "to", x,y, dist FROM
 (
-	SELECT c1.parte, c1.id AS "from", CASE WHEN c1.id + 1 <= c1.punto_final THEN c1.id + 1 ELSE c1.punto_final - c1.id + c1.punto_inicial  END AS "to", trunc(c1.x,2) as x, trunc(c1.y,2) as y, trunc(st_distance(c1.geom, c2.geom)::numeric, 2) AS dist, c1.geom
+	SELECT c1.parte, c1.id AS "from", CASE WHEN c1.id + 1 <= c1.punto_final THEN c1.id + 1 ELSE c1.punto_final - c1.id + c1.punto_inicial  END AS "to", trunc(c1.x,2) as x, trunc(c1.y,2) as y, trunc(st_distance(c1.geom, c2.geom)::numeric, CASE WHEN 'ZONA_URBANA' = $P{zone} THEN 2 ELSE 1 END) AS dist, c1.geom
 	FROM puntos_lindero_ordenados c1 JOIN puntos_lindero_ordenados c2 ON c1.id + 1 = c2.id AND c1.id < c1.punto_final
 	UNION
 	SELECT c1.parte, c1.id AS "from", CASE WHEN c1.id + 1 <= c1.punto_final THEN c1.id + 1 ELSE c1.punto_final - c1.id + c1.punto_inicial  END AS "to", c1.x, c1.y, round(st_distance(c1.geom, c2.geom)::numeric, 2) AS dist, c1.geom
@@ -351,7 +352,7 @@ SELECT "from", "to", x,y, dist FROM
 				</textElement>
 				<textFieldExpression><![CDATA[$F{to}]]></textFieldExpression>
 			</textField>
-			<textField pattern="#,##0.00">
+			<textField>
 				<reportElement x="413" y="0" width="117" height="15" uuid="bdd97402-bdab-42d3-be6c-6da0aa5e9fa7">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>

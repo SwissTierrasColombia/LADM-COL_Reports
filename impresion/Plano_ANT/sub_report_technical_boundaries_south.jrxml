@@ -21,6 +21,7 @@
 	</parameter>
 	<parameter name="criterio_punto_inicial" class="java.lang.Integer"/>
 	<parameter name="datasetName" class="java.lang.String"/>
+	<parameter name="zone" class="java.lang.String"/>
 	<parameter name="parte" class="java.lang.Integer"/>
 	<queryString language="SQL">
 		<![CDATA[WITH
@@ -344,7 +345,7 @@ SELECT
 	, COALESCE(info_total_interesados.nombre, 'INDETERMINADO') AS interesado
 	, COALESCE(info_total_interesados.agrupacion_interesado, 'INDETERMINADO') AS tipo_interesado
 	, COALESCE((select numero_predial from $P!{datasetName}.lc_predio where t_id = (select baunit from $P!{datasetName}.col_uebaunit where col_uebaunit.ue_lc_terreno = t_id_terreno limit 1)), 'INDETERMINADO') AS numero_predial_colindante
-	, trunc(st_length(colindantes.geom)::numeric,1) distancia
+	, trunc(st_length(colindantes.geom)::numeric, CASE WHEN 'ZONA_URBANA' = $P{zone} THEN 2 ELSE 1 END) distancia
 	, (SELECT nodos FROM secuencia_nodos WHERE t_id = colindantes.t_id_linderos LIMIT 1) AS nodos
 	, round(degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2)))::numeric, 2) AS degrees
 	,CASE WHEN degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2))) BETWEEN 360-(SELECT tolerancia_sentidos FROM parametros) AND 360 or degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2))) BETWEEN 0 AND (SELECT tolerancia_sentidos FROM parametros) THEN 'norte'

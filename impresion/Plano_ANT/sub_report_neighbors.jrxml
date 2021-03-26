@@ -10,6 +10,7 @@
 	</parameter>
 	<parameter name="criterio_punto_inicial" class="java.lang.Integer"/>
 	<parameter name="datasetName" class="java.lang.String"/>
+	<parameter name="zone" class="java.lang.String"/>
 	<parameter name="parte" class="java.lang.Integer"/>
 	<queryString language="SQL">
 		<![CDATA[WITH
@@ -278,7 +279,7 @@ SELECT
      ELSE COALESCE(numero_predial || ';','') || COALESCE('FMI: ' || matricula_inmobiliaria || ';','') || COALESCE('NOMBRE: ' || UPPER(nombre), '')
     END AS predio
   , lc_predio.t_id
-  , trunc(st_length(colindantes.geom)::numeric, 2) distancia,
+  , trunc(st_length(colindantes.geom)::numeric, CASE WHEN 'ZONA_URBANA' = $P{zone} THEN 2 ELSE 1 END) distancia,
   COALESCE((SELECT
 	CASE WHEN lc_derecho.interesado_lc_interesado is not NULL THEN
 		(SELECT UPPER(( coalesce(primer_nombre,'') || coalesce(' ' || segundo_nombre, '') || coalesce(' ' || primer_apellido, '') || coalesce(' ' || segundo_apellido, '') ) || ( coalesce(razon_social, '') )) FROM $P!{datasetName}.lc_interesado WHERE t_id = lc_derecho.interesado_lc_interesado)
@@ -460,7 +461,7 @@ ORDER BY id]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{hasta}]]></textFieldExpression>
 			</textField>
-			<textField textAdjust="StretchHeight" pattern="#,###.00">
+			<textField textAdjust="StretchHeight">
 				<reportElement stretchType="RelativeToBandHeight" x="100" y="0" width="65" height="15" isPrintWhenDetailOverflows="true" uuid="b7c05ef6-36f7-445d-90b3-c94392e2c56b">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>

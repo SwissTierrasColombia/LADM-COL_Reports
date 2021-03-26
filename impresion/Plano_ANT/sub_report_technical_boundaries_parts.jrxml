@@ -14,6 +14,7 @@
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<parameter name="srp_id" class="java.lang.Integer"/>
 	<parameter name="srp_criterio_punto_inicial" class="java.lang.Integer"/>
+	<parameter name="srp_zone" class="java.lang.String"/>
 	<parameter name="srp_datasetName" class="java.lang.String"/>
 	<queryString>
 		<![CDATA[WITH
@@ -331,6 +332,9 @@ group by parte order by parte]]>
 				<subreportParameter name="parte">
 					<subreportParameterExpression><![CDATA[$F{parte}]]></subreportParameterExpression>
 				</subreportParameter>
+				<subreportParameter name="zone">
+					<subreportParameterExpression><![CDATA[$P{srp_zone}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["sub_report_technical_boundaries_north.jasper"]]></subreportExpression>
 			</subreport>
@@ -366,6 +370,9 @@ group by parte order by parte]]>
 				</subreportParameter>
 				<subreportParameter name="parte">
 					<subreportParameterExpression><![CDATA[$F{parte}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="zone">
+					<subreportParameterExpression><![CDATA[$P{srp_zone}]]></subreportParameterExpression>
 				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["sub_report_technical_boundaries_east.jasper"]]></subreportExpression>
@@ -403,6 +410,9 @@ group by parte order by parte]]>
 				<subreportParameter name="parte">
 					<subreportParameterExpression><![CDATA[$F{parte}]]></subreportParameterExpression>
 				</subreportParameter>
+				<subreportParameter name="zone">
+					<subreportParameterExpression><![CDATA[$P{srp_zone}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["sub_report_technical_boundaries_south.jasper"]]></subreportExpression>
 			</subreport>
@@ -438,6 +448,9 @@ group by parte order by parte]]>
 				</subreportParameter>
 				<subreportParameter name="parte">
 					<subreportParameterExpression><![CDATA[$F{parte}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="zone">
+					<subreportParameterExpression><![CDATA[$P{srp_zone}]]></subreportParameterExpression>
 				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["sub_report_technical_boundaries_west.jasper"]]></subreportExpression>

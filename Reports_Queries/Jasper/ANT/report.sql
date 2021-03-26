@@ -1,7 +1,7 @@
 WITH
 terreno_seleccionado AS (
 	SELECT lc_terreno.t_id AS id_terreno FROM ladm_lev_cat_v1.lc_terreno
-	WHERE lc_terreno.t_id = 955
+	WHERE lc_terreno.t_id = 1433
 ),
 predio_seleccionado AS (
 	SELECT col_uebaunit.baunit AS t_id FROM ladm_lev_cat_v1.col_uebaunit JOIN terreno_seleccionado ON col_uebaunit.ue_lc_terreno = terreno_seleccionado.id_terreno LIMIT 1
@@ -72,12 +72,13 @@ SELECT case when info_predio.orip is null then info_predio.fmi else concat(COALE
        ,info_predio.departamento
        ,info_predio.municipio
 	   ,(
-		   select CASE WHEN FLOOR(area_geom/10000) = 0 THEN CONCAT(TRUNC(area_geom, 2), ' m2') ELSE CONCAT(FLOOR(area_geom/10000), ' ha ', TRUNC(((area_geom/10000) - FLOOR(area_geom/10000))*10000, 2), ' m2') END
+		   select CONCAT(TRUNC(area_geom, 2), ' m2')
 		   from (
 			   select COALESCE(round(sum(st_area(geometria))::numeric, 2), 0) as area_geom
 		   	   from ladm_lev_cat_v1.lc_unidadconstruccion
 		       where lc_construccion in (select col_uebaunit.ue_lc_construccion from ladm_lev_cat_v1.col_uebaunit where baunit = info_predio.t_id and col_uebaunit.ue_lc_construccion IS NOT NULL)
-		   ) as calculo_area_construida ) area_construida
+		   ) as calculo_area_construida
+	   ) area_construida
 	   ,(
 		   SELECT
 		   case when (SELECT dispname FROM ladm_lev_cat_v1.extdireccion_tipo_direccion WHERE t_id = extdireccion.tipo_direccion) = 'Estructurada' then
@@ -101,11 +102,21 @@ SELECT case when info_predio.orip is null then info_predio.fmi else concat(COALE
 		   WHERE st_intersects(geometria, terreno.geometria)
 		   ORDER BY st_area(st_intersection(geometria, terreno.geometria)) desc
 		   LIMIT 1) corregimiento
-	   , CASE WHEN FLOOR(terreno.area_geom/10000) = 0 THEN CONCAT(TRUNC(terreno.area_geom, 1), ' m2') ELSE CONCAT(FLOOR(terreno.area_geom/10000), ' ha ', TRUNC(((terreno.area_geom/10000) - FLOOR(terreno.area_geom/10000))*10000, 1), ' m2') END as area_terreno
+	   , CASE WHEN 'ZONA_URBANA' = 'ZONA_RURAL' THEN
+		    CONCAT(TRUNC(terreno.area_geom, 1), ' m2')
+		 ELSE
+		 	CONCAT(FLOOR(terreno.area_geom/10000), ' ha + ', TRUNC(((terreno.area_geom/10000) - FLOOR(terreno.area_geom/10000))*10000, 0), ' m2')
+		 END AS area_terreno
 	   ,(
-		   SELECT CASE WHEN FLOOR(COALESCE(Area_Registral_M2, 0)/10000) = 0 THEN CONCAT(TRUNC(COALESCE(Area_Registral_M2, 0), 1), ' m2') ELSE CONCAT(FLOOR(COALESCE(Area_Registral_M2, 0)/10000), ' ha ', TRUNC(((COALESCE(Area_Registral_M2,0)/10000) - FLOOR(COALESCE(Area_Registral_M2,0)/10000))*10000, 1), ' m2') END
+		   SELECT
+		   CASE WHEN 'ZONA_URBANA' = 'ZONA_RURAL' THEN
+		       CONCAT(TRUNC(COALESCE(Area_Registral_M2, 0), 1), ' m2')
+		   ELSE
+		       CONCAT(FLOOR(COALESCE(Area_Registral_M2, 0)/10000), ' ha + ', TRUNC(((COALESCE(Area_Registral_M2,0)/10000) - FLOOR(COALESCE(Area_Registral_M2,0)/10000))*10000, 0), ' m2')
+		   END
 		   FROM ladm_lev_cat_v1.lc_datosadicionaleslevantamientocatastral
-		   WHERE lc_predio = info_predio.t_id) area_registral
+		   WHERE lc_predio = info_predio.t_id
+	   ) area_registral
 	   , es_baldio
 	   ,info_total_interesados.tipo_documento
 	   ,info_total_interesados.documento_identidad

@@ -264,7 +264,7 @@ SELECT
      ELSE COALESCE(numero_predial || ';','') || COALESCE('FMI: ' || matricula_inmobiliaria || ';','') || COALESCE('NOMBRE: ' || UPPER(nombre), '')
     END AS predio
   , lc_predio.t_id
-  , trunc(st_length(colindantes.geom)::numeric, 2) distancia,
+  , trunc(st_length(colindantes.geom)::numeric, CASE WHEN 'ZONA_URBANA' = 'ZONA_RURAL'  THEN 2 ELSE 1 END) distancia,
   COALESCE((SELECT
 	CASE WHEN lc_derecho.interesado_lc_interesado is not NULL THEN
 		(SELECT UPPER(( coalesce(primer_nombre,'') || coalesce(' ' || segundo_nombre, '') || coalesce(' ' || primer_apellido, '') || coalesce(' ' || segundo_apellido, '') ) || ( coalesce(razon_social, '') )) FROM ladm_lev_cat_v1.lc_interesado WHERE t_id = lc_derecho.interesado_lc_interesado)
