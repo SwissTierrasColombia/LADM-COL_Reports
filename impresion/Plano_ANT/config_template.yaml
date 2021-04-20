@@ -62,9 +62,6 @@ templates:
           layers:
             - type: "grid"
               renderAsSvg: true
-              unitFormat: " %s"
-              formatGroupingSeparator: "."
-              valueFormat: "###,###"
               rotateLabels: false
               numberOfLines: [4,4]
               labelColor: "#000000"
@@ -83,40 +80,11 @@ templates:
                       strokeWidth: 0.3
                       strokeColor: "#3c3c3c"
                       strokeOpacity: 0.5
-      overviewOverlayLayers: !staticLayers
-        default:
-          layers:
-            - type: "grid"
-              renderAsSvg: true
-              unitFormat: " %s"
-              formatGroupingSeparator: "."
-              valueFormat: "###,###"
-              rotateLabels: false
-              numberOfLines: [4,4]
-              labelColor: "#000000"
-              haloColor: "#ffffff"
-              haloRadius: 1
-              font:
-                size: 4
-                name: ["Arial", "Helvetica", "Nimbus Sans L", "Liberation Sans", "FreeSans", "Sans-serif"]
-              style:
-                version: 2
-                "*":
-                    symbolizers:
-                    - type: line
-                      strokeDashstyle: "solid"
-                      strokeWidth: 0.3
-                      strokeColor: "#3c3c3c"
-                      strokeOpacity: 0.5
     processors:
     - !addBackgroundLayers
       inputMapper:
           overlayLayers: staticLayers
           map: map
-    - !addBackgroundLayers
-      inputMapper:
-          overviewOverlayLayers: staticLayers
-          overviewMap: map
     - !reportBuilder
       directory: '.'
     - !createMap

@@ -23,8 +23,8 @@
         },
         {
           "geoJson": {"type": "FeatureCollection", "features": []},
-          "name": "linderos",
-          "style": "file:///styles/linderos.sld",
+          "name": "construcciones",
+          "style": "file:///styles/construccion.sld",
           "type": "geojson"
         },
         {
@@ -37,12 +37,6 @@
           "geoJson": {"type": "FeatureCollection", "features": []},
           "name": "terrenos",
           "style": "file:///styles/terrenos.sld",
-          "type": "geojson"
-        },
-        {
-          "geoJson": {"type": "FeatureCollection", "features": []},
-          "name": "construcciones",
-          "style": "file:///styles/construccion.sld",
           "type": "geojson"
         },
         {
