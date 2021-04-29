@@ -66,14 +66,20 @@
       "layers": [
         {
           "geoJson": {"type": "FeatureCollection", "features": []},
-          "name": "terrenos_overview",
-          "style": "file:///styles/terrenos_overview.sld",
+          "name": "terreno_overview",
+          "style": "file:///styles/terreno_overview.sld",
           "type": "geojson"
         },
         {
           "geoJson": {"type": "FeatureCollection", "features": []},
-          "name": "terreno_overview",
-          "style": "file:///styles/terreno_overview.sld",
+          "name": "limite_municipio_overview",
+          "style": "file:///styles/limite_municipio_overview.sld",
+          "type": "geojson"
+        },
+        {
+          "geoJson": {"type": "FeatureCollection", "features": []},
+          "name": "terrenos_overview",
+          "style": "file:///styles/terrenos_overview.sld",
           "type": "geojson"
         },
         {
@@ -86,12 +92,6 @@
           "geoJson": {"type": "FeatureCollection", "features": []},
           "name": "limite_urbano_overview",
           "style": "file:///styles/limite_urbano.sld",
-          "type": "geojson"
-        },
-        {
-          "geoJson": {"type": "FeatureCollection", "features": []},
-          "name": "limite_municipio_overview",
-          "style": "file:///styles/limite_municipio.sld",
           "type": "geojson"
         }
       ]

@@ -11,7 +11,13 @@
                 <sld:SemanticTypeIdentifier>generic:geometry</sld:SemanticTypeIdentifier>
                 <sld:SemanticTypeIdentifier>simple</sld:SemanticTypeIdentifier>
                 <sld:Rule>
-                    <sld:Name>punto_lindero</sld:Name>
+                    <sld:Name>start_end_point</sld:Name>
+                    <ogc:Filter>
+                      <ogc:PropertyIsEqualTo>
+                        <ogc:PropertyName>priority</ogc:PropertyName>
+                        <ogc:Literal>10</ogc:Literal>
+                      </ogc:PropertyIsEqualTo>
+                    </ogc:Filter>
                     <sld:PointSymbolizer>
                         <sld:Graphic>
                             <sld:Mark>
@@ -34,7 +40,7 @@
                             <sld:CssParameter name="font-family">Arial</sld:CssParameter>
                             <sld:CssParameter name="font-size">6.0</sld:CssParameter>
                             <sld:CssParameter name="font-style">normal</sld:CssParameter>
-                            <sld:CssParameter name="font-weight">bold</sld:CssParameter>
+                            <sld:CssParameter name="font-weight">normal</sld:CssParameter>
                         </sld:Font>
                         <sld:LabelPlacement>
                             <sld:PointPlacement>
@@ -62,6 +68,62 @@
                         <sld:VendorOption name="spaceAround">10</sld:VendorOption>
                         <sld:VendorOption name="goodnessOfFit">0.3</sld:VendorOption>
                         <sld:VendorOption name="displacementMode">NE, NW, SW, SE, S, N, E, W</sld:VendorOption>
+                    </sld:TextSymbolizer>
+                </sld:Rule>
+                <sld:Rule>
+                    <sld:Name>midpoint</sld:Name>
+                    <ogc:Filter>
+                      <ogc:PropertyIsEqualTo>
+                        <ogc:PropertyName>priority</ogc:PropertyName>
+                        <ogc:Literal>20</ogc:Literal>
+                      </ogc:PropertyIsEqualTo>
+                    </ogc:Filter>
+                    <sld:PointSymbolizer>
+                        <sld:Graphic>
+                            <sld:Mark>
+                                <sld:WellKnownName>circle</sld:WellKnownName>
+                                <sld:Fill>
+                                    <sld:CssParameter name="fill">#FEA932</sld:CssParameter>
+                                </sld:Fill>
+                                <sld:Stroke>
+                                    <sld:CssParameter name="stroke-width">0.5</sld:CssParameter>
+                                </sld:Stroke>
+                            </sld:Mark>
+                            <sld:Size>6</sld:Size>
+                        </sld:Graphic>
+                    </sld:PointSymbolizer>
+                    <sld:TextSymbolizer>
+                        <sld:Label>
+                            <ogc:PropertyName>point_number</ogc:PropertyName>
+                        </sld:Label>
+                        <sld:Font>
+                            <sld:CssParameter name="font-family">Arial</sld:CssParameter>
+                            <sld:CssParameter name="font-size">8.0</sld:CssParameter>
+                            <sld:CssParameter name="font-style">normal</sld:CssParameter>
+                            <sld:CssParameter name="font-weight">bold</sld:CssParameter>
+                        </sld:Font>
+                        <sld:LabelPlacement>
+                            <sld:PointPlacement>
+                                <sld:AnchorPoint>
+                                    <sld:AnchorPointX>0.0</sld:AnchorPointX>
+                                    <sld:AnchorPointY>0.0</sld:AnchorPointY>
+                                </sld:AnchorPoint>
+                                <sld:Displacement>
+                                    <sld:DisplacementX>5.0</sld:DisplacementX>
+                                    <sld:DisplacementY>0.0</sld:DisplacementY>
+                                </sld:Displacement>
+                            </sld:PointPlacement>
+                        </sld:LabelPlacement>
+                        <sld:Halo>
+                            <sld:Radius>0.4</sld:Radius>
+                            <sld:Fill>
+                                <sld:CssParameter name="fill">#FFFFFF</sld:CssParameter>
+                            </sld:Fill>
+                        </sld:Halo>
+                        <sld:Fill>
+                            <sld:CssParameter name="fill">#000000</sld:CssParameter>
+                        </sld:Fill>
+                        <sld:VendorOption name="maxDisplacement">200</sld:VendorOption>
                     </sld:TextSymbolizer>
                 </sld:Rule>
             </sld:FeatureTypeStyle>

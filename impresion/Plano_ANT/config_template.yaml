@@ -50,8 +50,9 @@ templates:
           fontSize: 8
       northArrowDef: !northArrow
         size: 40
+        createSubReport: false
         default:
-          graphic: "file://images/NorthArrow.png"
+          graphic: 'file://images/NorthArrow.png'
       overviewMap: !overviewMap
         width: 265
         height: 215
@@ -103,5 +104,3 @@ templates:
     - !createNorthArrow
       inputMapper:
         northArrowDef: northArrow
-      outputMapper:
-        northArrowSubReport: northArrowSubReport1

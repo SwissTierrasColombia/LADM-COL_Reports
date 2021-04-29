@@ -13,7 +13,6 @@
 	<parameter name="mapContext1" class="org.mapfish.print.attribute.map.MapfishMapContext"/>
 	<parameter name="criterio_punto_inicial" class="java.lang.Integer"/>
 	<parameter name="datasetName" class="java.lang.String"/>
-	<parameter name="northArrowSubReport1" class="java.lang.String"/>
 	<parameter name="scalebarSubReport1" class="java.lang.String"/>
 	<parameter name="zone" class="java.lang.String"/>
 	<parameter name="nameWhoElaborated" class="java.lang.String"/>
@@ -21,6 +20,7 @@
 	<parameter name="nameWhoRevised" class="java.lang.String"/>
 	<parameter name="licenseWhoRevised" class="java.lang.String"/>
 	<parameter name="observationsReport" class="java.lang.String"/>
+	<parameter name="northArrowGraphic" class="java.lang.String"/>
 	<queryString>
 		<![CDATA[WITH
 terreno_seleccionado AS (
@@ -1033,15 +1033,6 @@ LIMIT 1]]>
 				<imageExpression><![CDATA["images/convenciones.png"]]></imageExpression>
 			</image>
 			<subreport>
-				<reportElement x="15" y="30" width="40" height="40" uuid="bc94dcd5-eef0-46c0-b977-607d0b4f14c6">
-					<property name="com.jaspersoft.studio.unit.x" value="px"/>
-					<property name="com.jaspersoft.studio.unit.y" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<subreportExpression><![CDATA[$P{northArrowSubReport1}]]></subreportExpression>
-			</subreport>
-			<subreport>
 				<reportElement x="369" y="403" width="180" height="20" uuid="ca404419-e767-47ad-a9e1-bf7b64e7c7f8">
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
@@ -1137,6 +1128,22 @@ LIMIT 1]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{observationsReport}]]></textFieldExpression>
 			</textField>
+			<image>
+				<reportElement x="14" y="30" width="40" height="40" uuid="d4bf7674-3b0f-475d-b6db-7f351f2ed1cc">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<imageExpression><![CDATA[net.sf.jasperreports.renderers.BatikRenderer.getInstance(new java.io.File(new java.net.URI($P{northArrowGraphic})))]]></imageExpression>
+			</image>
+			<image>
+				<reportElement x="290" y="450" width="20" height="20" uuid="d3f790f9-44c1-4221-87e5-42f38c7333fc">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<imageExpression><![CDATA[net.sf.jasperreports.renderers.BatikRenderer.getInstance(new java.io.File(new java.net.URI($P{northArrowGraphic})))]]></imageExpression>
+			</image>
 		</band>
 		<band height="53">
 			<property name="com.jaspersoft.studio.unit.height" value="pixel"/>

@@ -4,7 +4,7 @@
             <sld:FeatureTypeConstraint/>
         </sld:LayerFeatureConstraints>
         <sld:UserStyle>
-            <sld:Name>construcciones</sld:Name>
+            <sld:Name>mpio</sld:Name>
             <sld:FeatureTypeStyle>
                 <sld:Name>group0</sld:Name>
                 <sld:FeatureTypeName>Feature</sld:FeatureTypeName>
@@ -14,20 +14,16 @@
                     <sld:Name>default rule</sld:Name>
                     <sld:PolygonSymbolizer>
                         <sld:Stroke>
-                            <sld:CssParameter name="stroke">#808080</sld:CssParameter>
-                            <sld:CssParameter name="stroke-width">0.5</sld:CssParameter>
+                            <sld:CssParameter name="stroke">#730000</sld:CssParameter>
                         </sld:Stroke>
                     </sld:PolygonSymbolizer>
                     <sld:TextSymbolizer>
                         <sld:Label>
-                            <ogc:PropertyName>predio</ogc:PropertyName>
+                            <ogc:PropertyName>nombre_municipio</ogc:PropertyName>
                         </sld:Label>
-                        <sld:VendorOption name="partials">true</sld:VendorOption>
-                        <sld:VendorOption name="autoWrap">60</sld:VendorOption>
-                        <sld:VendorOption name="spaceAround">10</sld:VendorOption>
                         <sld:Font>
-                            <sld:CssParameter name="font-family">Arial</sld:CssParameter>
-                            <sld:CssParameter name="font-size">4.0</sld:CssParameter>
+                            <sld:CssParameter name="font-family">Serif</sld:CssParameter>
+                            <sld:CssParameter name="font-size">7.0</sld:CssParameter>
                             <sld:CssParameter name="font-style">normal</sld:CssParameter>
                             <sld:CssParameter name="font-weight">normal</sld:CssParameter>
                         </sld:Font>
@@ -43,12 +39,21 @@
                                 </sld:Displacement>
                             </sld:PointPlacement>
                         </sld:LabelPlacement>
+                        <sld:Halo>
+                            <sld:Radius>0.4</sld:Radius>
+                            <sld:Fill>
+                                <sld:CssParameter name="fill">#000000</sld:CssParameter>
+                            </sld:Fill>
+                        </sld:Halo>
                         <sld:Fill>
-                            <sld:CssParameter name="fill">#000000</sld:CssParameter>
+                            <sld:CssParameter name="fill">#FFFFFF</sld:CssParameter>
                         </sld:Fill>
+                        <sld:VendorOption name="autoWrap">50</sld:VendorOption>
+                        <sld:VendorOption name="maxDisplacement">10</sld:VendorOption>
                     </sld:TextSymbolizer>
                 </sld:Rule>
             </sld:FeatureTypeStyle>
         </sld:UserStyle>
     </sld:UserLayer>
 </sld:StyledLayerDescriptor>
+
