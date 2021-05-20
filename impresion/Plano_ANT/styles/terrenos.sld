@@ -22,12 +22,9 @@
                         <sld:Label>
                             <ogc:PropertyName>predio</ogc:PropertyName>
                         </sld:Label>
-                        <sld:VendorOption name="partials">true</sld:VendorOption>
-                        <sld:VendorOption name="autoWrap">60</sld:VendorOption>
-                        <sld:VendorOption name="spaceAround">10</sld:VendorOption>
                         <sld:Font>
                             <sld:CssParameter name="font-family">Arial</sld:CssParameter>
-                            <sld:CssParameter name="font-size">4.0</sld:CssParameter>
+                            <sld:CssParameter name="font-size">5.0</sld:CssParameter>
                             <sld:CssParameter name="font-style">normal</sld:CssParameter>
                             <sld:CssParameter name="font-weight">normal</sld:CssParameter>
                         </sld:Font>
@@ -46,6 +43,7 @@
                         <sld:Fill>
                             <sld:CssParameter name="fill">#000000</sld:CssParameter>
                         </sld:Fill>
+                        <sld:VendorOption name="autoWrap">60</sld:VendorOption>
                     </sld:TextSymbolizer>
                 </sld:Rule>
             </sld:FeatureTypeStyle>
