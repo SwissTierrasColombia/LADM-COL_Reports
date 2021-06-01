@@ -11,7 +11,6 @@
     "observationsReport": "",
     "datasetName": "",
     "map": {
-      "bbox": [],
       "rotation": 0,
       "longitudeFirst": true,
       "layers": [
@@ -59,7 +58,11 @@
         }
       ],
       "projection": "EPSG:9377",
-      "dpi": 250
+      "dpi": 250,
+      "zoomToFeatures": {
+        "minScale": 50,
+        "layer": "terreno"
+      }
     },
     "criterio_punto_inicial": 1,
     "overviewMap": {

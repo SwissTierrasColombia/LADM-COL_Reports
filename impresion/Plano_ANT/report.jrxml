@@ -514,7 +514,7 @@ LIMIT 1]]>
 					<font size="7"/>
 					<paragraph leftIndent="5"/>
 				</textElement>
-				<text><![CDATA[NÚMERO PREDIAL]]></text>
+				<text><![CDATA[TERRENO]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
 				<reportElement x="330" y="31" width="71" height="10" uuid="f448d780-12b8-4d81-9444-a1c2d9b4a327">
