@@ -78,7 +78,7 @@ SELECT case when info_predio.orip is null then info_predio.fmi else concat(COALE
 					) and tipo_novedad in (select t_id from ladm_lev_cat_v1.lc_estructuranovedadnumeropredial_tipo_novedad where ilicode in ('Predio_Nuevo', 'Cambio_Numero_Predial')) limit 1
 			   )
 		   end
-		   from ladm_lev_cat_v1.lc_derecho where unidad = info_predio.t_id
+		   from ladm_lev_cat_v1.lc_derecho where unidad = info_predio.t_id limit 1
 	   ) as numero_predial
        ,info_predio.nombre
        ,info_predio.departamento
