@@ -1227,7 +1227,7 @@ LIMIT 1]]>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Justified"/>
-				<textFieldExpression><![CDATA["El inmueble "+($F{direccion} != null? "denominado "+$F{direccion} +", " : "sin dirección asociada, ") +" identificado "+($F{numero_predial} != null?"con número predial "+$F{numero_predial}:"sin número predial, ")+($F{fmi} != null? " cuyo folio de matrícula "+$F{fmi}: "sin folio de matrícula")+($F{area_registral} !=null? " con área registra de  "+$F{area_registral}:" sin área registral")+", y que una vez validada y actualizada su cabida por el método indirecto, "+($F{num_partes} == 1? "genera un globo de terreno con área de ": "genera ("+$F{num_partes}+") globos de terreno con área total de ")+$F{area_terreno}+", presenta los siguientes linderos, referidos al sistema de referencia oficial Magna Sirgas Origen Nacional:"]]></textFieldExpression>
+				<textFieldExpression><![CDATA["El inmueble "+($F{direccion} != null? "denominado "+$F{direccion} +", " : "sin dirección asociada, ") +" identificado "+($F{numero_predial} != null?"con número predial "+$F{numero_predial}:"sin número predial, ")+($F{fmi} != null? " cuyo folio de matrícula "+$F{fmi}: " sin folio de matrícula")+($F{area_registral} !=null? " con área registra de  "+$F{area_registral}:" sin área registral")+", y que una vez validada y actualizada su cabida por el método indirecto, "+($F{num_partes} == 1? "genera un globo de terreno con área de ": "genera ("+$F{num_partes}+") globos de terreno con área total de ")+$F{area_terreno}+", presenta los siguientes linderos, referidos al sistema de referencia oficial Magna Sirgas Origen Nacional:"]]></textFieldExpression>
 			</textField>
 		</band>
 		<band height="46">

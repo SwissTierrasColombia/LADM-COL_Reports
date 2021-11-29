@@ -268,34 +268,54 @@ linderos_colindantes AS (
 ),
 colindantes AS (
 	SELECT linderos_colindantes.*, terrenos_asociados_linderos.t_id_terreno  FROM linderos_colindantes LEFT JOIN terrenos_asociados_linderos ON linderos_colindantes.t_id_linderos = terrenos_asociados_linderos.t_id_lindero
+),
+colindantes_por_derecho as (
+	SELECT
+	  id
+	  , desde
+	  , hasta
+	  , ubicacion
+	  , nupre
+	  , CASE WHEN numero_predial is null AND matricula_inmobiliaria IS NULL AND nombre IS NULL THEN 'ÁREA INDETERMINADA'
+	     ELSE COALESCE(numero_predial || ';','') || COALESCE('FMI: ' || matricula_inmobiliaria || ';','') || COALESCE('NOMBRE: ' || UPPER(nombre), '')
+	    END AS predio
+	  , lc_predio.t_id
+	  , trunc(st_length(colindantes.geom)::numeric, CASE WHEN 'ZONA_URBANA' = $P{zone} THEN 2 ELSE 1 END) distancia,
+	  COALESCE((SELECT
+		CASE WHEN lc_derecho.interesado_lc_interesado is not NULL THEN
+			(SELECT UPPER(( coalesce(primer_nombre,'') || coalesce(' ' || segundo_nombre, '') || coalesce(' ' || primer_apellido, '') || coalesce(' ' || segundo_apellido, '') ) || ( coalesce(razon_social, '') )) FROM $P!{datasetName}.lc_interesado WHERE t_id = lc_derecho.interesado_lc_interesado)
+		ELSE
+			(SELECT UPPER(( coalesce(primer_nombre,'') || coalesce(' ' || segundo_nombre, '') || coalesce(' ' || primer_apellido, '') || coalesce(' ' || segundo_apellido, '') ) || ( coalesce(razon_social, '') )) || ' Y OTROS' FROM (SELECT * FROM $P!{datasetName}.lc_agrupacioninteresados WHERE t_id = lc_derecho.interesado_lc_agrupacioninteresados) as agrupacion_filtrada
+			 JOIN $P!{datasetName}.col_miembros ON agrupacion = agrupacion_filtrada.t_id
+			 JOIN $P!{datasetName}.lc_interesado ON lc_interesado.t_id = col_miembros.interesado_lc_interesado LIMIT 1)
+		END as interesado
+		from $P!{datasetName}.lc_derecho where lc_derecho.unidad = lc_predio.t_id limit 1), 'INDETERMINADO') as interesado,
+		(select case when ilicode like 'Dominio' then 1 else 0 end from $P!{datasetName}.lc_derechotipo where t_id = lc_derecho.tipo) as formal
+	FROM
+	colindantes
+	LEFT JOIN $P!{datasetName}.lc_terreno ON lc_terreno.t_id = colindantes.t_id_terreno
+	LEFT JOIN $P!{datasetName}.col_uebaunit ON colindantes.t_id_terreno = ue_lc_terreno
+	LEFT JOIN $P!{datasetName}.lc_predio ON lc_predio.t_id = baunit
+	LEFT JOIN $P!{datasetName}.lc_derecho ON lc_derecho.unidad = lc_predio.t_id
+	WHERE parte = $P{parte}
+	ORDER BY id, formal
 )
-SELECT
-  id
-  , desde
-  , hasta
-  , ubicacion
-  , nupre
-  , CASE WHEN numero_predial is null AND matricula_inmobiliaria IS NULL AND nombre IS NULL THEN 'ÁREA INDETERMINADA'
-     ELSE COALESCE(numero_predial || ';','') || COALESCE('FMI: ' || matricula_inmobiliaria || ';','') || COALESCE('NOMBRE: ' || UPPER(nombre), '')
-    END AS predio
-  , lc_predio.t_id
-  , trunc(st_length(colindantes.geom)::numeric, CASE WHEN 'ZONA_URBANA' = $P{zone} THEN 2 ELSE 1 END) distancia,
-  COALESCE((SELECT
-	CASE WHEN lc_derecho.interesado_lc_interesado is not NULL THEN
-		(SELECT UPPER(( coalesce(primer_nombre,'') || coalesce(' ' || segundo_nombre, '') || coalesce(' ' || primer_apellido, '') || coalesce(' ' || segundo_apellido, '') ) || ( coalesce(razon_social, '') )) FROM $P!{datasetName}.lc_interesado WHERE t_id = lc_derecho.interesado_lc_interesado)
-	ELSE
-		(SELECT UPPER(( coalesce(primer_nombre,'') || coalesce(' ' || segundo_nombre, '') || coalesce(' ' || primer_apellido, '') || coalesce(' ' || segundo_apellido, '') ) || ( coalesce(razon_social, '') )) || ' Y OTROS' FROM (SELECT * FROM $P!{datasetName}.lc_agrupacioninteresados WHERE t_id = lc_derecho.interesado_lc_agrupacioninteresados) as agrupacion_filtrada
-		 JOIN $P!{datasetName}.col_miembros ON agrupacion = agrupacion_filtrada.t_id
-		 JOIN $P!{datasetName}.lc_interesado ON lc_interesado.t_id = col_miembros.interesado_lc_interesado LIMIT 1)
-	END as interesado
-	from $P!{datasetName}.lc_derecho where lc_derecho.unidad = lc_predio.t_id limit 1), 'INDETERMINADO') as interesado
-FROM
-colindantes
-LEFT JOIN $P!{datasetName}.lc_terreno ON lc_terreno.t_id = colindantes.t_id_terreno
-LEFT JOIN $P!{datasetName}.col_uebaunit ON colindantes.t_id_terreno = ue_lc_terreno
-LEFT JOIN $P!{datasetName}.lc_predio ON lc_predio.t_id = baunit
-WHERE parte = $P{parte}
-ORDER BY id]]>
+select 
+id,
+desde,
+hasta,
+ubicacion,
+nupre,
+predio,
+t_id,
+distancia,
+interesado
+from (
+	select *, rank() OVER (PARTITION BY id ORDER BY formal ASC) pos_prioridad_derecho
+	from colindantes_por_derecho
+) as colindancias_informales
+where pos_prioridad_derecho = 1
+order by id]]>
 	</queryString>
 	<field name="id" class="java.lang.Long"/>
 	<field name="desde" class="java.lang.Long"/>
