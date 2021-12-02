@@ -91,19 +91,7 @@ info_total_interesados AS (
 SELECT case when info_predio.orip is null then info_predio.fmi else concat(COALESCE(info_predio.orip, ''), ' - ', COALESCE(info_predio.fmi, '')) end fmi
        ,info_predio.nupre
 	   ,info_predio.id_operacion
-       , (
-		   select case when lc_derecho.tipo = (select t_id from $P!{datasetName}.lc_derechotipo where ilicode = 'Dominio') then
-		        info_predio.numero_predial
-		   else
-			   (
-				   select numero_predial from $P!{datasetName}.lc_estructuranovedadnumeropredial where  lc_dtsdcnlstmntctstral_novedad_numeros_prediales = (
-						select t_id from $P!{datasetName}.lc_datosadicionaleslevantamientocatastral
-						where lc_datosadicionaleslevantamientocatastral.lc_predio = info_predio.t_id
-					) and tipo_novedad in (select t_id from $P!{datasetName}.lc_estructuranovedadnumeropredial_tipo_novedad where ilicode in ('Predio_Nuevo', 'Cambio_Numero_Predial')) limit 1
-			   )
-		   end
-		   from $P!{datasetName}.lc_derecho where unidad = info_predio.t_id limit 1
-	   ) as numero_predial
+       ,info_predio.numero_predial
        ,info_predio.nombre
        ,info_predio.departamento
        ,info_predio.municipio
@@ -1227,7 +1215,7 @@ LIMIT 1]]>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Justified"/>
-				<textFieldExpression><![CDATA["El inmueble "+($F{direccion} != null? "denominado "+$F{direccion} +", " : "sin dirección asociada, ") +" identificado "+($F{numero_predial} != null?"con número predial "+$F{numero_predial}:"sin número predial, ")+($F{fmi} != null? " cuyo folio de matrícula "+$F{fmi}: " sin folio de matrícula")+($F{area_registral} !=null? " con área registra de  "+$F{area_registral}:" sin área registral")+", y que una vez validada y actualizada su cabida por el método indirecto, "+($F{num_partes} == 1? "genera un globo de terreno con área de ": "genera ("+$F{num_partes}+") globos de terreno con área total de ")+$F{area_terreno}+", presenta los siguientes linderos, referidos al sistema de referencia oficial Magna Sirgas Origen Nacional:"]]></textFieldExpression>
+				<textFieldExpression><![CDATA["El inmueble "+($F{direccion} != null? "denominado "+$F{direccion} +", " : "sin dirección asociada, ") +" identificado "+($F{numero_predial} != null?"con número predial "+$F{numero_predial}:"sin número predial, ")+($F{fmi} != null? " cuyo folio de matrícula "+$F{fmi}: "sin folio de matrícula")+($F{area_registral} !=null? " con área registra de  "+$F{area_registral}:" sin área registral")+", y que una vez validada y actualizada su cabida por el método indirecto, "+($F{num_partes} == 1? "genera un globo de terreno con área de ": "genera ("+$F{num_partes}+") globos de terreno con área total de ")+$F{area_terreno}+", presenta los siguientes linderos, referidos al sistema de referencia oficial Magna Sirgas Origen Nacional:"]]></textFieldExpression>
 			</textField>
 		</band>
 		<band height="46">

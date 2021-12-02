@@ -322,64 +322,36 @@ info_agrupacion AS (
 ),
 info_total_interesados AS (
 	SELECT * FROM info_interesado UNION all SELECT * FROM info_agrupacion
-),
-linderos_colindantes_por_derecho as (
-	SELECT
-	    distinct
-		id
-		,desde
-		,hasta
-		,ubicacion
-		, (SELECT trunc(x,2) FROM puntos_lindero_ordenados WHERE id = desde LIMIT 1) AS xi
-		, (SELECT trunc(y,2) FROM puntos_lindero_ordenados WHERE id = desde LIMIT 1) AS yi
-		, (SELECT trunc(x,2) FROM puntos_lindero_ordenados WHERE id = hasta LIMIT 1) AS xf
-		, (SELECT trunc(y,2) FROM puntos_lindero_ordenados WHERE id = hasta LIMIT 1) AS yf
-		, COALESCE(info_total_interesados.nombre, 'INDETERMINADO') AS interesado
-		, COALESCE(info_total_interesados.agrupacion_interesado, 'INDETERMINADO') AS tipo_interesado
-		, COALESCE((select numero_predial from $P!{datasetName}.lc_predio where t_id = (select baunit from $P!{datasetName}.col_uebaunit where col_uebaunit.ue_lc_terreno = t_id_terreno limit 1)), 'INDETERMINADO') AS numero_predial_colindante
-		, trunc(st_length(colindantes.geom)::numeric, CASE WHEN 'ZONA_URBANA' = $P{zone} THEN 2 ELSE 1 END) distancia
-		, (SELECT nodos FROM secuencia_nodos WHERE t_id = colindantes.t_id_linderos LIMIT 1) AS nodos
-		, round(degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2)))::numeric, 2) AS degrees
-		,CASE WHEN degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2))) BETWEEN 360-(SELECT tolerancia_sentidos FROM parametros) AND 360 or degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2))) BETWEEN 0 AND (SELECT tolerancia_sentidos FROM parametros) THEN 'norte'
-		  WHEN degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2))) BETWEEN (SELECT tolerancia_sentidos FROM parametros) AND 90-(SELECT tolerancia_sentidos FROM parametros) THEN 'noreste'
-		  WHEN degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2))) BETWEEN 90-(SELECT tolerancia_sentidos FROM parametros) AND 90+(SELECT tolerancia_sentidos FROM parametros) THEN 'este'
-		  WHEN degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2))) BETWEEN 90+(SELECT tolerancia_sentidos FROM parametros) AND 180-(SELECT tolerancia_sentidos FROM parametros) THEN 'sureste'
-		  WHEN degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2))) BETWEEN 180-(SELECT tolerancia_sentidos FROM parametros) AND 180+(SELECT tolerancia_sentidos FROM parametros) THEN 'sur'
-		  WHEN degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2))) BETWEEN 180+(SELECT tolerancia_sentidos FROM parametros) AND 270-(SELECT tolerancia_sentidos FROM parametros) THEN 'suroeste'
-		  WHEN degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2))) BETWEEN 270-(SELECT tolerancia_sentidos FROM parametros) AND 270+(SELECT tolerancia_sentidos FROM parametros) THEN 'oeste'
-		  WHEN degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2))) BETWEEN 270+(SELECT tolerancia_sentidos FROM parametros) AND 360-(SELECT tolerancia_sentidos FROM parametros) THEN 'noroeste'
-		END AS sentido
-		,(SELECT count(*) FROM colindantes) AS total_linderos
-		,(select case when ilicode like 'Dominio' then 1 else 0 end from $P!{datasetName}.lc_derechotipo where t_id = (select tipo from $P!{datasetName}.lc_derecho where t_id = t_id_derecho)) as formal
-	FROM colindantes LEFT JOIN info_total_interesados ON colindantes.t_id_terreno = info_total_interesados.t_id_colindante
-	LEFT JOIN derechos_seleccionados on colindantes.t_id_terreno = derechos_seleccionados.t_id_colindante 
-	WHERE ubicacion = '2_Este' and parte = $P{parte}
-	ORDER BY id, formal
 )
-select
-	distinct
-    id
-    ,desde
-    ,hasta
-    ,ubicacion
-    ,xi
-    ,yi
-    ,xf
-    ,yf
-    ,interesado
-    ,tipo_interesado
-    ,numero_predial_colindante
-    ,distancia
-    ,nodos
-    ,degrees
-    ,sentido
-    ,total_linderos
-from (
-	select *, rank() OVER (PARTITION BY id ORDER BY formal ASC) pos
-	from linderos_colindantes_por_derecho
-) as linderos_colindantes_informales
-where pos = 1
-order by id]]>
+SELECT
+    distinct
+	id
+	,desde
+	,hasta
+	,ubicacion
+	, (SELECT trunc(x,2) FROM puntos_lindero_ordenados WHERE id = desde LIMIT 1) AS xi
+	, (SELECT trunc(y,2) FROM puntos_lindero_ordenados WHERE id = desde LIMIT 1) AS yi
+	, (SELECT trunc(x,2) FROM puntos_lindero_ordenados WHERE id = hasta LIMIT 1) AS xf
+	, (SELECT trunc(y,2) FROM puntos_lindero_ordenados WHERE id = hasta LIMIT 1) AS yf
+	, COALESCE(info_total_interesados.nombre, 'INDETERMINADO') AS interesado
+	, COALESCE(info_total_interesados.agrupacion_interesado, 'INDETERMINADO') AS tipo_interesado
+	, COALESCE((select numero_predial from $P!{datasetName}.lc_predio where t_id = (select baunit from $P!{datasetName}.col_uebaunit where col_uebaunit.ue_lc_terreno = t_id_terreno limit 1)), 'INDETERMINADO') AS numero_predial_colindante
+	, trunc(st_length(colindantes.geom)::numeric, CASE WHEN 'ZONA_URBANA' = $P{zone} THEN 2 ELSE 1 END) distancia
+	, (SELECT nodos FROM secuencia_nodos WHERE t_id = colindantes.t_id_linderos LIMIT 1) AS nodos
+	, round(degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2)))::numeric, 2) AS degrees
+	,CASE WHEN degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2))) BETWEEN 360-(SELECT tolerancia_sentidos FROM parametros) AND 360 or degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2))) BETWEEN 0 AND (SELECT tolerancia_sentidos FROM parametros) THEN 'norte'
+	  WHEN degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2))) BETWEEN (SELECT tolerancia_sentidos FROM parametros) AND 90-(SELECT tolerancia_sentidos FROM parametros) THEN 'noreste'
+	  WHEN degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2))) BETWEEN 90-(SELECT tolerancia_sentidos FROM parametros) AND 90+(SELECT tolerancia_sentidos FROM parametros) THEN 'este'
+	  WHEN degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2))) BETWEEN 90+(SELECT tolerancia_sentidos FROM parametros) AND 180-(SELECT tolerancia_sentidos FROM parametros) THEN 'sureste'
+	  WHEN degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2))) BETWEEN 180-(SELECT tolerancia_sentidos FROM parametros) AND 180+(SELECT tolerancia_sentidos FROM parametros) THEN 'sur'
+	  WHEN degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2))) BETWEEN 180+(SELECT tolerancia_sentidos FROM parametros) AND 270-(SELECT tolerancia_sentidos FROM parametros) THEN 'suroeste'
+	  WHEN degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2))) BETWEEN 270-(SELECT tolerancia_sentidos FROM parametros) AND 270+(SELECT tolerancia_sentidos FROM parametros) THEN 'oeste'
+	  WHEN degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2))) BETWEEN 270+(SELECT tolerancia_sentidos FROM parametros) AND 360-(SELECT tolerancia_sentidos FROM parametros) THEN 'noroeste'
+	END AS sentido
+	,(SELECT count(*) FROM colindantes) AS total_linderos
+FROM colindantes LEFT JOIN info_total_interesados ON colindantes.t_id_terreno = info_total_interesados.t_id_colindante
+WHERE ubicacion = '2_Este' and parte = $P{parte}
+ORDER BY id]]>
 	</queryString>
 	<field name="id" class="java.lang.Long"/>
 	<field name="desde" class="java.lang.Long"/>
