@@ -8,10 +8,11 @@ Actualmente se encuentran implementado dos reportes para el modelo de levantamie
 
 ## Notas
 
-- Trabajo realizado en su mayor parte por @mejiafabiandj y adoptado por @seralra96 y @lacardonap.
+- Trabajo realizado en su mayor parte por @mejiafabiandj.
 - Adaptado para ser utilizado por otras aplicaciones como:
   - [Asistente LADM-COL](https://github.com/SwissTierrasColombia/Asistente-LADM-COL) por @gacarrillor.
   - [Geoportal](https://github.com/SwissTierrasColombia/print_server) por @felipecanol.
+- Adoptado por @seralra96 y @lacardonap.
 
 ## Para desarrollores
 
