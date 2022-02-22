@@ -64,20 +64,63 @@ info_total_interesados AS (
 	UNION ALL
 	SELECT *  FROM info_agrupacion
 )
-SELECT case when info_predio.orip is null then info_predio.fmi else concat(COALESCE(info_predio.orip, ''), ' - ', COALESCE(info_predio.fmi, '')) end fmi
+SELECT
+		(
+		   select
+                case
+                    when lc_derecho.tipo = (select t_id from ladm_lev_cat_v1.lc_derechotipo where ilicode = 'Dominio') then
+                        case when info_predio.orip is null then info_predio.fmi else concat(COALESCE(info_predio.orip, ''), ' - ', COALESCE(info_predio.fmi, '')) end
+                    else
+                        case
+                            when info_predio.fmi is not null then
+                                case when info_predio.orip is null then info_predio.fmi else concat(COALESCE(info_predio.orip, ''), ' - ', COALESCE(info_predio.fmi, '')) end
+                            else
+                                (
+                                    select case when codigo_orip is null then numero_fmi else concat(COALESCE(codigo_orip, ''), ' - ', COALESCE(numero_fmi , '')) end
+                                    from ladm_lev_cat_v1.lc_estructuranovedadfmi where lc_dtsdcnlstmntctstral_novedad_fmi = (
+                                        select t_id from ladm_lev_cat_v1.lc_datosadicionaleslevantamientocatastral
+                                        where lc_datosadicionaleslevantamientocatastral.lc_predio = info_predio.t_id
+                                    ) limit 1
+                                )
+                        end
+                end
+		   from ladm_lev_cat_v1.lc_derecho where unidad = info_predio.t_id limit 1
+	   ) as fmi
        ,info_predio.nupre
 	   ,info_predio.id_operacion
        ,(
-		   select case when lc_derecho.tipo = (select t_id from ladm_lev_cat_v1.lc_derechotipo where ilicode = 'Dominio') then
-		        info_predio.numero_predial
-		   else
-			   (
-				   select numero_predial from ladm_lev_cat_v1.lc_estructuranovedadnumeropredial where  lc_dtsdcnlstmntctstral_novedad_numeros_prediales = (
-						select t_id from ladm_lev_cat_v1.lc_datosadicionaleslevantamientocatastral
-						where lc_datosadicionaleslevantamientocatastral.lc_predio = info_predio.t_id
-					) and tipo_novedad in (select t_id from ladm_lev_cat_v1.lc_estructuranovedadnumeropredial_tipo_novedad where ilicode in ('Predio_Nuevo', 'Cambio_Numero_Predial')) limit 1
-			   )
-		   end
+		   select
+                case
+                    when lc_derecho.tipo = (select t_id from ladm_lev_cat_v1.lc_derechotipo where ilicode = 'Dominio') then
+                        case
+                            when info_predio.numero_predial is not null then
+                                info_predio.numero_predial
+                            else
+                                (
+                                   select numero_predial from ladm_lev_cat_v1.lc_estructuranovedadnumeropredial where  lc_dtsdcnlstmntctstral_novedad_numeros_prediales = (
+                                        select t_id from ladm_lev_cat_v1.lc_datosadicionaleslevantamientocatastral
+                                        where lc_datosadicionaleslevantamientocatastral.lc_predio = info_predio.t_id
+                                    ) and tipo_novedad in (select t_id from ladm_lev_cat_v1.lc_estructuranovedadnumeropredial_tipo_novedad where ilicode in ('Predio_Nuevo', 'Cambio_Numero_Predial', '', 'Desenglobe', 'Englobe')) limit 1
+                                )
+                        end
+                    else
+                        case when
+                            (
+                               select numero_predial from ladm_lev_cat_v1.lc_estructuranovedadnumeropredial where  lc_dtsdcnlstmntctstral_novedad_numeros_prediales = (
+                                    select t_id from ladm_lev_cat_v1.lc_datosadicionaleslevantamientocatastral
+                                    where lc_datosadicionaleslevantamientocatastral.lc_predio = info_predio.t_id
+                                ) and tipo_novedad in (select t_id from ladm_lev_cat_v1.lc_estructuranovedadnumeropredial_tipo_novedad where ilicode in ('Predio_Nuevo', 'Cambio_Numero_Predial')) limit 1
+                            ) is not null then
+                                (
+                                   select numero_predial from ladm_lev_cat_v1.lc_estructuranovedadnumeropredial where  lc_dtsdcnlstmntctstral_novedad_numeros_prediales = (
+                                        select t_id from ladm_lev_cat_v1.lc_datosadicionaleslevantamientocatastral
+                                        where lc_datosadicionaleslevantamientocatastral.lc_predio = info_predio.t_id
+                                    ) and tipo_novedad in (select t_id from ladm_lev_cat_v1.lc_estructuranovedadnumeropredial_tipo_novedad where ilicode in ('Predio_Nuevo', 'Cambio_Numero_Predial')) limit 1
+                                )
+                        else
+                            info_predio.numero_predial
+                        end
+                end
 		   from ladm_lev_cat_v1.lc_derecho where unidad = info_predio.t_id limit 1
 	   ) as numero_predial
        ,info_predio.nombre
