@@ -318,7 +318,50 @@ SELECT
 	, (SELECT trunc(y,2) FROM puntos_lindero_ordenados WHERE id = hasta LIMIT 1) AS yf
 	, COALESCE(info_total_interesados.nombre, 'INDETERMINADO') AS interesado
 	, COALESCE(info_total_interesados.agrupacion_interesado, 'INDETERMINADO') AS tipo_interesado
-	, COALESCE((select numero_predial from ladm_lev_cat_v1.lc_predio where t_id = (select baunit from ladm_lev_cat_v1.col_uebaunit where col_uebaunit.ue_lc_terreno = t_id_terreno limit 1)), 'INDETERMINADO') AS numero_predial_colindante
+	, COALESCE((
+	    select
+            (
+                select
+                    case
+                        when (
+                               select numero_predial from ladm_lev_cat_v1.lc_estructuranovedadnumeropredial where  lc_dtsdcnlstmntctstral_novedad_numeros_prediales = (
+                                    select t_id from ladm_lev_cat_v1.lc_datosadicionaleslevantamientocatastral
+                                    where lc_datosadicionaleslevantamientocatastral.lc_predio = lc_predio.t_id
+                                ) and tipo_novedad in (select t_id from ladm_lev_cat_v1.lc_estructuranovedadnumeropredial_tipo_novedad where ilicode not in ('Ninguna', 'Cancelacion')) limit 1
+                            ) is not null then
+                            case
+                                when (select tipo from ladm_lev_cat_v1.lc_derecho where unidad  = lc_predio.t_id limit 1) = (select t_id from ladm_lev_cat_v1.lc_derechotipo where ilicode = 'Dominio') then
+                                    (
+                                       select numero_predial from ladm_lev_cat_v1.lc_estructuranovedadnumeropredial where  lc_dtsdcnlstmntctstral_novedad_numeros_prediales = (
+                                            select t_id from ladm_lev_cat_v1.lc_datosadicionaleslevantamientocatastral
+                                            where lc_datosadicionaleslevantamientocatastral.lc_predio = lc_predio.t_id
+                                        ) and tipo_novedad in (select t_id from ladm_lev_cat_v1.lc_estructuranovedadnumeropredial_tipo_novedad where ilicode not in ('Ninguna', 'Cancelacion')) limit 1
+                                    )
+                                else
+                                    case
+                                        when
+                                            (
+                                               select numero_predial from ladm_lev_cat_v1.lc_estructuranovedadnumeropredial where  lc_dtsdcnlstmntctstral_novedad_numeros_prediales = (
+                                                    select t_id from ladm_lev_cat_v1.lc_datosadicionaleslevantamientocatastral
+                                                    where lc_datosadicionaleslevantamientocatastral.lc_predio = lc_predio.t_id
+                                                ) and tipo_novedad in (select t_id from ladm_lev_cat_v1.lc_estructuranovedadnumeropredial_tipo_novedad where ilicode in ('Predio_Nuevo', 'Cambio_Numero_Predial')) limit 1
+                                            ) is not null then
+                                                (
+                                                   select numero_predial from ladm_lev_cat_v1.lc_estructuranovedadnumeropredial where  lc_dtsdcnlstmntctstral_novedad_numeros_prediales = (
+                                                        select t_id from ladm_lev_cat_v1.lc_datosadicionaleslevantamientocatastral
+                                                        where lc_datosadicionaleslevantamientocatastral.lc_predio = lc_predio.t_id
+                                                    ) and tipo_novedad in (select t_id from ladm_lev_cat_v1.lc_estructuranovedadnumeropredial_tipo_novedad where ilicode in ('Predio_Nuevo', 'Cambio_Numero_Predial')) limit 1
+                                                )
+                                        else
+                                            numero_predial
+                                    end
+                            end
+                        else
+                            numero_predial
+                    end
+                from ladm_lev_cat_v1.lc_derecho where unidad = lc_predio.t_id limit 1
+            ) as numero_predial_novedad
+	from ladm_lev_cat_v1.lc_predio where t_id = (select baunit from ladm_lev_cat_v1.col_uebaunit where col_uebaunit.ue_lc_terreno = t_id_terreno limit 1)), 'INDETERMINADO') AS numero_predial_colindante
 	, trunc(st_length(colindantes.geom)::numeric, CASE WHEN 'ZONA_URBANA' = 'ZONA_RURAL'  THEN 2 ELSE 1 END) distancia
 	, (SELECT nodos FROM secuencia_nodos WHERE t_id = colindantes.t_id_linderos LIMIT 1) AS nodos
 	, round(degrees(ST_Azimuth(st_startpoint(geom),ST_PointN(geom,2)))::numeric, 3) AS degrees

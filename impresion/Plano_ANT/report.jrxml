@@ -114,37 +114,43 @@ SELECT
 	   ,info_predio.id_operacion
        ,(
 		   select
-                case
-                    when lc_derecho.tipo = (select t_id from $P!{datasetName}.lc_derechotipo where ilicode = 'Dominio') then
-                        case
-                            when info_predio.numero_predial is not null then
-                                info_predio.numero_predial
-                            else
-                                (
-                                   select numero_predial from $P!{datasetName}.lc_estructuranovedadnumeropredial where  lc_dtsdcnlstmntctstral_novedad_numeros_prediales = (
-                                        select t_id from $P!{datasetName}.lc_datosadicionaleslevantamientocatastral
-                                        where lc_datosadicionaleslevantamientocatastral.lc_predio = info_predio.t_id
-                                    ) and tipo_novedad in (select t_id from $P!{datasetName}.lc_estructuranovedadnumeropredial_tipo_novedad where ilicode in ('Predio_Nuevo', 'Cambio_Numero_Predial', '', 'Desenglobe', 'Englobe')) limit 1
-                                )
-                        end
-                    else
-                        case when
-                            (
-                               select numero_predial from $P!{datasetName}.lc_estructuranovedadnumeropredial where  lc_dtsdcnlstmntctstral_novedad_numeros_prediales = (
-                                    select t_id from $P!{datasetName}.lc_datosadicionaleslevantamientocatastral
-                                    where lc_datosadicionaleslevantamientocatastral.lc_predio = info_predio.t_id
-                                ) and tipo_novedad in (select t_id from $P!{datasetName}.lc_estructuranovedadnumeropredial_tipo_novedad where ilicode in ('Predio_Nuevo', 'Cambio_Numero_Predial')) limit 1
-                            ) is not null then
-                                (
-                                   select numero_predial from $P!{datasetName}.lc_estructuranovedadnumeropredial where  lc_dtsdcnlstmntctstral_novedad_numeros_prediales = (
-                                        select t_id from $P!{datasetName}.lc_datosadicionaleslevantamientocatastral
-                                        where lc_datosadicionaleslevantamientocatastral.lc_predio = info_predio.t_id
-                                    ) and tipo_novedad in (select t_id from $P!{datasetName}.lc_estructuranovedadnumeropredial_tipo_novedad where ilicode in ('Predio_Nuevo', 'Cambio_Numero_Predial')) limit 1
-                                )
-                        else
-                            info_predio.numero_predial
-                        end
-                end
+				case
+					when (
+						   select numero_predial from $P!{datasetName}.lc_estructuranovedadnumeropredial where  lc_dtsdcnlstmntctstral_novedad_numeros_prediales = (
+								select t_id from $P!{datasetName}.lc_datosadicionaleslevantamientocatastral
+								where lc_datosadicionaleslevantamientocatastral.lc_predio = info_predio.t_id
+							) and tipo_novedad in (select t_id from $P!{datasetName}.lc_estructuranovedadnumeropredial_tipo_novedad where ilicode not in ('Ninguna', 'Cancelacion')) limit 1
+					   	) is not null then
+						case
+							when (select tipo from $P!{datasetName}.lc_derecho where unidad  = info_predio.t_id limit 1) = (select t_id from $P!{datasetName}.lc_derechotipo where ilicode = 'Dominio') then
+								(
+								   select numero_predial from $P!{datasetName}.lc_estructuranovedadnumeropredial where  lc_dtsdcnlstmntctstral_novedad_numeros_prediales = (
+										select t_id from $P!{datasetName}.lc_datosadicionaleslevantamientocatastral
+										where lc_datosadicionaleslevantamientocatastral.lc_predio = info_predio.t_id
+									) and tipo_novedad in (select t_id from $P!{datasetName}.lc_estructuranovedadnumeropredial_tipo_novedad where ilicode not in ('Ninguna', 'Cancelacion')) limit 1
+								)
+							else
+								case
+									when
+						   				(
+										   select numero_predial from $P!{datasetName}.lc_estructuranovedadnumeropredial where  lc_dtsdcnlstmntctstral_novedad_numeros_prediales = (
+												select t_id from $P!{datasetName}.lc_datosadicionaleslevantamientocatastral
+												where lc_datosadicionaleslevantamientocatastral.lc_predio = info_predio.t_id
+											) and tipo_novedad in (select t_id from $P!{datasetName}.lc_estructuranovedadnumeropredial_tipo_novedad where ilicode in ('Predio_Nuevo', 'Cambio_Numero_Predial')) limit 1
+									   	) is not null then
+											(
+											   select numero_predial from $P!{datasetName}.lc_estructuranovedadnumeropredial where  lc_dtsdcnlstmntctstral_novedad_numeros_prediales = (
+													select t_id from $P!{datasetName}.lc_datosadicionaleslevantamientocatastral
+													where lc_datosadicionaleslevantamientocatastral.lc_predio = info_predio.t_id
+												) and tipo_novedad in (select t_id from $P!{datasetName}.lc_estructuranovedadnumeropredial_tipo_novedad where ilicode in ('Predio_Nuevo', 'Cambio_Numero_Predial')) limit 1
+											)
+									else
+										numero_predial
+								end
+						end
+					else
+						numero_predial
+				end
 		   from $P!{datasetName}.lc_derecho where unidad = info_predio.t_id limit 1
 	   ) as numero_predial
        ,info_predio.nombre

@@ -1,7 +1,7 @@
 WITH
 terreno_seleccionado AS (
 	SELECT lc_terreno.t_id AS id_terreno FROM ladm_lev_cat_v1.lc_terreno
-	WHERE lc_terreno.t_id = 1433
+	WHERE lc_terreno.t_id = 20606
 ),
 predio_seleccionado AS (
 	SELECT col_uebaunit.baunit AS t_id FROM ladm_lev_cat_v1.col_uebaunit JOIN terreno_seleccionado ON col_uebaunit.ue_lc_terreno = terreno_seleccionado.id_terreno LIMIT 1
@@ -90,44 +90,50 @@ SELECT
 	   ,info_predio.id_operacion
        ,(
 		   select
-                case
-                    when lc_derecho.tipo = (select t_id from ladm_lev_cat_v1.lc_derechotipo where ilicode = 'Dominio') then
-                        case
-                            when info_predio.numero_predial is not null then
-                                info_predio.numero_predial
-                            else
-                                (
-                                   select numero_predial from ladm_lev_cat_v1.lc_estructuranovedadnumeropredial where  lc_dtsdcnlstmntctstral_novedad_numeros_prediales = (
-                                        select t_id from ladm_lev_cat_v1.lc_datosadicionaleslevantamientocatastral
-                                        where lc_datosadicionaleslevantamientocatastral.lc_predio = info_predio.t_id
-                                    ) and tipo_novedad in (select t_id from ladm_lev_cat_v1.lc_estructuranovedadnumeropredial_tipo_novedad where ilicode in ('Predio_Nuevo', 'Cambio_Numero_Predial', '', 'Desenglobe', 'Englobe')) limit 1
-                                )
-                        end
-                    else
-                        case when
-                            (
-                               select numero_predial from ladm_lev_cat_v1.lc_estructuranovedadnumeropredial where  lc_dtsdcnlstmntctstral_novedad_numeros_prediales = (
-                                    select t_id from ladm_lev_cat_v1.lc_datosadicionaleslevantamientocatastral
-                                    where lc_datosadicionaleslevantamientocatastral.lc_predio = info_predio.t_id
-                                ) and tipo_novedad in (select t_id from ladm_lev_cat_v1.lc_estructuranovedadnumeropredial_tipo_novedad where ilicode in ('Predio_Nuevo', 'Cambio_Numero_Predial')) limit 1
-                            ) is not null then
-                                (
-                                   select numero_predial from ladm_lev_cat_v1.lc_estructuranovedadnumeropredial where  lc_dtsdcnlstmntctstral_novedad_numeros_prediales = (
-                                        select t_id from ladm_lev_cat_v1.lc_datosadicionaleslevantamientocatastral
-                                        where lc_datosadicionaleslevantamientocatastral.lc_predio = info_predio.t_id
-                                    ) and tipo_novedad in (select t_id from ladm_lev_cat_v1.lc_estructuranovedadnumeropredial_tipo_novedad where ilicode in ('Predio_Nuevo', 'Cambio_Numero_Predial')) limit 1
-                                )
-                        else
-                            info_predio.numero_predial
-                        end
-                end
+				case
+					when (
+						   select numero_predial from ladm_lev_cat_v1.lc_estructuranovedadnumeropredial where  lc_dtsdcnlstmntctstral_novedad_numeros_prediales = (
+								select t_id from ladm_lev_cat_v1.lc_datosadicionaleslevantamientocatastral
+								where lc_datosadicionaleslevantamientocatastral.lc_predio = info_predio.t_id
+							) and tipo_novedad in (select t_id from ladm_lev_cat_v1.lc_estructuranovedadnumeropredial_tipo_novedad where ilicode not in ('Ninguna', 'Cancelacion')) limit 1
+					   	) is not null then
+						case
+							when (select tipo from ladm_lev_cat_v1.lc_derecho where unidad  = info_predio.t_id limit 1) = (select t_id from ladm_lev_cat_v1.lc_derechotipo where ilicode = 'Dominio') then
+								(
+								   select numero_predial from ladm_lev_cat_v1.lc_estructuranovedadnumeropredial where  lc_dtsdcnlstmntctstral_novedad_numeros_prediales = (
+										select t_id from ladm_lev_cat_v1.lc_datosadicionaleslevantamientocatastral
+										where lc_datosadicionaleslevantamientocatastral.lc_predio = info_predio.t_id
+									) and tipo_novedad in (select t_id from ladm_lev_cat_v1.lc_estructuranovedadnumeropredial_tipo_novedad where ilicode not in ('Ninguna', 'Cancelacion')) limit 1
+								)
+							else
+								case
+									when
+						   				(
+										   select numero_predial from ladm_lev_cat_v1.lc_estructuranovedadnumeropredial where  lc_dtsdcnlstmntctstral_novedad_numeros_prediales = (
+												select t_id from ladm_lev_cat_v1.lc_datosadicionaleslevantamientocatastral
+												where lc_datosadicionaleslevantamientocatastral.lc_predio = info_predio.t_id
+											) and tipo_novedad in (select t_id from ladm_lev_cat_v1.lc_estructuranovedadnumeropredial_tipo_novedad where ilicode in ('Predio_Nuevo', 'Cambio_Numero_Predial')) limit 1
+									   	) is not null then
+											(
+											   select numero_predial from ladm_lev_cat_v1.lc_estructuranovedadnumeropredial where  lc_dtsdcnlstmntctstral_novedad_numeros_prediales = (
+													select t_id from ladm_lev_cat_v1.lc_datosadicionaleslevantamientocatastral
+													where lc_datosadicionaleslevantamientocatastral.lc_predio = info_predio.t_id
+												) and tipo_novedad in (select t_id from ladm_lev_cat_v1.lc_estructuranovedadnumeropredial_tipo_novedad where ilicode in ('Predio_Nuevo', 'Cambio_Numero_Predial')) limit 1
+											)
+									else
+										numero_predial
+								end
+						end
+					else
+						numero_predial
+				end
 		   from ladm_lev_cat_v1.lc_derecho where unidad = info_predio.t_id limit 1
 	   ) as numero_predial
        ,info_predio.nombre
        ,info_predio.departamento
        ,info_predio.municipio
 	   ,(
-		   select CONCAT(TRUNC(area_geom, 2), ' m2')
+		   select CONCAT(TRUNC(area_geom, 2), ' m²')
 		   from (
 			   select COALESCE(round(sum(st_area(geometria))::numeric, 2), 0) as area_geom
 		   	   from ladm_lev_cat_v1.lc_unidadconstruccion
@@ -158,16 +164,16 @@ SELECT
 		   ORDER BY st_area(st_intersection(geometria, terreno.geometria)) desc
 		   LIMIT 1) corregimiento
 	   , CASE WHEN 'ZONA_URBANA' = 'ZONA_RURAL' THEN
-		    CONCAT(TRUNC(terreno.area_geom, 1), ' m2')
+		    CONCAT(TRUNC(terreno.area_geom, 1), ' m²')
 		 ELSE
-		 	CONCAT(FLOOR(terreno.area_geom/10000), ' ha + ', TRUNC(((terreno.area_geom/10000) - FLOOR(terreno.area_geom/10000))*10000, 0), ' m2')
+		 	CONCAT(FLOOR(terreno.area_geom/10000), ' ha + ', TRUNC(((terreno.area_geom/10000) - FLOOR(terreno.area_geom/10000))*10000, 0), ' m²')
 		 END AS area_terreno
 	   ,(
 		   SELECT
 		   CASE WHEN 'ZONA_URBANA' = 'ZONA_RURAL' THEN
-		       CONCAT(TRUNC(COALESCE(Area_Registral_M2, 0), 1), ' m2')
+		       CONCAT(TRUNC(COALESCE(Area_Registral_M2, 0), 1), ' m²')
 		   ELSE
-		       CONCAT(FLOOR(COALESCE(Area_Registral_M2, 0)/10000), ' ha + ', TRUNC(((COALESCE(Area_Registral_M2,0)/10000) - FLOOR(COALESCE(Area_Registral_M2,0)/10000))*10000, 0), ' m2')
+		       CONCAT(FLOOR(COALESCE(Area_Registral_M2, 0)/10000), ' ha + ', TRUNC(((COALESCE(Area_Registral_M2,0)/10000) - FLOOR(COALESCE(Area_Registral_M2,0)/10000))*10000, 0), ' m²')
 		   END
 		   FROM ladm_lev_cat_v1.lc_datosadicionaleslevantamientocatastral
 		   WHERE lc_predio = info_predio.t_id

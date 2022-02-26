@@ -260,8 +260,90 @@ SELECT
   , hasta
   , ubicacion
   , nupre
-  , CASE WHEN numero_predial is null AND matricula_inmobiliaria IS NULL AND nombre IS NULL THEN 'ÁREA INDETERMINADA'
-     ELSE COALESCE(numero_predial || ';','') || COALESCE('FMI: ' || matricula_inmobiliaria || ';','') || COALESCE('NOMBRE: ' || UPPER(nombre), '')
+  , CASE
+  	 when (
+		select
+			case
+				when (
+					   select numero_predial from ladm_lev_cat_v1.lc_estructuranovedadnumeropredial where  lc_dtsdcnlstmntctstral_novedad_numeros_prediales = (
+							select t_id from ladm_lev_cat_v1.lc_datosadicionaleslevantamientocatastral
+							where lc_datosadicionaleslevantamientocatastral.lc_predio = lc_predio.t_id
+						) and tipo_novedad in (select t_id from ladm_lev_cat_v1.lc_estructuranovedadnumeropredial_tipo_novedad where ilicode not in ('Ninguna', 'Cancelacion')) limit 1
+				   	) is not null then
+					case
+						when (select tipo from ladm_lev_cat_v1.lc_derecho where unidad  = lc_predio.t_id limit 1) = (select t_id from ladm_lev_cat_v1.lc_derechotipo where ilicode = 'Dominio') then
+							(
+							   select numero_predial from ladm_lev_cat_v1.lc_estructuranovedadnumeropredial where  lc_dtsdcnlstmntctstral_novedad_numeros_prediales = (
+									select t_id from ladm_lev_cat_v1.lc_datosadicionaleslevantamientocatastral
+									where lc_datosadicionaleslevantamientocatastral.lc_predio = lc_predio.t_id
+								) and tipo_novedad in (select t_id from ladm_lev_cat_v1.lc_estructuranovedadnumeropredial_tipo_novedad where ilicode not in ('Ninguna', 'Cancelacion')) limit 1
+							)
+						else
+							case
+								when
+					   				(
+									   select numero_predial from ladm_lev_cat_v1.lc_estructuranovedadnumeropredial where  lc_dtsdcnlstmntctstral_novedad_numeros_prediales = (
+											select t_id from ladm_lev_cat_v1.lc_datosadicionaleslevantamientocatastral
+											where lc_datosadicionaleslevantamientocatastral.lc_predio = lc_predio.t_id
+										) and tipo_novedad in (select t_id from ladm_lev_cat_v1.lc_estructuranovedadnumeropredial_tipo_novedad where ilicode in ('Predio_Nuevo', 'Cambio_Numero_Predial')) limit 1
+								   	) is not null then
+										(
+										   select numero_predial from ladm_lev_cat_v1.lc_estructuranovedadnumeropredial where  lc_dtsdcnlstmntctstral_novedad_numeros_prediales = (
+												select t_id from ladm_lev_cat_v1.lc_datosadicionaleslevantamientocatastral
+												where lc_datosadicionaleslevantamientocatastral.lc_predio = lc_predio.t_id
+											) and tipo_novedad in (select t_id from ladm_lev_cat_v1.lc_estructuranovedadnumeropredial_tipo_novedad where ilicode in ('Predio_Nuevo', 'Cambio_Numero_Predial')) limit 1
+										)
+								else
+									numero_predial
+							end
+					end
+				else
+					numero_predial
+			end
+		from ladm_lev_cat_v1.lc_derecho where unidad = lc_predio.t_id limit 1
+	) is null AND matricula_inmobiliaria IS NULL AND nombre IS NULL THEN 'ÁREA INDETERMINADA'
+     ELSE COALESCE(
+     (
+		select
+			case
+				when (
+					   select numero_predial from ladm_lev_cat_v1.lc_estructuranovedadnumeropredial where  lc_dtsdcnlstmntctstral_novedad_numeros_prediales = (
+							select t_id from ladm_lev_cat_v1.lc_datosadicionaleslevantamientocatastral
+							where lc_datosadicionaleslevantamientocatastral.lc_predio = lc_predio.t_id
+						) and tipo_novedad in (select t_id from ladm_lev_cat_v1.lc_estructuranovedadnumeropredial_tipo_novedad where ilicode not in ('Ninguna', 'Cancelacion')) limit 1
+				   	) is not null then
+					case
+						when (select tipo from ladm_lev_cat_v1.lc_derecho where unidad  = lc_predio.t_id limit 1) = (select t_id from ladm_lev_cat_v1.lc_derechotipo where ilicode = 'Dominio') then
+							(
+							   select numero_predial from ladm_lev_cat_v1.lc_estructuranovedadnumeropredial where  lc_dtsdcnlstmntctstral_novedad_numeros_prediales = (
+									select t_id from ladm_lev_cat_v1.lc_datosadicionaleslevantamientocatastral
+									where lc_datosadicionaleslevantamientocatastral.lc_predio = lc_predio.t_id
+								) and tipo_novedad in (select t_id from ladm_lev_cat_v1.lc_estructuranovedadnumeropredial_tipo_novedad where ilicode not in ('Ninguna', 'Cancelacion')) limit 1
+							)
+						else
+							case
+								when
+					   				(
+									   select numero_predial from ladm_lev_cat_v1.lc_estructuranovedadnumeropredial where  lc_dtsdcnlstmntctstral_novedad_numeros_prediales = (
+											select t_id from ladm_lev_cat_v1.lc_datosadicionaleslevantamientocatastral
+											where lc_datosadicionaleslevantamientocatastral.lc_predio = lc_predio.t_id
+										) and tipo_novedad in (select t_id from ladm_lev_cat_v1.lc_estructuranovedadnumeropredial_tipo_novedad where ilicode in ('Predio_Nuevo', 'Cambio_Numero_Predial')) limit 1
+								   	) is not null then
+										(
+										   select numero_predial from ladm_lev_cat_v1.lc_estructuranovedadnumeropredial where  lc_dtsdcnlstmntctstral_novedad_numeros_prediales = (
+												select t_id from ladm_lev_cat_v1.lc_datosadicionaleslevantamientocatastral
+												where lc_datosadicionaleslevantamientocatastral.lc_predio = lc_predio.t_id
+											) and tipo_novedad in (select t_id from ladm_lev_cat_v1.lc_estructuranovedadnumeropredial_tipo_novedad where ilicode in ('Predio_Nuevo', 'Cambio_Numero_Predial')) limit 1
+										)
+								else
+									numero_predial
+							end
+					end
+				else
+					numero_predial
+			end
+		from ladm_lev_cat_v1.lc_derecho where unidad = lc_predio.t_id limit 1
+	) || ';','') || COALESCE('FMI: ' || matricula_inmobiliaria || ';','') || COALESCE('NOMBRE: ' || UPPER(nombre), '')
     END AS predio
   , lc_predio.t_id
   , trunc(st_length(colindantes.geom)::numeric, CASE WHEN 'ZONA_URBANA' = 'ZONA_RURAL'  THEN 2 ELSE 1 END) distancia,
